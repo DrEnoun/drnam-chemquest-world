@@ -7,6 +7,7 @@ import { worldProgress, worldStates, walkPath, starKey } from '../js/progress.js
 import { EMBLEMS } from '../js/badges.js';
 import { newGame, flip, clearPending, pickSets, starsForHearts } from '../js/memory-logic.js';
 import { SHAPES } from '../js/shapes.js';
+import { TRACKS, SCREEN_TRACK, MAJOR_SCALE, STEPS_PER_BAR, BARS, LOOP_STEPS, midiFreq, chordTones, eighth } from '../js/music.js';
 import { MONSTERS, GEOMETRY, ATOM, MOODS } from '../js/monsters.js';
 import { OPTIONS, DEFAULT_AVATAR, randomAvatar, WIDTH, HEIGHT } from '../js/avatar.js';
 
@@ -220,5 +221,35 @@ for (let i = 1; i <= 60; i++) for (const lv of mem.levels) { const sets = pickSe
   const r = flip(g, ca[2].uid); assert.equal(r.type, 'match'); assert.equal(r.cards.length, 3); assert.equal(g.matches, 1);
   flip(g, cb.uid); const bad = flip(g, g.cards.find(c => c.setId !== B.id && !g.matched.has(c.uid)).uid); assert.equal(bad.type, 'mismatch'); assert.equal(bad.cards.length, 2);
 }
+
+// ---------- Background music: the notes are data, so check the music theory ----------
+const inKey = (midi, tonic) => MAJOR_SCALE.includes(((midi - tonic) % 12 + 12) % 12);
+assert.deepEqual(Object.keys(TRACKS).sort(), ['diner', 'map', 'memory']);
+assert.equal(LOOP_STEPS, 32);
+for (const [id, t] of Object.entries(TRACKS)) {
+  assert.ok(t.name && t.bpm >= 76 && t.bpm <= 130, `${id}: tempo`);
+  assert.ok(t.level > 0 && t.level <= 1);
+  assert.equal(t.chords.length, BARS, `${id}: one chord per bar`);
+  for (const k of ['bass', 'arp', 'kick', 'hat', 'stab']) assert.equal(t[k].length, STEPS_PER_BAR, `${id}.${k} needs ${STEPS_PER_BAR} steps`);
+  assert.equal(t.melody.length, BARS);
+  t.chords.forEach((c, i) => {
+    assert.ok(c.root >= 40 && c.root <= 58, `${id} bar ${i + 1}: bass root ${c.root} out of range`);
+    chordTones(c).forEach(n => assert.ok(inKey(n, t.tonic), `${id} bar ${i + 1}: chord tone ${n} is not in the key`));
+  });
+  assert.ok(inKey(t.chords[0].root, t.tonic) && (t.chords[0].root - t.tonic) % 12 === 0, `${id}: starts on the tonic chord`);
+  t.melody.forEach((bar, b) => {
+    assert.equal(bar.length, STEPS_PER_BAR, `${id} melody bar ${b + 1}`);
+    assert.ok(bar[0] != null, `${id} melody bar ${b + 1} must start on the beat`);
+    bar.filter(n => n != null).forEach(n => { assert.ok(inKey(n, t.tonic), `${id} melody note ${n} is not in the key`); assert.ok(n >= 70 && n <= 86, `${id}: melody note ${n} out of a comfortable range`); });
+  });
+  t.bass.forEach(i => assert.ok(i === null || [0, 1, 2].includes(i)));
+  t.arp.forEach(i => assert.ok(i === null || [0, 1, 2, 3].includes(i)));
+  assert.ok(t.chords[3].root !== t.chords[0].root, `${id}: the last chord leads back to the first`);
+  assert.ok(eighth(t) > 0.2 && eighth(t) < 0.45);
+}
+assert.ok(Math.abs(midiFreq(69) - 440) < 1e-9 && Math.abs(midiFreq(81) - 880) < 1e-9);
+// every screen has a track, and the three kinds of screen do not all play the same loop
+for (const screen of ['menu', 'shifts', 'avatar', 'game', 'memory']) assert.ok(TRACKS[SCREEN_TRACK[screen]], `${screen}: no track`);
+assert.equal(new Set(Object.values(SCREEN_TRACK)).size, 3);
 
 console.log(`ChemQuest data OK (${orders} orders, ${d.ions.length} ions)`);

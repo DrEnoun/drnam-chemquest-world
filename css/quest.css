@@ -46,7 +46,6 @@ h1, h2, h3 { font-family: var(--font-display); }
   border: calc(2px * var(--k)) solid var(--glass-edge); background: var(--glass-fill); backdrop-filter: blur(var(--blur-glass));
   font-family: var(--font-display); font-weight: 700; font-size: calc(16px * var(--k)); color: var(--ink); white-space: nowrap;
 }
-@media (max-width: 380px) { .chip { padding: 6px 12px; font-size: 15px; } .hud__hearts { font-size: 24px; letter-spacing: 1px; } }
 .btn-start {
   min-height: calc(60px * var(--k)); padding: 0 calc(36px * var(--k)); border-radius: var(--radius-pill); cursor: pointer;
   border: var(--stroke-doodle) solid var(--sticker-ink); background: var(--spark-400); color: var(--on-spark);
@@ -353,3 +352,16 @@ canvas { image-rendering: auto; }
 
 /* Full screen is for laptops and projectors; on a phone it only crowds the top bar */
 html:not(.wide) #btn-full { display: none; }
+
+/* Narrow phones: compact buttons so the top bars (menu, game, memory) never run off the edge */
+@media (max-width: 430px) {
+  .chip { padding: 6px 10px; font-size: 14px; min-height: 40px; }
+  .toolbar, .hud { gap: 6px; }
+  .topline { gap: 6px; }
+  .logo-plate { height: 42px; padding: 3px 8px; }
+  .hud__hearts { font-size: 22px; letter-spacing: 0; }
+  .hud__coins { font-size: 19px; gap: 5px; }
+}
+@media (max-width: 370px) { .hud__hearts { font-size: 19px; } .chip { padding: 6px 8px; font-size: 13px; } .logo-plate { height: 38px; } }
+/* Very narrow phones: let the top bar wrap onto a second line instead of clipping a button */
+@media (max-width: 400px) { .topline { flex-wrap: wrap; row-gap: 6px; } .toolbar { flex-wrap: wrap; justify-content: flex-end; } .hud { flex-wrap: wrap; row-gap: 6px; } }

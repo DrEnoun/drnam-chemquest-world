@@ -29,6 +29,9 @@ function tone({ freq = 440, to = freq, dur = 0.12, type = 'sine', vol = 0.15, de
   o.stop(t0 + dur + 0.02);
 }
 
+// The music engine shares this audio context so the browser only has to unlock one.
+export const getContext = ac;
+
 export const sound = {
   get enabled() { return enabled; },
   set enabled(v) { enabled = !!v; },
