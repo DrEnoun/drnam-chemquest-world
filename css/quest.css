@@ -348,3 +348,5 @@ canvas { image-rendering: auto; }
   .hud__coins { font-size: 19px; gap: 5px; }
 }
 @media (max-width: 370px) { .hud__hearts { font-size: 19px; } .chip { padding: 6px 8px; font-size: 13px; } .logo-plate { height: 38px; } }
+/* Very narrow phones: let the top bar wrap onto a second line instead of clipping a button */
+@media (max-width: 400px) { .topline { flex-wrap: wrap; row-gap: 6px; } .toolbar { flex-wrap: wrap; justify-content: flex-end; } .hud { flex-wrap: wrap; row-gap: 6px; } }

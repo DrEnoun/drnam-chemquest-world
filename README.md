@@ -27,7 +27,7 @@ Open the game link on a phone (Chrome on Android works best). Tap a pin to trave
 
 ## Music and sound effects
 
-Three short original music loops are generated in the browser (no audio files): one for the map and menus, a livelier one for Ion Diner, and a gentle music-box one for Lab Meadow. **Music** and **Effects** have separate on/off buttons in the top bar, so players can keep the sound effects without the music, or the other way round. Each choice is saved on the device. Music starts after the first tap (browsers do not allow sound before that) and pauses when the tab is hidden.
+Three short original music loops are generated in the browser (no audio files): one for the map and menus, a livelier one for Ion Diner, and a gentle music-box one for Lab Meadow. **Music** and **Sound FX** have separate on/off buttons in the top bar, so players can keep the Sound FX without the music, or the other way round. Each choice is saved on the device. Music starts after the first tap (browsers do not allow sound before that) and pauses when the tab is hidden.
 
 The notes are plain data in `js/music.js` (`TRACKS`), and `npm test` checks that every note and chord is in the key.
 

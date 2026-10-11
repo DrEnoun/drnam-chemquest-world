@@ -48,9 +48,9 @@ function applyTheme() {
   $('btn-theme-menu').textContent = save.theme === 'day' ? 'Night mode' : 'Day mode';
 }
 function applySound() {
-  const label = sound.enabled ? 'Effects on' : 'Effects off';
+  const label = sound.enabled ? 'Sound FX on' : 'Sound FX off';
   $('btn-sound').textContent = label; $('btn-sound-menu').textContent = label; $('mem-sound').textContent = label;
-  [$('btn-sound'), $('btn-sound-menu'), $('mem-sound')].forEach(b => { b.setAttribute('aria-label', sound.enabled ? 'Sound effects are on. Tap to turn them off.' : 'Sound effects are off. Tap to turn them on.'); b.setAttribute('aria-pressed', String(sound.enabled)); });
+  [$('btn-sound'), $('btn-sound-menu'), $('mem-sound')].forEach(b => { b.setAttribute('aria-label', sound.enabled ? 'Sound FX are on. Tap to turn them off.' : 'Sound FX are off. Tap to turn them on.'); b.setAttribute('aria-pressed', String(sound.enabled)); });
   applyMusic();
 }
 // A music on/off button next to each sound button (music and sound effects are switched separately)
