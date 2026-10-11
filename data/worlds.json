@@ -76,13 +76,20 @@
       ],
       "badge": "Table Topper",
       "emblem": "grid",
-      "playable": false,
-      "callout": "Coming soon",
+      "playable": true,
+      "callout": "4 levels",
       "tip": "Did you know? The halogens are the elements in Group 17 of the periodic table.",
       "pinWide": [
         270,
         280
-      ]
+      ],
+      "levelIds": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "blurb": "Pop the element bubbles that match the sign, and build the periodic table as you go."
     },
     {
       "id": 4,

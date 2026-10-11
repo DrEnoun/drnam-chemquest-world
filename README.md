@@ -8,7 +8,7 @@ Travel across a map of six islands. Each world teaches one chemistry topic with 
 |---|---|---|---|---|
 | 1 | Lab Meadow | Memory match | Names, formulae and shapes | **Playable** (4 levels) |
 | 2 | Orbital Ruins | Push puzzle | Electron configuration | **Playable** (4 levels) |
-| 3 | Periodic Falls | Pop and shoot | Periodic table and trends | Coming soon |
+| 3 | Periodic Falls | Pop and shoot | Periodic table (families, groups, periods) | **Playable** (4 levels) |
 | 4 | Trend Peaks | Platform jumper | Periodic trends | Coming soon |
 | 5 | Bond Glacier | Drag and drop | Lewis structures and VSEPR | Coming soon |
 | 6 | Ion Diner | Diner dash | Ionic compounds and formulae | **Playable** (4 shifts) |
@@ -59,6 +59,8 @@ All questions, levels and worlds are in `data/`:
 |---|---|
 | `data/diner.json` | Ion Diner: the ions and every shift (orders, customers, patience, tips, boss) |
 | `data/memory.json` | Lab Meadow: every card set, level and the timed boss |
+| `data/falls.json` | Periodic Falls: every round (the sign, the rule, how many bubbles) |
+| `data/elements.json` | The 45 elements used (group, period, block, category, family) |
 | `data/orbitals.json` | Orbital Ruins: each level's element, board layout and tip |
 | `data/worlds.json` | The map: world names, topics, colours, pin positions, badges, tips |
 
@@ -81,6 +83,7 @@ More detail on adding Ion Diner shifts and memory levels is in [`docs/EDITING.md
 - Plain HTML, CSS and JavaScript. The pixel art is drawn in code on canvas, so there are no image files for the world, avatar or monsters.
 - `js/overworld.js` and `js/scenery.js`: the map. `js/monsters.js`: the molecule monsters.
 - `js/diner.js` and `js/diner-logic.js`: Ion Diner. `js/memory.js` and `js/memory-logic.js`: Lab Meadow.
+- `js/falls.js` and `js/pop-logic.js`: Periodic Falls (the bubbles and the rules for each round).
 - `js/orbital.js` and `js/orbital-logic.js`: Orbital Ruins (the board and the Aufbau, Hund and Pauli rules).
 - `js/progress.js`: unlocking worlds and earning badges. `js/avatar.js`: the avatar creator.
 - Game rules live in the `*-logic.js` and `progress.js` files, with no screen code, so they can be tested in Node.
