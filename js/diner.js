@@ -2,6 +2,7 @@
 // Content lives in data/diner.json; rules in diner-logic.js; the avatar in avatar.js.
 import './fit.js';
 import { sound } from './sound.js';
+import { music, SCREEN_TRACK } from './music.js';
 import {
   buildOrders, buildTray, checkServe, ionHTML, netCharge, orderName, revealAnswer, starsFor, tipFor, chargeStr,
 } from './diner-logic.js';
@@ -19,12 +20,13 @@ const KEY = 'drnam-quest:v1';
 const LOGO = 'brand/logos/chemistry-with-dr-nam-logo.jpg';
 
 // ---------- Saved progress (localStorage may be blocked, so every access is guarded) ----------
-const defaults = () => ({ world: 1, coins: 0, xp: 0, stars: {}, avatar: { ...DEFAULT_AVATAR }, theme: 'night', mute: false });
+const defaults = () => ({ world: 1, coins: 0, xp: 0, stars: {}, avatar: { ...DEFAULT_AVATAR }, theme: 'night', mute: false, music: true });
 let save = defaults();
 try { save = { ...defaults(), ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch (e) { /* use defaults */ }
 const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) { /* ignore */ } };
 for (const k of Object.keys(save.stars)) if (/^\d+$/.test(k)) { save.stars['6.' + k] = Math.max(save.stars['6.' + k] || 0, save.stars[k]); delete save.stars[k]; }
 sound.enabled = !save.mute;
+music.setEnabled(save.music !== false);
 
 try { await Promise.all([document.fonts.load('800 17px "League Spartan"'), document.fonts.load('400 12px Questrial')]); } catch (e) { /* fall back to system fonts */ }
 const data = await (await fetch('data/diner.json')).json();
@@ -37,6 +39,7 @@ const ionById = Object.fromEntries(data.ions.map(i => [i.id, i]));
 const screens = ['menu', 'shifts', 'memory', 'avatar', 'game'];
 function show(name) {
   if (name !== 'menu') overworld.stop();
+  music.play(SCREEN_TRACK[name]);
   screens.forEach(s => { $('screen-' + s).hidden = s !== name; });
   window.scrollTo(0, 0);
 }
@@ -45,9 +48,22 @@ function applyTheme() {
   $('btn-theme-menu').textContent = save.theme === 'day' ? 'Night mode' : 'Day mode';
 }
 function applySound() {
-  const label = sound.enabled ? 'Sound on' : 'Muted';
+  const label = sound.enabled ? 'Effects on' : 'Effects off';
   $('btn-sound').textContent = label; $('btn-sound-menu').textContent = label; $('mem-sound').textContent = label;
+  [$('btn-sound'), $('btn-sound-menu'), $('mem-sound')].forEach(b => { b.setAttribute('aria-label', sound.enabled ? 'Sound effects are on. Tap to turn them off.' : 'Sound effects are off. Tap to turn them on.'); b.setAttribute('aria-pressed', String(sound.enabled)); });
+  applyMusic();
 }
+// A music on/off button next to each sound button (music and sound effects are switched separately)
+const musicButtons = [$('btn-sound-menu'), $('btn-sound'), $('mem-sound')].map(sb => {
+  const b = document.createElement('button'); b.type = 'button'; b.className = sb.className; b.dataset.role = 'music'; sb.after(b); return b;
+});
+function applyMusic() {
+  musicButtons.forEach(b => { b.textContent = music.enabled ? '♪ Music on' : '♪ Music off'; b.setAttribute('aria-label', music.enabled ? 'Music is on. Tap to turn it off.' : 'Music is off. Tap to turn it on.'); b.setAttribute('aria-pressed', String(music.enabled)); });
+}
+const toggleMusic = () => { music.setEnabled(!music.enabled); save.music = music.enabled; persist(); applyMusic(); sound.unlock(); sound.pop(); };
+musicButtons.forEach(b => { b.onclick = toggleMusic; });
+// Browsers keep audio silent until the first tap, so unlock it on the first touch, click or key press.
+['pointerdown', 'touchend', 'keydown'].forEach(ev => addEventListener(ev, () => sound.unlock(), { passive: true }));
 const toggleSound = () => { sound.enabled = !sound.enabled; save.mute = !sound.enabled; persist(); applySound(); sound.unlock(); sound.select(); };
 $('btn-sound').onclick = $('btn-sound-menu').onclick = $('mem-sound').onclick = toggleSound;
 $('btn-theme-menu').onclick = () => { save.theme = save.theme === 'day' ? 'night' : 'day'; persist(); applyTheme(); };

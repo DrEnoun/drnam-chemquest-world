@@ -46,7 +46,6 @@ h1, h2, h3 { font-family: var(--font-display); }
   border: calc(2px * var(--k)) solid var(--glass-edge); background: var(--glass-fill); backdrop-filter: blur(var(--blur-glass));
   font-family: var(--font-display); font-weight: 700; font-size: calc(16px * var(--k)); color: var(--ink); white-space: nowrap;
 }
-@media (max-width: 380px) { .chip { padding: 6px 12px; font-size: 15px; } .hud__hearts { font-size: 24px; letter-spacing: 1px; } }
 .btn-start {
   min-height: calc(60px * var(--k)); padding: 0 calc(36px * var(--k)); border-radius: var(--radius-pill); cursor: pointer;
   border: var(--stroke-doodle) solid var(--sticker-ink); background: var(--spark-400); color: var(--on-spark);
@@ -338,3 +337,14 @@ canvas { image-rendering: auto; }
 .wide .menu-side--lower .badge { font-size: calc(12px * var(--k)); }
 .wide .menu-side--lower .badge small { font-size: calc(11px * var(--k)); }
 @media (max-height: 820px) { .wide .menu-side--lower .topic-card small { display: none; } }
+
+/* Narrow phones: compact buttons so the top bars (menu, game, memory) never run off the edge */
+@media (max-width: 430px) {
+  .chip { padding: 6px 10px; font-size: 14px; min-height: 40px; }
+  .toolbar, .hud { gap: 6px; }
+  .topline { gap: 6px; }
+  .logo-plate { height: 42px; padding: 3px 8px; }
+  .hud__hearts { font-size: 22px; letter-spacing: 0; }
+  .hud__coins { font-size: 19px; gap: 5px; }
+}
+@media (max-width: 370px) { .hud__hearts { font-size: 19px; } .chip { padding: 6px 8px; font-size: 13px; } .logo-plate { height: 38px; } }
