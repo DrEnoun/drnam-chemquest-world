@@ -34,7 +34,7 @@ export function createMemory({ $, levels, says, sound, onFinish, onExit }) {
   function start(levelId) {
     level = levels.find(l => l.id === levelId);
     g = newGame(level); timeLeft = level.time || 0; react = null;
-    grid.innerHTML = ''; grid.style.setProperty('--cols', g.cards.length > 10 ? 3 : 3);
+    grid.innerHTML = ''; grid.dataset.n = String(g.cards.length);
     g.cards.forEach(c => {
       const b = document.createElement('button'); b.type = 'button'; b.className = 'mem-card'; b.dataset.uid = c.uid; b.dataset.kind = c.kind; b.dataset.open = 'false';
       b.setAttribute('aria-label', `Card ${c.uid + 1}, face down`);

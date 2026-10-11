@@ -25,6 +25,16 @@ Open the game link on a phone (Chrome on Android works best). Tap a pin to trave
 - **Wrong answers explain the rule** in the Dr. NAM bubble instead of just saying "wrong".
 - **Works offline** after the first visit, so it is safe to use where the wifi is poor. Add it to the home screen to install it.
 
+## Presenting on a projector or big screen
+
+The game adapts to the screen it is on:
+
+- **Wide screens (16:9, 16:10, 3:2: laptops, projectors, TVs):** the map sits on the left and the world card, avatar, topics and badges beside it. Ion Diner shows the scene on the left and the counter, tray and **Serve** button on the right. The memory cards fill the window. Nothing needs scrolling, and text and buttons grow with the window height so they can be read from the back of a room.
+- **Square or upright screens (4:3 projectors, tablets held upright):** one column, scaled up for readability.
+- **Phones:** one column, with the Serve button pinned to the bottom of the screen.
+
+Press **Full screen** (top right of the map) before presenting. Click with a mouse or a presentation clicker, or touch a touchscreen board. Tab and Enter also work.
+
 ## Run it yourself
 
 No build step. Any static file server works:

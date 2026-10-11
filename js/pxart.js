@@ -1,3 +1,4 @@
+import './polyfill.js';
 // Small toolkit for the 16-bit look: draw smooth shapes, then "crisp" them into hard-edged pixel art with a 1px outline.
 export const pxCanvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
 
