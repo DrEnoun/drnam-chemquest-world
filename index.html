@@ -24,6 +24,7 @@
 
   <!-- ================= Overworld (home) ================= -->
   <main class="screen screen--menu" id="screen-menu">
+    <header class="head">
     <div class="topline">
       <div class="logo-plate"><img src="brand/logos/uitm-logo-full.png" alt="Universiti Teknologi MARA"></div>
       <div class="toolbar">
@@ -42,6 +43,19 @@
       </div>
     </section>
     <p class="tagline">Six worlds of chemistry. Tap a pin to travel!</p>
+    </div>
+    </header>
+
+    <div class="map-cell">
+      <div class="map" id="map">
+        <canvas id="map-canvas" aria-label="World map with six islands"></canvas>
+        <div class="map__pins" id="map-pins"></div>
+      </div>
+    </div>
+
+    <div class="side-col">
+    <section class="world-card sticker-static" id="world-card" aria-live="polite"></section>
+    <aside class="says" id="menu-says"></aside>
     <section class="player sticker-static">
       <canvas id="menu-avatar" width="192" height="264" aria-label="Your avatar"></canvas>
       <div class="player__info">
@@ -50,32 +64,17 @@
         <button class="sticker" id="btn-avatar" type="button">Customise</button>
       </div>
     </section>
-    </div>
-    <div class="map" id="map">
-      <canvas id="map-canvas" aria-label="World map with six islands"></canvas>
-      <div class="map__pins" id="map-pins"></div>
-    </div>
-
-    <div class="menu-side menu-side--lower">
-    <div class="menu-col">
-    <section class="world-card sticker-static" id="world-card" aria-live="polite"></section>
-    <aside class="says" id="menu-says"></aside>
-
-
-    </div>
-    <div class="menu-col">
-    <section aria-labelledby="topics-h">
-      <h2 class="section-title" id="topics-h"><span class="num-disc" aria-hidden="true">✦</span>What you will learn</h2>
-      <div class="topic-grid" id="topic-grid"></div>
-    </section>
-
-    <section aria-labelledby="badges-h">
+    <section class="badges-block" aria-labelledby="badges-h">
       <h2 class="section-title" id="badges-h"><span class="num-disc" aria-hidden="true">✦</span>Badge shelf</h2>
       <div class="badge-shelf sticker-static" id="badge-shelf"></div>
       <p class="shelf-note">Clear every level in a world to earn its badge!</p>
     </section>
     </div>
-    </div>
+
+    <section class="topics-strip" aria-labelledby="topics-h">
+      <h2 class="section-title" id="topics-h"><span class="num-disc" aria-hidden="true">✦</span>What you will learn</h2>
+      <div class="topic-grid" id="topic-grid"></div>
+    </section>
   </main>
 
   <!-- ================= Shift picker (World 6) ================= -->
