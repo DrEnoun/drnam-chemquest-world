@@ -451,3 +451,58 @@ html:not(.wide) #btn-full { display: none; }
   .orb-swipe { display: block; position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); padding: 4px 14px; border-radius: 999px; background: rgba(6, 13, 27, .78); color: #e3eef8; font: 700 13px var(--font-display); letter-spacing: .02em; pointer-events: none; transition: opacity .5s; white-space: nowrap; }
   .screen--orbital.played .orb-swipe { opacity: 0; }
 }
+
+/* ===================================================================================================
+   World 3 — Periodic Falls
+   =================================================================================================== */
+.screen--falls { gap: calc(10px * var(--k)); }
+.fall-left, .fall-right { display: contents; }
+.fall-arena { position: relative; width: 100%; aspect-ratio: 4 / 4.3; border-radius: calc(16px * var(--k)); border: var(--stroke-doodle) solid var(--sticker-ink); box-shadow: var(--shadow-sticker); overflow: hidden; background: #0b5b84; touch-action: none; }
+#fall-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; user-select: none; -webkit-user-select: none; cursor: crosshair; }
+.fall-actions { display: flex; gap: calc(8px * var(--k)); }
+.fall-prompt { margin: calc(2px * var(--k)) 0 calc(8px * var(--k)); }
+.fall-prompt strong { font-family: var(--font-display); font-weight: 800; font-size: calc(26px * var(--k)); background: var(--spark-400); color: var(--on-spark); padding: 0 calc(10px * var(--k)); border-radius: calc(10px * var(--k)); border: calc(2px * var(--k)) solid var(--sticker-ink); }
+.fall-count { font-size: calc(15px * var(--k)); opacity: .8; margin-left: calc(6px * var(--k)); white-space: nowrap; }
+.fall-progress { margin-bottom: calc(6px * var(--k)); }
+.fall-progress span { transition: transform .25s; }
+
+.fall-table { padding: calc(10px * var(--k)) calc(12px * var(--k)) calc(12px * var(--k)); border-radius: var(--radius-md); display: grid; gap: calc(6px * var(--k)); }
+.fall-table h2 { font-size: calc(18px * var(--k)); font-weight: 800; }
+.pt-grid { display: grid; grid-template-columns: repeat(18, minmax(0, 1fr)); grid-template-rows: repeat(6, auto); gap: calc(2px * var(--k)); }
+.pt-cell { aspect-ratio: 1 / 1; border-radius: calc(4px * var(--k)); display: flex; align-items: center; justify-content: center; font: 800 calc(9px * var(--k)) var(--font-display); line-height: 1; color: #06323a; border: 1.5px solid rgba(35, 31, 32, .25); background: rgba(35, 31, 32, .06); overflow: hidden; }
+.pt-cell[data-state="got"] { background: var(--c); border-color: #231f20; box-shadow: 0 0 calc(8px * var(--k)) var(--c); animation: ptpop .45s var(--ease-out); }
+.pt-cell[data-state="missed"] { background: transparent; border: 2px dashed var(--c); color: #7a2e2e; }
+@keyframes ptpop { 0% { transform: scale(.3); } 60% { transform: scale(1.35); } 100% { transform: scale(1); } }
+.pt-key { display: flex; flex-wrap: wrap; gap: calc(4px * var(--k)) calc(10px * var(--k)); font-size: calc(11px * var(--k)); align-items: center; opacity: .9; }
+.pt-key i { display: inline-block; width: calc(10px * var(--k)); height: calc(10px * var(--k)); border-radius: 3px; background: var(--c); border: 1.5px solid #231f20; margin-right: calc(3px * var(--k)); }
+@media (prefers-reduced-motion: reduce) { .pt-cell[data-state="got"] { animation: none; } .fall-progress span { transition: none; } }
+
+/* phones: the screen fits the display, the arena takes the spare height */
+@media (max-width: 700px) {
+  html:not(.wide) .screen--falls { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; gap: 8px; padding-top: 10px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); overscroll-behavior: none; }
+  html:not(.wide) .fall-left { display: flex; flex-direction: column; gap: 8px; flex: 1 1 0; min-height: 0; }
+  html:not(.wide) .fall-right { display: flex; flex-direction: column; gap: 8px; flex: 0 0 auto; }
+  html:not(.wide) .fall-arena { flex: 1 1 0; min-height: 0; aspect-ratio: auto; }
+  html:not(.wide) .screen--falls .ticket { padding: 6px 12px; transform: none; }
+  html:not(.wide) .screen--falls .ticket__meta { font-size: 12px; }
+  html:not(.wide) .fall-prompt strong { font-size: 19px; }
+  html:not(.wide) .fall-prompt { margin: 2px 0 6px; }
+  html:not(.wide) .fall-actions { display: none; }
+  html:not(.wide) .screen--falls .says__avatar { width: 38px; height: 38px; }
+  html:not(.wide) .screen--falls .says__bubble { min-height: 0; padding: 6px 10px; }
+  html:not(.wide) .screen--falls .says__name { display: none; }
+  html:not(.wide) .screen--falls .says__text { font-size: 13.5px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  html:not(.wide) .screen--falls .says__bubble[data-state] .says__text { -webkit-line-clamp: 6; }
+  html:not(.wide) .fall-table { padding: 6px 10px 8px; }
+  html:not(.wide) .fall-table h2 { display: none; }
+  html:not(.wide) .pt-key { display: none; }
+  html:not(.wide) .pt-cell { font-size: 8px; }
+}
+/* the Hint button replaces nothing on phones: tapping the ticket asks for a hint */
+/* wide screens: arena on the left, bubble and table on the right, no scrolling */
+.wide .screen--falls { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); column-gap: calc(28px * var(--k)); }
+.wide .screen--falls .hud { grid-column: 1 / -1; }
+.wide .fall-left, .wide .fall-right { display: flex; flex-direction: column; gap: calc(10px * var(--k)); min-height: 0; }
+.wide .fall-arena { flex: 1 1 0; min-height: 0; aspect-ratio: auto; }
+.wide .fall-right { overflow-y: auto; }
+@media (max-width: 700px) and (max-height: 700px) { html:not(.wide) .screen--falls .ticket__meta { display: none; } }

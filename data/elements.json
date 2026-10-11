@@ -1,0 +1,454 @@
+{
+ "elements": [
+  {
+   "z": 1,
+   "symbol": "H",
+   "name": "hydrogen",
+   "group": 1,
+   "period": 1,
+   "block": "s",
+   "category": "nonmetal",
+   "family": null
+  },
+  {
+   "z": 2,
+   "symbol": "He",
+   "name": "helium",
+   "group": 18,
+   "period": 1,
+   "block": "s",
+   "category": "nonmetal",
+   "family": "noble"
+  },
+  {
+   "z": 3,
+   "symbol": "Li",
+   "name": "lithium",
+   "group": 1,
+   "period": 2,
+   "block": "s",
+   "category": "metal",
+   "family": "alkali"
+  },
+  {
+   "z": 4,
+   "symbol": "Be",
+   "name": "beryllium",
+   "group": 2,
+   "period": 2,
+   "block": "s",
+   "category": "metal",
+   "family": "alkaline"
+  },
+  {
+   "z": 5,
+   "symbol": "B",
+   "name": "boron",
+   "group": 13,
+   "period": 2,
+   "block": "p",
+   "category": "metalloid",
+   "family": null
+  },
+  {
+   "z": 6,
+   "symbol": "C",
+   "name": "carbon",
+   "group": 14,
+   "period": 2,
+   "block": "p",
+   "category": "nonmetal",
+   "family": null
+  },
+  {
+   "z": 7,
+   "symbol": "N",
+   "name": "nitrogen",
+   "group": 15,
+   "period": 2,
+   "block": "p",
+   "category": "nonmetal",
+   "family": null
+  },
+  {
+   "z": 8,
+   "symbol": "O",
+   "name": "oxygen",
+   "group": 16,
+   "period": 2,
+   "block": "p",
+   "category": "nonmetal",
+   "family": null
+  },
+  {
+   "z": 9,
+   "symbol": "F",
+   "name": "fluorine",
+   "group": 17,
+   "period": 2,
+   "block": "p",
+   "category": "nonmetal",
+   "family": "halogen"
+  },
+  {
+   "z": 10,
+   "symbol": "Ne",
+   "name": "neon",
+   "group": 18,
+   "period": 2,
+   "block": "p",
+   "category": "nonmetal",
+   "family": "noble"
+  },
+  {
+   "z": 11,
+   "symbol": "Na",
+   "name": "sodium",
+   "group": 1,
+   "period": 3,
+   "block": "s",
+   "category": "metal",
+   "family": "alkali"
+  },
+  {
+   "z": 12,
+   "symbol": "Mg",
+   "name": "magnesium",
+   "group": 2,
+   "period": 3,
+   "block": "s",
+   "category": "metal",
+   "family": "alkaline"
+  },
+  {
+   "z": 13,
+   "symbol": "Al",
+   "name": "aluminium",
+   "group": 13,
+   "period": 3,
+   "block": "p",
+   "category": "metal",
+   "family": null
+  },
+  {
+   "z": 14,
+   "symbol": "Si",
+   "name": "silicon",
+   "group": 14,
+   "period": 3,
+   "block": "p",
+   "category": "metalloid",
+   "family": null
+  },
+  {
+   "z": 15,
+   "symbol": "P",
+   "name": "phosphorus",
+   "group": 15,
+   "period": 3,
+   "block": "p",
+   "category": "nonmetal",
+   "family": null
+  },
+  {
+   "z": 16,
+   "symbol": "S",
+   "name": "sulfur",
+   "group": 16,
+   "period": 3,
+   "block": "p",
+   "category": "nonmetal",
+   "family": null
+  },
+  {
+   "z": 17,
+   "symbol": "Cl",
+   "name": "chlorine",
+   "group": 17,
+   "period": 3,
+   "block": "p",
+   "category": "nonmetal",
+   "family": "halogen"
+  },
+  {
+   "z": 18,
+   "symbol": "Ar",
+   "name": "argon",
+   "group": 18,
+   "period": 3,
+   "block": "p",
+   "category": "nonmetal",
+   "family": "noble"
+  },
+  {
+   "z": 19,
+   "symbol": "K",
+   "name": "potassium",
+   "group": 1,
+   "period": 4,
+   "block": "s",
+   "category": "metal",
+   "family": "alkali"
+  },
+  {
+   "z": 20,
+   "symbol": "Ca",
+   "name": "calcium",
+   "group": 2,
+   "period": 4,
+   "block": "s",
+   "category": "metal",
+   "family": "alkaline"
+  },
+  {
+   "z": 21,
+   "symbol": "Sc",
+   "name": "scandium",
+   "group": 3,
+   "period": 4,
+   "block": "d",
+   "category": "metal",
+   "family": null
+  },
+  {
+   "z": 22,
+   "symbol": "Ti",
+   "name": "titanium",
+   "group": 4,
+   "period": 4,
+   "block": "d",
+   "category": "metal",
+   "family": null
+  },
+  {
+   "z": 23,
+   "symbol": "V",
+   "name": "vanadium",
+   "group": 5,
+   "period": 4,
+   "block": "d",
+   "category": "metal",
+   "family": null
+  },
+  {
+   "z": 24,
+   "symbol": "Cr",
+   "name": "chromium",
+   "group": 6,
+   "period": 4,
+   "block": "d",
+   "category": "metal",
+   "family": null
+  },
+  {
+   "z": 25,
+   "symbol": "Mn",
+   "name": "manganese",
+   "group": 7,
+   "period": 4,
+   "block": "d",
+   "category": "metal",
+   "family": null
+  },
+  {
+   "z": 26,
+   "symbol": "Fe",
+   "name": "iron",
+   "group": 8,
+   "period": 4,
+   "block": "d",
+   "category": "metal",
+   "family": null
+  },
+  {
+   "z": 27,
+   "symbol": "Co",
+   "name": "cobalt",
+   "group": 9,
+   "period": 4,
+   "block": "d",
+   "category": "metal",
+   "family": null
+  },
+  {
+   "z": 28,
+   "symbol": "Ni",
+   "name": "nickel",
+   "group": 10,
+   "period": 4,
+   "block": "d",
+   "category": "metal",
+   "family": null
+  },
+  {
+   "z": 29,
+   "symbol": "Cu",
+   "name": "copper",
+   "group": 11,
+   "period": 4,
+   "block": "d",
+   "category": "metal",
+   "family": null
+  },
+  {
+   "z": 30,
+   "symbol": "Zn",
+   "name": "zinc",
+   "group": 12,
+   "period": 4,
+   "block": "d",
+   "category": "metal",
+   "family": null
+  },
+  {
+   "z": 31,
+   "symbol": "Ga",
+   "name": "gallium",
+   "group": 13,
+   "period": 4,
+   "block": "p",
+   "category": "metal",
+   "family": null
+  },
+  {
+   "z": 32,
+   "symbol": "Ge",
+   "name": "germanium",
+   "group": 14,
+   "period": 4,
+   "block": "p",
+   "category": "metalloid",
+   "family": null
+  },
+  {
+   "z": 33,
+   "symbol": "As",
+   "name": "arsenic",
+   "group": 15,
+   "period": 4,
+   "block": "p",
+   "category": "metalloid",
+   "family": null
+  },
+  {
+   "z": 34,
+   "symbol": "Se",
+   "name": "selenium",
+   "group": 16,
+   "period": 4,
+   "block": "p",
+   "category": "nonmetal",
+   "family": null
+  },
+  {
+   "z": 35,
+   "symbol": "Br",
+   "name": "bromine",
+   "group": 17,
+   "period": 4,
+   "block": "p",
+   "category": "nonmetal",
+   "family": "halogen"
+  },
+  {
+   "z": 36,
+   "symbol": "Kr",
+   "name": "krypton",
+   "group": 18,
+   "period": 4,
+   "block": "p",
+   "category": "nonmetal",
+   "family": "noble"
+  },
+  {
+   "z": 47,
+   "symbol": "Ag",
+   "name": "silver",
+   "group": 11,
+   "period": 5,
+   "block": "d",
+   "category": "metal",
+   "family": null
+  },
+  {
+   "z": 50,
+   "symbol": "Sn",
+   "name": "tin",
+   "group": 14,
+   "period": 5,
+   "block": "p",
+   "category": "metal",
+   "family": null
+  },
+  {
+   "z": 53,
+   "symbol": "I",
+   "name": "iodine",
+   "group": 17,
+   "period": 5,
+   "block": "p",
+   "category": "nonmetal",
+   "family": "halogen"
+  },
+  {
+   "z": 54,
+   "symbol": "Xe",
+   "name": "xenon",
+   "group": 18,
+   "period": 5,
+   "block": "p",
+   "category": "nonmetal",
+   "family": "noble"
+  },
+  {
+   "z": 55,
+   "symbol": "Cs",
+   "name": "caesium",
+   "group": 1,
+   "period": 6,
+   "block": "s",
+   "category": "metal",
+   "family": "alkali"
+  },
+  {
+   "z": 56,
+   "symbol": "Ba",
+   "name": "barium",
+   "group": 2,
+   "period": 6,
+   "block": "s",
+   "category": "metal",
+   "family": "alkaline"
+  },
+  {
+   "z": 79,
+   "symbol": "Au",
+   "name": "gold",
+   "group": 11,
+   "period": 6,
+   "block": "d",
+   "category": "metal",
+   "family": null
+  },
+  {
+   "z": 80,
+   "symbol": "Hg",
+   "name": "mercury",
+   "group": 12,
+   "period": 6,
+   "block": "d",
+   "category": "metal",
+   "family": null
+  },
+  {
+   "z": 82,
+   "symbol": "Pb",
+   "name": "lead",
+   "group": 14,
+   "period": 6,
+   "block": "p",
+   "category": "metal",
+   "family": null
+  }
+ ]
+}

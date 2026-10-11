@@ -106,6 +106,34 @@
     <div class="mem-grid" id="mem-grid"></div>
   </main>
 
+  <!-- ================= Periodic Falls (World 3) ================= -->
+  <main class="screen screen--falls" id="screen-falls" hidden>
+    <header class="hud">
+      <button class="chip" id="fall-quit" type="button" aria-label="Back to the map">‹ Menu</button>
+      <div class="hud__hearts" id="fall-hearts" role="img" aria-label="Hearts"></div>
+      <div class="hud__coins"><span class="coin-dot" aria-hidden="true"></span><span id="fall-coins">0</span></div>
+      <button class="chip" id="fall-sound" type="button"></button>
+    </header>
+    <div class="fall-left">
+      <section class="ticket sticker-static" aria-live="polite">
+        <p class="ticket__meta" id="fall-meta"></p>
+        <p class="ticket__order fall-prompt"><strong id="fall-prompt"></strong> <span class="fall-count" id="fall-count"></span></p>
+        <div class="patience fall-progress" id="fall-progress" role="progressbar" aria-label="Round progress" aria-valuemin="0" aria-valuemax="100"><span></span></div>
+        <div class="patience" id="fall-timer" role="progressbar" aria-label="Time left" aria-valuemin="0" aria-valuemax="100" hidden><span></span></div>
+      </section>
+      <div class="fall-arena" id="fall-arena"><canvas id="fall-canvas" aria-label="Element bubbles. Tap the bubbles that match the sign."></canvas></div>
+      <div class="fall-actions"><button class="chip" id="fall-hint" type="button">Hint</button></div>
+    </div>
+    <div class="fall-right">
+      <aside class="says" id="fall-says" aria-live="polite"></aside>
+      <section class="fall-table sticker-static" aria-labelledby="fall-table-h">
+        <h2 id="fall-table-h">Your periodic table</h2>
+        <div class="pt-grid" id="fall-grid"></div>
+        <p class="pt-key"><i style="--c:#ff8a8a"></i>Alkali <i style="--c:#ffb86b"></i>Alkaline earth <i style="--c:#ffe66d"></i>Halogen <i style="--c:#c4b5fd"></i>Noble gas <i style="--c:#9fc3ff"></i>Metal <i style="--c:#8be9c0"></i>Nonmetal <i style="--c:#e3f27a"></i>Metalloid</p>
+      </section>
+    </div>
+  </main>
+
   <!-- ================= Orbital Ruins (World 2) ================= -->
   <main class="screen screen--orbital" id="screen-orbital" hidden>
     <header class="hud">

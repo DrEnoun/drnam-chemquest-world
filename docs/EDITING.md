@@ -37,3 +37,13 @@ Each level is one atom. The rules (Aufbau, Hund, Pauli) are in `js/orbital-logic
 - `tip`, `goal`, `title`, `subtitle`, and `"boss": true` for the last level.
 
 Run `node tools/solve-orbital.mjs` after editing: it shows a shortest solution or reports that the board cannot be solved. `npm test` also solves every level, replays the solution through the game rules, and checks the final configuration against a hand-written answer key (`FULL` in `tools/test-game.mjs`), so add the new element there.
+
+## Periodic Falls rounds (`data/falls.json`)
+
+Each level is a list of rounds. A round is a sign ("Pop the halogens") and a rule; the game picks the right bubbles and the decoys itself.
+
+- `prompt` and `noun`: the sign, and how Dr. NAM names the group in an explanation ("so it is not a halogen").
+- `rule`: `{ "type": "family", "value": "halogen" }`. Types: `family` (`alkali`, `alkaline`, `halogen`, `noble`), `category` (`metal`, `nonmetal`, `metalloid`), `group` (1 to 18), `period` (1 to 6) and `block` (`s`, `p`, `d`). Combine two with `{ "all": [rule, rule] }`, for example the nonmetals in period 3.
+- `targets`: how many matching bubbles appear (and must be popped). `total`: all bubbles on screen (14 at most). Half of the wrong bubbles are "near misses" from the same period or the next group.
+- `fact`: shown when the round is cleared. `time` (seconds) makes a round timed; only the boss level is timed.
+- The elements are in `data/elements.json`. If you add one, `npm test` checks its group, period and block against its electron configuration, and each prompt's matching elements against a hand-written answer (`ANSWER` in `tools/test-game.mjs`), so add the new prompt there.

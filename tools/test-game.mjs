@@ -9,6 +9,7 @@ import { newGame, flip, clearPending, pickSets, starsForHearts } from '../js/mem
 import { SHAPES } from '../js/shapes.js';
 import { TRACKS, SCREEN_TRACK, MAJOR_SCALE, STEPS_PER_BAR, BARS, LOOP_STEPS, midiFreq, chordTones, eighth } from '../js/music.js';
 import { AUFBAU, BOXES, newState, check, legalTargets, place, configString, electronCount, crateCount, complete, lowestOpen, parseGrid, step, startGame, solve, liveCells } from '../js/orbital-logic.js';
+import { matches, matching, buildRound, describe, wrongText } from '../js/pop-logic.js';
 import { MONSTERS, GEOMETRY, ATOM, MOODS } from '../js/monsters.js';
 import { OPTIONS, DEFAULT_AVATAR, randomAvatar, WIDTH, HEIGHT } from '../js/avatar.js';
 
@@ -107,6 +108,8 @@ const wd = JSON.parse(readFileSync('data/worlds.json', 'utf8'));
 const W = wd.worlds;
 const mem = JSON.parse(readFileSync('data/memory.json', 'utf8'));
 const orb = JSON.parse(readFileSync('data/orbitals.json', 'utf8'));
+const fal = JSON.parse(readFileSync('data/falls.json', 'utf8'));
+const EL = JSON.parse(readFileSync('data/elements.json', 'utf8')).elements;
 assert.deepEqual(W.map(w => w.id), [1, 2, 3, 4, 5, 6]);
 assert.equal(new Set(W.map(w => w.badge)).size, 6, 'badge names must be unique');
 assert.equal(new Set(W.map(w => w.accent)).size, 6, 'world colours must be unique');
@@ -114,7 +117,7 @@ for (const w of W) {
   assert.ok(EMBLEMS[w.emblem], `world ${w.id}: unknown emblem ${w.emblem}`);
   assert.ok(w.pin[0] > 56 && w.pin[0] < wd.map.width - 56 && w.pin[1] > 60 && w.pin[1] < wd.map.height - 40, `world ${w.id}: pin too close to the map edge`);
   assert.ok(w.tip && w.topic && w.gameplay && w.callout);
-  if (w.playable) { assert.ok(w.blurb); w.levelIds.forEach(id => assert.ok((w.id === 6 ? d.levels : w.id === 2 ? orb.levels : mem.levels).some(l => l.id === id), `world ${w.id}: unknown level ${id}`)); }
+  if (w.playable) { assert.ok(w.blurb); w.levelIds.forEach(id => assert.ok((w.id === 6 ? d.levels : w.id === 2 ? orb.levels : w.id === 3 ? fal.levels : mem.levels).some(l => l.id === id), `world ${w.id}: unknown level ${id}`)); }
   else assert.ok(!w.levelIds, `world ${w.id}: unbuilt worlds have no levels yet`);
 }
 for (let i = 1; i < W.length; i++) assert.ok(W[i].pin[1] < W[i - 1].pin[1], 'worlds climb the map from bottom to top');
@@ -226,7 +229,7 @@ for (let i = 1; i <= 60; i++) for (const lv of mem.levels) { const sets = pickSe
 
 // ---------- Background music: the notes are data, so check the music theory ----------
 const inKey = (midi, tonic) => MAJOR_SCALE.includes(((midi - tonic) % 12 + 12) % 12);
-assert.deepEqual(Object.keys(TRACKS).sort(), ['diner', 'map', 'memory', 'ruins']);
+assert.deepEqual(Object.keys(TRACKS).sort(), ['diner', 'falls', 'map', 'memory', 'ruins']);
 assert.equal(LOOP_STEPS, 32);
 for (const [id, t] of Object.entries(TRACKS)) {
   assert.ok(t.name && t.bpm >= 76 && t.bpm <= 130, `${id}: tempo`);
@@ -251,8 +254,8 @@ for (const [id, t] of Object.entries(TRACKS)) {
 }
 assert.ok(Math.abs(midiFreq(69) - 440) < 1e-9 && Math.abs(midiFreq(81) - 880) < 1e-9);
 // every screen has a track, and the three kinds of screen do not all play the same loop
-for (const screen of ['menu', 'shifts', 'avatar', 'game', 'memory', 'orbital']) assert.ok(TRACKS[SCREEN_TRACK[screen]], `${screen}: no track`);
-assert.equal(new Set(Object.values(SCREEN_TRACK)).size, 4);
+for (const screen of ['menu', 'shifts', 'avatar', 'game', 'memory', 'orbital', 'falls']) assert.ok(TRACKS[SCREEN_TRACK[screen]], `${screen}: no track`);
+assert.equal(new Set(Object.values(SCREEN_TRACK)).size, 5);
 
 // ---------- World 2 Orbital Ruins: chemistry answer key, rules, and proof that every level can be solved ----------
 // Independent ground truth (written by hand from the periodic table, not computed): full ground-state configurations
@@ -322,4 +325,81 @@ for (const lv of orb.levels) {
   assert.equal(r.g, cur, 'a refused push changes nothing');
 }
 console.log('Orbital Ruins OK');
+// ---------- World 3 Periodic Falls: element data checked two independent ways, then every round ----------
+{
+  // (1) group, period and block derived from the electron configuration (simple Aufbau filling), not copied from the data
+  const ORDER = [['1s', 2], ['2s', 2], ['2p', 6], ['3s', 2], ['3p', 6], ['4s', 2], ['3d', 10], ['4p', 6], ['5s', 2], ['4d', 10], ['5p', 6], ['6s', 2], ['4f', 14], ['5d', 10], ['6p', 6]];
+  const derive = z => {
+    let left = z; const occ = [];
+    for (const [sub, cap] of ORDER) { if (left <= 0) break; const n = Math.min(cap, left); occ.push([sub, n]); left -= n; }
+    const last = occ[occ.length - 1], block = last[0].slice(-1), period = Math.max(...occ.map(([sub]) => +sub[0]));
+    const count = sub => (occ.find(([x]) => x === sub) || [0, 0])[1];
+    let group;
+    if (z === 2) group = 18;
+    else if (block === 's') group = last[1];
+    else if (block === 'p') group = 12 + last[1];
+    else group = 2 + count(last[0]);                       // d-block: s electrons (2) + d electrons
+    return { group, period, block };
+  };
+  assert.equal(new Set(EL.map(e => e.z)).size, EL.length, 'duplicate element');
+  for (const e of EL) {
+    const d = derive(e.z);
+    assert.deepEqual({ group: e.group, period: e.period, block: e.block }, d, `${e.symbol} (Z=${e.z}): group, period or block is wrong`);
+    assert.ok(['metal', 'nonmetal', 'metalloid'].includes(e.category) && ['alkali', 'alkaline', 'halogen', 'noble', null].includes(e.family));
+    assert.ok(/^[A-Z][a-z]?$/.test(e.symbol) && e.name === e.name.toLowerCase());
+  }
+  assert.ok(!EL.some(e => ['aluminum', 'cesium', 'sulphur'].includes(e.name)), 'use British spellings');
+  assert.deepEqual([EL.find(e => e.z === 13).name, EL.find(e => e.z === 55).name, EL.find(e => e.z === 16).name], ['aluminium', 'caesium', 'sulfur']);
+  // (2) hand-written answer sets for the families and categories
+  const sym = list => list.map(e => e.symbol).sort().join(' ');
+  const KEY = {
+    alkali: 'Cs K Li Na', alkaline: 'Ba Be Ca Mg', halogen: 'Br Cl F I', noble: 'Ar He Kr Ne Xe',
+  };
+  for (const [fam, set] of Object.entries(KEY)) assert.equal(sym(EL.filter(e => e.family === fam)), set, `family ${fam}`);
+  assert.equal(sym(EL.filter(e => e.category === 'metalloid')), 'As B Ge Si');
+  assert.equal(sym(EL.filter(e => e.category === 'nonmetal')), 'Ar Br C Cl F H He I Kr N Ne O P S Se Xe');
+  assert.ok(EL.find(e => e.symbol === 'H').family === null, 'hydrogen is not an alkali metal');
+  assert.ok(EL.filter(e => e.family === 'alkali').every(e => e.group === 1 && e.category === 'metal'));
+  assert.ok(EL.filter(e => e.family === 'halogen').every(e => e.group === 17) && EL.filter(e => e.family === 'noble').every(e => e.group === 18));
+  assert.ok(EL.filter(e => e.family === 'alkaline').every(e => e.group === 2));
+  // (3) every prompt, checked against hand-written answers
+  const ANSWER = {
+    'Pop the alkali metals': 'Cs K Li Na', 'Pop the halogens': 'Br Cl F I', 'Pop the noble gases': 'Ar He Kr Ne Xe', 'Pop the alkaline earth metals': 'Ba Be Ca Mg',
+    'Pop the metalloids': 'As B Ge Si', 'Pop the nonmetals': 'Ar Br C Cl F H He I Kr N Ne O P S Se Xe',
+    'Pop the metals': 'Ag Al Au Ba Be Ca Co Cr Cs Cu Fe Ga Hg K Li Mg Mn Na Ni Pb Sc Sn Ti V Zn', 'Pop the metals in period 3': 'Al Mg Na', 'Pop the elements in group 17': 'Br Cl F I',
+    'Pop the elements in group 14': 'C Ge Pb Si Sn', 'Pop the elements in period 3': 'Ar Al Cl Mg Na P S Si', 'Pop the elements in group 1': 'Cs H K Li Na',
+    'Pop the d-block elements': 'Ag Au Co Cr Cu Fe Hg Mn Ni Sc Ti V Zn', 'Pop the elements in group 15': 'As N P', 'Pop the nonmetals in period 3': 'Ar Cl P S',
+    'Pop the elements in group 2': 'Ba Be Ca Mg', 'Pop the metals in group 13': 'Al Ga',
+  };
+  assert.deepEqual(fal.levels.map(l => l.id), [1, 2, 3, 4]);
+  const seeded = a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const prompts = new Set();
+  for (const lv of fal.levels) {
+    assert.ok(lv.tip && lv.title && lv.subtitle && lv.speed > 0.05 && lv.speed < 0.3);
+    assert.equal(lv.boss === true, lv.id === 4); assert.ok(lv.rounds.length >= 4);
+    for (const r of lv.rounds) {
+      const id = `level ${lv.id} "${r.prompt}"`;
+      assert.ok(!prompts.has(r.prompt) || lv.id === 4 || r.prompt === 'Pop the metalloids', `${id}: repeated prompt`); prompts.add(r.prompt);
+      assert.ok(r.fact.length > 40 && r.noun && r.prompt.startsWith('Pop '), id);
+      assert.ok(ANSWER[r.prompt], `${id}: add the correct answer to ANSWER`);
+      assert.equal(sym(matching(EL, r.rule)), ANSWER[r.prompt].split(' ').sort().join(' '), `${id}: the matching elements are wrong`);
+      const yes = matching(EL, r.rule).length;
+      assert.ok(r.targets >= 2 && r.targets <= yes, `${id}: ${r.targets} targets but only ${yes} elements match`);
+      assert.ok(r.total > r.targets && r.total - r.targets <= EL.length - yes && r.total <= 14, `${id}: bubble counts`);
+      assert.equal(!!r.time, lv.id === 4, `${id}: only the boss is timed`);
+      for (let k = 1; k <= 60; k++) {
+        const b = buildRound(r, EL, seeded(k)), sy = b.bubbles.map(e => e.symbol);
+        assert.equal(b.bubbles.length, r.total, `${id}: bubble count`); assert.equal(new Set(sy).size, sy.length, `${id}: duplicate bubble`);
+        assert.equal(b.targets.length, r.targets); assert.ok(b.targets.every(e => matches(e, r.rule) && sy.includes(e.symbol)));
+        assert.equal(b.bubbles.filter(e => matches(e, r.rule)).length, r.targets, `${id}: a decoy matches the rule`);
+      }
+    }
+  }
+  // explanations name the element's real family, group and period
+  const na = EL.find(e => e.symbol === 'Na'), ar = EL.find(e => e.symbol === 'Ar'), h = EL.find(e => e.symbol === 'H');
+  assert.equal(describe(na), 'an alkali metal in group 1, period 3'); assert.equal(describe(ar), 'a noble gas in group 18, period 3');
+  assert.equal(wrongText(na, { noun: 'a halogen' }), 'Sodium (Na) is an alkali metal in group 1, period 3, so it is not a halogen.');
+  assert.match(wrongText(h, { noun: 'an alkali metal' }), /Hydrogen sits in group 1 but is a nonmetal/);
+}
+console.log('Periodic Falls OK');
 console.log(`ChemQuest data OK (${orders} orders, ${d.ions.length} ions)`);

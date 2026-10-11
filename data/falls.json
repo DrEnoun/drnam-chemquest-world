@@ -1,0 +1,269 @@
+{
+ "levels": [
+  {
+   "id": 1,
+   "title": "Families",
+   "subtitle": "Alkali metals, halogens and noble gases",
+   "speed": 0.1,
+   "tip": "Try this: pop only the elements that belong to the family on the sign. Tap a bubble to pop it. A wrong pop costs a heart and I will tell you what it really is.",
+   "rounds": [
+    {
+     "prompt": "Pop the alkali metals",
+     "noun": "an alkali metal",
+     "rule": {
+      "type": "family",
+      "value": "alkali"
+     },
+     "targets": 3,
+     "total": 9,
+     "fact": "The alkali metals (Li, Na, K, Cs…) are in group 1. Each has one valence electron, so they are soft, shiny and react strongly with water."
+    },
+    {
+     "prompt": "Pop the halogens",
+     "noun": "a halogen",
+     "rule": {
+      "type": "family",
+      "value": "halogen"
+     },
+     "targets": 3,
+     "total": 9,
+     "fact": "The halogens (F, Cl, Br, I) are in group 17. Each has seven valence electrons and gains one electron to form a 1− ion."
+    },
+    {
+     "prompt": "Pop the noble gases",
+     "noun": "a noble gas",
+     "rule": {
+      "type": "family",
+      "value": "noble"
+     },
+     "targets": 4,
+     "total": 11,
+     "fact": "The noble gases are in group 18. Their outer shells are full, so they are very unreactive."
+    },
+    {
+     "prompt": "Pop the alkaline earth metals",
+     "noun": "an alkaline earth metal",
+     "rule": {
+      "type": "family",
+      "value": "alkaline"
+     },
+     "targets": 3,
+     "total": 10,
+     "fact": "The alkaline earth metals (Be, Mg, Ca, Ba) are in group 2. Each has two valence electrons and forms a 2+ ion."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "title": "Metal or not?",
+   "subtitle": "Metals, nonmetals and metalloids",
+   "speed": 0.13,
+   "tip": "Did you know? On the periodic table a zigzag line separates the metals on the left from the nonmetals on the right. The elements touching the line are the metalloids.",
+   "rounds": [
+    {
+     "prompt": "Pop the metalloids",
+     "noun": "a metalloid",
+     "rule": {
+      "type": "category",
+      "value": "metalloid"
+     },
+     "targets": 3,
+     "total": 9,
+     "fact": "Metalloids (B, Si, Ge, As…) sit along the zigzag line. They have some properties of metals and some of nonmetals."
+    },
+    {
+     "prompt": "Pop the nonmetals",
+     "noun": "a nonmetal",
+     "rule": {
+      "type": "category",
+      "value": "nonmetal"
+     },
+     "targets": 5,
+     "total": 11,
+     "fact": "Nonmetals are on the right of the table (plus hydrogen). They are poor conductors and tend to gain electrons."
+    },
+    {
+     "prompt": "Pop the metals",
+     "noun": "a metal",
+     "rule": {
+      "type": "category",
+      "value": "metal"
+     },
+     "targets": 5,
+     "total": 11,
+     "fact": "Most elements are metals. They conduct electricity, are shiny and tend to lose electrons to form positive ions."
+    },
+    {
+     "prompt": "Pop the metals in period 3",
+     "noun": "a metal in period 3",
+     "rule": {
+      "all": [
+       {
+        "type": "category",
+        "value": "metal"
+       },
+       {
+        "type": "period",
+        "value": 3
+       }
+      ]
+     },
+     "targets": 3,
+     "total": 10,
+     "fact": "Period 3 runs Na, Mg, Al (metals), Si (metalloid), then P, S, Cl, Ar (nonmetals): it changes from metal to nonmetal across a period."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "title": "Groups and periods",
+   "subtitle": "Columns and rows of the table",
+   "speed": 0.16,
+   "tip": "Try this: a group is a column and a period is a row. Elements in the same group have the same number of valence electrons.",
+   "rounds": [
+    {
+     "prompt": "Pop the elements in group 17",
+     "noun": "an element in group 17",
+     "rule": {
+      "type": "group",
+      "value": 17
+     },
+     "targets": 3,
+     "total": 10,
+     "fact": "Group 17 is the halogens: F, Cl, Br and I. The same column means the same number of valence electrons (7)."
+    },
+    {
+     "prompt": "Pop the elements in group 14",
+     "noun": "an element in group 14",
+     "rule": {
+      "type": "group",
+      "value": 14
+     },
+     "targets": 4,
+     "total": 11,
+     "fact": "Group 14 runs from nonmetal carbon to metals tin and lead. Each has four valence electrons."
+    },
+    {
+     "prompt": "Pop the elements in period 3",
+     "noun": "an element in period 3",
+     "rule": {
+      "type": "period",
+      "value": 3
+     },
+     "targets": 5,
+     "total": 12,
+     "fact": "Period 3 is the third row: Na, Mg, Al, Si, P, S, Cl and Ar. Their outer electrons are in the third shell."
+    },
+    {
+     "prompt": "Pop the elements in group 1",
+     "noun": "an element in group 1",
+     "rule": {
+      "type": "group",
+      "value": 1
+     },
+     "targets": 4,
+     "total": 11,
+     "fact": "Group 1 holds hydrogen and the alkali metals. Hydrogen has one valence electron too, but it is not an alkali metal."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "title": "Falls Master",
+   "subtitle": "Boss: everything, against the clock",
+   "boss": true,
+   "speed": 0.2,
+   "tip": "Boss level! Six rounds, 40 seconds each. Read the sign carefully: some rounds combine two rules, and a near miss costs a heart.",
+   "rounds": [
+    {
+     "prompt": "Pop the d-block elements",
+     "noun": "a d-block element",
+     "rule": {
+      "type": "block",
+      "value": "d"
+     },
+     "targets": 5,
+     "total": 13,
+     "fact": "The d-block is the middle of the table (groups 3 to 12), where the d subshell is being filled. Most are metals.",
+     "time": 40
+    },
+    {
+     "prompt": "Pop the elements in group 15",
+     "noun": "an element in group 15",
+     "rule": {
+      "type": "group",
+      "value": 15
+     },
+     "targets": 3,
+     "total": 11,
+     "fact": "Group 15 has five valence electrons: N, P, As (and Sb, Bi).",
+     "time": 40
+    },
+    {
+     "prompt": "Pop the nonmetals in period 3",
+     "noun": "a nonmetal in period 3",
+     "rule": {
+      "all": [
+       {
+        "type": "category",
+        "value": "nonmetal"
+       },
+       {
+        "type": "period",
+        "value": 3
+       }
+      ]
+     },
+     "targets": 4,
+     "total": 12,
+     "fact": "The nonmetals in period 3 are P, S, Cl and Ar.",
+     "time": 40
+    },
+    {
+     "prompt": "Pop the halogens",
+     "noun": "a halogen",
+     "rule": {
+      "type": "family",
+      "value": "halogen"
+     },
+     "targets": 4,
+     "total": 12,
+     "fact": "All four halogens in the game: F, Cl, Br and I, in group 17.",
+     "time": 40
+    },
+    {
+     "prompt": "Pop the elements in group 2",
+     "noun": "an element in group 2",
+     "rule": {
+      "type": "group",
+      "value": 2
+     },
+     "targets": 3,
+     "total": 11,
+     "fact": "Group 2 is the alkaline earth metals, with two valence electrons each.",
+     "time": 40
+    },
+    {
+     "prompt": "Pop the metals in group 13",
+     "noun": "a metal in group 13",
+     "rule": {
+      "all": [
+       {
+        "type": "category",
+        "value": "metal"
+       },
+       {
+        "type": "group",
+        "value": 13
+       }
+      ]
+     },
+     "targets": 2,
+     "total": 10,
+     "fact": "Group 13 starts with the metalloid boron; aluminium and gallium below it are metals.",
+     "time": 40
+    }
+   ]
+  }
+ ]
+}
