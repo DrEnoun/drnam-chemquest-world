@@ -40,6 +40,20 @@ export const TRACKS = {
     kick: [1, 0, 0, 0, 1, 0, 0, 0], hat: [0, 1, 0, 1, 0, 1, 0, 1], stab: [1, 0, 0, 1, 0, 0, 1, 0],
     lead: 'square', arpVoice: 'triangle',
   },
+  ruins: {
+    name: 'Ruins Riddle', bpm: 100, tonic: 2, level: 0.85,
+    chords: [{ root: 50, q: 'maj' }, { root: 47, q: 'min' }, { root: 55, q: 'maj' }, { root: 57, q: 'maj' }],
+    bass: [0, null, null, 1, 0, null, null, null],
+    arp: [0, 2, 1, 3, 0, 2, 1, 3],
+    melody: [
+      [78, null, 74, null, 78, null, 81, null],
+      [79, null, 78, null, 74, null, 71, null],
+      [79, null, 83, null, 81, null, 79, null],
+      [76, null, 81, null, 78, null, 76, null],
+    ],
+    kick: [1, 0, 0, 0, 0, 0, 0, 0], hat: [0, 0, 1, 0, 0, 0, 1, 0], stab: [0, 0, 0, 0, 0, 0, 0, 0],
+    lead: 'triangle', arpVoice: 'triangle',
+  },
   memory: {
     name: 'Meadow Puzzle', bpm: 80, tonic: 7, level: 0.9,
     chords: [{ root: 55, q: 'maj' }, { root: 52, q: 'min' }, { root: 48, q: 'maj' }, { root: 50, q: 'maj' }],
@@ -64,7 +78,7 @@ export const midiFreq = m => 440 * 2 ** ((m - 69) / 12);
 export const chordTones = c => TRIAD[c.q].map(i => c.root + i);
 
 // Which of the three loops each screen plays.
-export const SCREEN_TRACK = { menu: 'map', shifts: 'map', avatar: 'map', game: 'diner', memory: 'memory' };
+export const SCREEN_TRACK = { menu: 'map', shifts: 'map', avatar: 'map', game: 'diner', memory: 'memory', orbital: 'ruins' };
 
 // ---------- sound building blocks ----------
 const noiseCache = new WeakMap();

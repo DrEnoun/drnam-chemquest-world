@@ -47,13 +47,20 @@
       ],
       "badge": "Orbital Ace",
       "emblem": "orbit",
-      "playable": false,
-      "callout": "Coming soon",
+      "playable": true,
+      "callout": "4 levels",
       "tip": "Try this: electrons fill the lowest-energy orbitals first (Aufbau), and spread out one by one before pairing up (Hund’s rule).",
       "pinWide": [
         170,
         140
-      ]
+      ],
+      "levelIds": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "blurb": "Push electrons into orbitals, following the rules that decide where each one goes."
     },
     {
       "id": 3,

@@ -24,3 +24,16 @@ A **set** is the cards that belong together: 2 cards (name + formula, or formula
 ## Worlds and the map (`data/worlds.json`)
 
 Each world has a name, game, topic, colour, pin position, badge and a Dr. NAM `tip`. A world becomes playable when it has `"playable": true` and a `levelIds` list. Progress is saved per world and level, for example `6.2` for Ion Diner shift 2.
+
+## Orbital Ruins levels (`data/orbitals.json`)
+
+Each level is one atom. The rules (Aufbau, Hund, Pauli) are in `js/orbital-logic.js`, so a level only describes the atom and the board:
+
+- `element`: `symbol`, `name` and `z` (atomic number).
+- `given`: subshells that are already full and shown as "given", for example `["1s", "2s"]` for nitrogen.
+- `subshells` and `target`: the subshells the player fills and how many electrons each gets, for example `["2p"]` and `{ "2p": 3 }`. Given electrons plus target electrons must equal `z`.
+- `cells`: names each socket letter on the board, for example `"a": { "sub": "2p", "box": 0 }`. A subshell needs one socket per orbital (s has 1, p has 3).
+- `grid`: the board, one string per row. `#` wall, `.` floor, `@` player, `$` electron block, `a`-`z` sockets (entered only by pushing an electron in). Rows must be the same length, and the number of `$` must equal the electrons to place.
+- `tip`, `goal`, `title`, `subtitle`, and `"boss": true` for the last level.
+
+Run `node tools/solve-orbital.mjs` after editing: it shows a shortest solution or reports that the board cannot be solved. `npm test` also solves every level, replays the solution through the game rules, and checks the final configuration against a hand-written answer key (`FULL` in `tools/test-game.mjs`), so add the new element there.
