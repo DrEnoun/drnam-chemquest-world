@@ -1,0 +1,15 @@
+{
+  "name": "drnam-chemquest-world",
+  "version": "1.0.0",
+  "description": "DR NAM’s CHEMQUEST: a mobile-first chemistry game by Chemistry with Dr. NAM",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node tools/test-game.mjs",
+    "sw": "node tools/build-sw.mjs",
+    "tokens": "node tools/make-tokens-css.mjs",
+    "serve": "python3 -m http.server 8080"
+  },
+  "author": "Dr. Nur 'Ainun Mokhtar (Chemistry with Dr. NAM)",
+  "license": "UNLICENSED"
+}
