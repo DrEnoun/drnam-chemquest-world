@@ -27,7 +27,11 @@
         3,
         4
       ],
-      "blurb": "Flip the cards to match names, formulae and shapes."
+      "blurb": "Flip the cards to match names, formulae and shapes.",
+      "pinWide": [
+        70,
+        280
+      ]
     },
     {
       "id": 2,
@@ -45,7 +49,11 @@
       "emblem": "orbit",
       "playable": false,
       "callout": "Coming soon",
-      "tip": "Try this: electrons fill the lowest-energy orbitals first (Aufbau), and spread out one by one before pairing up (Hund’s rule)."
+      "tip": "Try this: electrons fill the lowest-energy orbitals first (Aufbau), and spread out one by one before pairing up (Hund’s rule).",
+      "pinWide": [
+        170,
+        140
+      ]
     },
     {
       "id": 3,
@@ -63,7 +71,11 @@
       "emblem": "grid",
       "playable": false,
       "callout": "Coming soon",
-      "tip": "Did you know? The halogens are the elements in Group 17 of the periodic table."
+      "tip": "Did you know? The halogens are the elements in Group 17 of the periodic table.",
+      "pinWide": [
+        270,
+        280
+      ]
     },
     {
       "id": 4,
@@ -81,7 +93,11 @@
       "emblem": "arrow",
       "playable": false,
       "callout": "Coming soon",
-      "tip": "Try this: ionisation energy generally increases across a period and decreases down a group."
+      "tip": "Try this: ionisation energy generally increases across a period and decreases down a group.",
+      "pinWide": [
+        370,
+        140
+      ]
     },
     {
       "id": 5,
@@ -99,7 +115,11 @@
       "emblem": "bond",
       "playable": false,
       "callout": "Coming soon",
-      "tip": "Try this: count the electron groups around the central atom. Lone pairs count too, and they change the shape."
+      "tip": "Try this: count the electron groups around the central atom. Lone pairs count too, and they change the shape.",
+      "pinWide": [
+        470,
+        280
+      ]
     },
     {
       "id": 6,
@@ -126,7 +146,15 @@
       "callout": "4 shifts",
       "tip": "Why do ionic compounds have zero net charge? Because the total positive charge cancels the total negative charge. Serve a few customers and see!",
       "calloutLift": 26,
-      "blurb": "Combine ions to serve ionic compounds before your customers lose patience."
+      "blurb": "Combine ions to serve ionic compounds before your customers lose patience.",
+      "pinWide": [
+        570,
+        140
+      ]
     }
-  ]
+  ],
+  "mapWide": {
+    "width": 640,
+    "height": 360
+  }
 }

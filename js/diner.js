@@ -78,7 +78,7 @@ const states = () => worldStates(worlds, save.stars);
 let selected = save.world;
 
 const overworld = createOverworld({
-  canvas: $('map-canvas'), pinsEl: $('map-pins'), worlds, map: worldData.map,
+  canvas: $('map-canvas'), pinsEl: $('map-pins'), worlds, map: worldData.map, mapWide: worldData.mapWide,
   getState: states, getAvatar: () => save.avatar,
   onMonster: m => { sound.unlock(); sound.select(); says($('menu-says'), { text: m.fact, status: `Meet ${m.name}!` }); },
   onSelect: (id, arrived) => {
