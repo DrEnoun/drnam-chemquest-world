@@ -106,6 +106,48 @@
     <div class="mem-grid" id="mem-grid"></div>
   </main>
 
+  <!-- ================= Orbital Ruins (World 2) ================= -->
+  <main class="screen screen--orbital" id="screen-orbital" hidden>
+    <header class="hud">
+      <button class="chip" id="orb-quit" type="button" aria-label="Back to the map">‹ Menu</button>
+      <div class="hud__hearts" id="orb-hearts" role="img" aria-label="Hearts"></div>
+      <div class="hud__coins"><span class="coin-dot" aria-hidden="true"></span><span id="orb-coins">0</span></div>
+      <button class="chip" id="orb-sound" type="button"></button>
+    </header>
+    <div class="orb-left">
+      <section class="ticket sticker-static" aria-live="polite">
+        <p class="ticket__meta" id="orb-meta"></p>
+        <p class="ticket__order" id="orb-goal"></p>
+      </section>
+      <div class="orb-board" id="orb-board"><canvas id="orb-canvas" aria-label="Puzzle board. Use the arrow keys, the buttons or swipe to move."></canvas><p class="orb-swipe">Swipe anywhere to move</p></div>
+      <div class="orb-controls">
+        <div class="orb-actions">
+          <button class="chip" id="orb-undo" type="button">Undo</button>
+          <button class="chip" id="orb-restart" type="button">Restart</button>
+          <button class="chip" id="orb-hint" type="button">Hint</button>
+          <button class="chip orb-padbtn" id="orb-pad" type="button" aria-pressed="false">Arrows</button>
+        </div>
+        <div class="dpad" role="group" aria-label="Move">
+          <button type="button" data-move="U" aria-label="Move up">▲</button>
+          <button type="button" data-move="L" aria-label="Move left">◀</button>
+          <button type="button" data-move="D" aria-label="Move down">▼</button>
+          <button type="button" data-move="R" aria-label="Move right">▶</button>
+        </div>
+      </div>
+    </div>
+    <div class="orb-right">
+      <aside class="says" id="orb-says" aria-live="polite"></aside>
+      <section class="orb-diagram sticker-static" aria-labelledby="orb-atom">
+        <h2 id="orb-atom"></h2>
+        <p class="orb-axis">Energy ↑</p>
+        <div id="orb-rows"></div>
+        <p class="orb-configlabel">Electron configuration</p>
+        <p class="orb-config" id="orb-config"></p>
+        <p class="orb-count" id="orb-count"></p>
+      </section>
+    </div>
+  </main>
+
   <!-- ================= Avatar creator ================= -->
   <main class="screen screen--avatar" id="screen-avatar" hidden>
     <h2 class="title title--small"><span class="lime-rule" aria-hidden="true"></span>Create your avatar</h2>

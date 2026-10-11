@@ -8,6 +8,7 @@ import { EMBLEMS } from '../js/badges.js';
 import { newGame, flip, clearPending, pickSets, starsForHearts } from '../js/memory-logic.js';
 import { SHAPES } from '../js/shapes.js';
 import { TRACKS, SCREEN_TRACK, MAJOR_SCALE, STEPS_PER_BAR, BARS, LOOP_STEPS, midiFreq, chordTones, eighth } from '../js/music.js';
+import { AUFBAU, BOXES, newState, check, legalTargets, place, configString, electronCount, crateCount, complete, lowestOpen, parseGrid, step, startGame, solve, liveCells } from '../js/orbital-logic.js';
 import { MONSTERS, GEOMETRY, ATOM, MOODS } from '../js/monsters.js';
 import { OPTIONS, DEFAULT_AVATAR, randomAvatar, WIDTH, HEIGHT } from '../js/avatar.js';
 
@@ -105,6 +106,7 @@ for (let i = 0; i < 50; i++) {
 const wd = JSON.parse(readFileSync('data/worlds.json', 'utf8'));
 const W = wd.worlds;
 const mem = JSON.parse(readFileSync('data/memory.json', 'utf8'));
+const orb = JSON.parse(readFileSync('data/orbitals.json', 'utf8'));
 assert.deepEqual(W.map(w => w.id), [1, 2, 3, 4, 5, 6]);
 assert.equal(new Set(W.map(w => w.badge)).size, 6, 'badge names must be unique');
 assert.equal(new Set(W.map(w => w.accent)).size, 6, 'world colours must be unique');
@@ -112,7 +114,7 @@ for (const w of W) {
   assert.ok(EMBLEMS[w.emblem], `world ${w.id}: unknown emblem ${w.emblem}`);
   assert.ok(w.pin[0] > 56 && w.pin[0] < wd.map.width - 56 && w.pin[1] > 60 && w.pin[1] < wd.map.height - 40, `world ${w.id}: pin too close to the map edge`);
   assert.ok(w.tip && w.topic && w.gameplay && w.callout);
-  if (w.playable) { assert.ok(w.blurb); w.levelIds.forEach(id => assert.ok((w.id === 6 ? d.levels : mem.levels).some(l => l.id === id), `world ${w.id}: unknown level ${id}`)); }
+  if (w.playable) { assert.ok(w.blurb); w.levelIds.forEach(id => assert.ok((w.id === 6 ? d.levels : w.id === 2 ? orb.levels : mem.levels).some(l => l.id === id), `world ${w.id}: unknown level ${id}`)); }
   else assert.ok(!w.levelIds, `world ${w.id}: unbuilt worlds have no levels yet`);
 }
 for (let i = 1; i < W.length; i++) assert.ok(W[i].pin[1] < W[i - 1].pin[1], 'worlds climb the map from bottom to top');
@@ -224,7 +226,7 @@ for (let i = 1; i <= 60; i++) for (const lv of mem.levels) { const sets = pickSe
 
 // ---------- Background music: the notes are data, so check the music theory ----------
 const inKey = (midi, tonic) => MAJOR_SCALE.includes(((midi - tonic) % 12 + 12) % 12);
-assert.deepEqual(Object.keys(TRACKS).sort(), ['diner', 'map', 'memory']);
+assert.deepEqual(Object.keys(TRACKS).sort(), ['diner', 'map', 'memory', 'ruins']);
 assert.equal(LOOP_STEPS, 32);
 for (const [id, t] of Object.entries(TRACKS)) {
   assert.ok(t.name && t.bpm >= 76 && t.bpm <= 130, `${id}: tempo`);
@@ -249,7 +251,75 @@ for (const [id, t] of Object.entries(TRACKS)) {
 }
 assert.ok(Math.abs(midiFreq(69) - 440) < 1e-9 && Math.abs(midiFreq(81) - 880) < 1e-9);
 // every screen has a track, and the three kinds of screen do not all play the same loop
-for (const screen of ['menu', 'shifts', 'avatar', 'game', 'memory']) assert.ok(TRACKS[SCREEN_TRACK[screen]], `${screen}: no track`);
-assert.equal(new Set(Object.values(SCREEN_TRACK)).size, 3);
+for (const screen of ['menu', 'shifts', 'avatar', 'game', 'memory', 'orbital']) assert.ok(TRACKS[SCREEN_TRACK[screen]], `${screen}: no track`);
+assert.equal(new Set(Object.values(SCREEN_TRACK)).size, 4);
 
+// ---------- World 2 Orbital Ruins: chemistry answer key, rules, and proof that every level can be solved ----------
+// Independent ground truth (written by hand from the periodic table, not computed): full ground-state configurations
+const FULL = { Li: '1s² 2s¹', N: '1s² 2s² 2p³', O: '1s² 2s² 2p⁴', P: '1s² 2s² 2p⁶ 3s² 3p³' };
+assert.deepEqual(AUFBAU.slice(0, 5), ['1s', '2s', '2p', '3s', '3p'], 'Aufbau energy order');
+assert.deepEqual([BOXES('1s'), BOXES('2p'), BOXES('3d')], [1, 3, 5]);
+assert.deepEqual(orb.levels.map(l => l.id), [1, 2, 3, 4]);
+for (const lv of orb.levels) {
+  const id = `${lv.element.name}`;
+  assert.ok(lv.tip && lv.goal && lv.title && lv.subtitle, `${id}: texts`);
+  assert.equal(lv.boss === true, lv.id === 4);
+  assert.ok(FULL[lv.element.symbol], `${id}: no answer key`);
+  // the electrons given plus the electrons to place add up to the atomic number
+  const st0 = newState(lv);
+  assert.equal(electronCount(st0) + crateCount(lv), lv.element.z, `${id}: electrons do not add up to Z = ${lv.element.z}`);
+  // the grid has exactly as many electrons to push as the level asks for, one player, and every socket is used by this level
+  const board = parseGrid(lv);
+  assert.equal(board.crates.length, crateCount(lv), `${id}: electrons on the board`);
+  assert.ok(board.player != null && board.walls.size > 0);
+  for (const s of board.sockets.values()) assert.ok(lv.subshells.includes(s.sub) && s.box < BOXES(s.sub), `${id}: bad socket`);
+  assert.equal(new Set([...board.sockets.values()].map(s => `${s.sub}${s.box}`)).size, board.sockets.size, `${id}: duplicate socket`);
+  for (const sub of lv.subshells) assert.equal([...board.sockets.values()].filter(s => s.sub === sub).length, BOXES(sub), `${id}: every ${sub} orbital needs a socket`);
+  // placing the electrons only where the rules allow gives exactly the known configuration (greedy, any legal choice)
+  let st = st0;
+  for (let i = 0; i < crateCount(lv); i++) { const legal = legalTargets(st); assert.ok(legal.length > 0, `${id}: stuck`); const t = legal[legal.length - 1]; st = place(st, t.sub, t.box); }
+  assert.equal(configString(st), FULL[lv.element.symbol], `${id}: configuration`);
+  assert.ok(complete(st, lv));
+  // rule-by-rule: every wrong placement is refused, with the right rule named
+  assert.ok(liveCells(board).size > 0);
+  // the level can be completed (shortest solution found by search)
+  const sol = solve(lv, 2_000_000);
+  assert.ok(sol.moves && sol.moves.length >= 12, `${id}: not solvable (${sol.states} states searched)`);
+  // replay the solution with the real step() function
+  let r = startGame(lv), g = r.g;
+  for (const m of sol.moves) { const out = step(r.board, g, m); assert.ok(out.moved, `${id}: replay failed`); g = out.g; }
+  assert.equal(g.crates.length, 0); assert.ok(complete(g.state, lv)); assert.equal(configString(g.state), FULL[lv.element.symbol]);
+}
+{ // the three rules, one at a time, on nitrogen's 2p subshell (1s and 2s given)
+  let st = newState(orb.levels[1]);
+  assert.equal(lowestOpen(st), '2p'); assert.deepEqual(legalTargets(st).length, 3);
+  assert.equal(check(st, '2p', 0).ok, true);
+  st = place(st, '2p', 0);
+  assert.equal(check(st, '2p', 0).rule, 'hund', 'second electron into the same p orbital while others are empty');
+  assert.equal(check(st, '2p', 1).ok, true); assert.equal(check(st, '2p', 2).ok, true);
+  assert.equal(check(st, '1s', 0).rule, 'pauli', 'a full orbital refuses another electron');
+  st = place(place(st, '2p', 1), '2p', 2);
+  assert.equal(check(st, '2p', 0).ok, true, 'once every orbital has one, pairing is allowed');
+  st = place(st, '2p', 0);
+  assert.equal(check(st, '2p', 0).rule, 'pauli', 'no third electron in one orbital');
+  assert.equal(configString(st), '1s² 2s² 2p⁴');
+}
+{ // Aufbau on lithium
+  const st = newState(orb.levels[0]);
+  assert.equal(check(st, '2s', 0).rule, 'aufbau'); assert.match(check(st, '2s', 0).text, /1s is lower in energy than 2s/);
+  const st1 = place(place(st, '1s', 0), '1s', 0);
+  assert.equal(check(st1, '1s', 0).rule, 'pauli'); assert.equal(check(st1, '2s', 0).ok, true);
+  assert.equal(configString(place(st1, '2s', 0)), '1s² 2s¹');
+}
+{ // pushing into the wrong socket is refused and costs nothing on the board; into the right socket is absorbed
+  const lv = orb.levels[0], { board, g } = startGame(lv); const w = board.w;
+  const cellOf = (x, y) => y * w + x;
+  const bSocket = cellOf(6, 1), crate = cellOf(6, 3);
+  assert.ok(board.sockets.has(bSocket) && g.crates.includes(crate));
+  let cur = { ...g, player: cellOf(6, 4) };
+  let r = step(board, cur, 'U'); assert.ok(r.moved && r.pushed && !r.absorbed); cur = r.g;
+  r = step(board, cur, 'U'); assert.ok(!r.moved && r.blocked && r.illegal && r.illegal.rule === 'aufbau', 'pushing into 2s first is refused');
+  assert.equal(r.g, cur, 'a refused push changes nothing');
+}
+console.log('Orbital Ruins OK');
 console.log(`ChemQuest data OK (${orders} orders, ${d.ions.length} ions)`);

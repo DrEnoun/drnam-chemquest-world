@@ -1,0 +1,189 @@
+{
+  "levels": [
+    {
+      "id": 1,
+      "title": "Fill from the bottom",
+      "subtitle": "Lithium: the Aufbau principle",
+      "element": {
+        "symbol": "Li",
+        "name": "lithium",
+        "z": 3
+      },
+      "given": [],
+      "subshells": [
+        "1s",
+        "2s"
+      ],
+      "target": {
+        "1s": 2,
+        "2s": 1
+      },
+      "cells": {
+        "a": {
+          "sub": "1s",
+          "box": 0
+        },
+        "b": {
+          "sub": "2s",
+          "box": 0
+        }
+      },
+      "grid": [
+        "#########",
+        "##a###b##",
+        "#.......#",
+        "#.$.$.$.#",
+        "#.......#",
+        "#...@...#",
+        "#########"
+      ],
+      "tip": "Try this: lithium has 3 electrons. Push them into the sockets from the lowest energy upwards: 1s first, then 2s.",
+      "goal": "Place all 3 electrons of lithium."
+    },
+    {
+      "id": 2,
+      "title": "One each first",
+      "subtitle": "Nitrogen: Hund’s rule",
+      "element": {
+        "symbol": "N",
+        "name": "nitrogen",
+        "z": 7
+      },
+      "given": [
+        "1s",
+        "2s"
+      ],
+      "subshells": [
+        "2p"
+      ],
+      "target": {
+        "2p": 3
+      },
+      "cells": {
+        "a": {
+          "sub": "2p",
+          "box": 0
+        },
+        "b": {
+          "sub": "2p",
+          "box": 1
+        },
+        "c": {
+          "sub": "2p",
+          "box": 2
+        }
+      },
+      "grid": [
+        "#########",
+        "##a#b#c##",
+        "#.......#",
+        "#.$...$.#",
+        "#.$.....#",
+        "#.......#",
+        "#...@...#",
+        "#########"
+      ],
+      "tip": "Did you know? The 1s and 2s orbitals of nitrogen are already full. Its last three electrons go into the three 2p orbitals: one in each, before any pair up.",
+      "goal": "Place the 3 electrons in the 2p orbitals."
+    },
+    {
+      "id": 3,
+      "title": "Pairing up",
+      "subtitle": "Oxygen: Hund’s rule and spin",
+      "element": {
+        "symbol": "O",
+        "name": "oxygen",
+        "z": 8
+      },
+      "given": [
+        "1s",
+        "2s"
+      ],
+      "subshells": [
+        "2p"
+      ],
+      "target": {
+        "2p": 4
+      },
+      "cells": {
+        "a": {
+          "sub": "2p",
+          "box": 0
+        },
+        "b": {
+          "sub": "2p",
+          "box": 1
+        },
+        "c": {
+          "sub": "2p",
+          "box": 2
+        }
+      },
+      "grid": [
+        "#########",
+        "##a#b#c##",
+        "#.......#",
+        "#.$...$.#",
+        "#...$...#",
+        "#.$.....#",
+        "#...@...#",
+        "#########"
+      ],
+      "tip": "Try this: oxygen has four electrons to place in 2p. The first three go one in each orbital. The fourth has to pair up with one of them, spinning the opposite way.",
+      "goal": "Place the 4 electrons in the 2p orbitals."
+    },
+    {
+      "id": 4,
+      "title": "The third shell",
+      "subtitle": "Phosphorus: all three rules",
+      "boss": true,
+      "element": {
+        "symbol": "P",
+        "name": "phosphorus",
+        "z": 15
+      },
+      "given": [
+        "1s",
+        "2s",
+        "2p"
+      ],
+      "subshells": [
+        "3s",
+        "3p"
+      ],
+      "target": {
+        "3s": 2,
+        "3p": 3
+      },
+      "cells": {
+        "a": {
+          "sub": "3s",
+          "box": 0
+        },
+        "b": {
+          "sub": "3p",
+          "box": 0
+        },
+        "c": {
+          "sub": "3p",
+          "box": 1
+        },
+        "d": {
+          "sub": "3p",
+          "box": 2
+        }
+      },
+      "grid": [
+        "###########",
+        "##a#b#c#d##",
+        "#.........#",
+        "#.$.$.$...#",
+        "#....$..$.#",
+        "#....@....#",
+        "###########"
+      ],
+      "tip": "Boss level! Phosphorus fills the third shell: 3s before 3p, two electrons in 3s, then one in each 3p orbital. The same three rules work in every shell.",
+      "goal": "Place the 5 electrons of phosphorus’s third shell."
+    }
+  ]
+}
