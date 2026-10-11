@@ -9,8 +9,10 @@ export function fit() {
   // Wide: scale with the window height. Squarer or portrait screens (4:3 projectors, tablets upright) keep the one-column layout,
   // scaled by width. A phone held sideways is short, so it stays at normal size.
   const k = wide ? Math.min(2.4, h / 720) : h < 500 ? 1 : Math.min(1.9, w / 560);
+  const changed = root.classList.contains('wide') !== wide;
   root.classList.toggle('wide', wide);
   root.style.setProperty('--k', Math.max(1, k).toFixed(3));
+  if (changed) dispatchEvent(new CustomEvent('drnam:layout', { detail: { wide } }));
 }
 fit();
 addEventListener('resize', fit);

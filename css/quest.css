@@ -182,19 +182,19 @@ canvas { image-rendering: auto; }
 .map canvas { display: block; width: 100%; height: auto; }
 .map__pins { position: absolute; inset: 0; pointer-events: none; }
 .map-pin { position: absolute; transform: translate(-50%, -100%); pointer-events: none; }
-.map-pin__btn { pointer-events: auto; background: none; border: 0; padding: 0; cursor: pointer; min-width: 13.408cqw; min-height: 13.408cqw; display: grid; place-items: end center; }
+.map-pin__btn { pointer-events: auto; background: none; border: 0; padding: 0; cursor: pointer; min-width: calc(13.408cqw * var(--mapk, 1)); min-height: calc(13.408cqw * var(--mapk, 1)); display: grid; place-items: end center; }
 .map-pin__call {
   display: grid; gap: 0; text-align: center; padding: calc(4px * var(--k)) calc(10px * var(--k)) calc(5px * var(--k)); border-radius: calc(12px * var(--k));
   background: var(--surface-000); color: var(--ink-strong); border: calc(2px * var(--k)) solid var(--accent); box-shadow: 0 calc(3px * var(--k)) 0 rgba(0, 0, 0, .45);
   font-size: calc(13px * var(--k)); line-height: 1.15; white-space: nowrap; position: relative; margin-bottom: calc(6px * var(--k));
 }
-.map-pin__call::after { content: ""; position: absolute; left: 50%; bottom: -1.955cqw; width: 2.793cqw; height: 2.793cqw; background: var(--surface-000); border: solid var(--accent); border-width: 0 0.559cqw 0.559cqw 0; transform: translateX(-50%) rotate(45deg); }
-.map-pin__call b { font-family: var(--font-display); font-weight: 800; font-size: 3.352cqw; letter-spacing: .06em; color: var(--accent); }
-.map-pin__call span { font-family: var(--font-display); font-weight: 700; font-size: 4.19cqw; }
-.map-pin__call small { font-size: 3.352cqw; opacity: .85; }
+.map-pin__call::after { content: ""; position: absolute; left: 50%; bottom: calc(-1.955cqw * var(--mapk, 1)); width: calc(2.793cqw * var(--mapk, 1)); height: calc(2.793cqw * var(--mapk, 1)); background: var(--surface-000); border: solid var(--accent); border-width: 0 calc(0.559cqw * var(--mapk, 1)) calc(0.559cqw * var(--mapk, 1)) 0; transform: translateX(-50%) rotate(45deg); }
+.map-pin__call b { font-family: var(--font-display); font-weight: 800; font-size: calc(3.352cqw * var(--mapk, 1)); letter-spacing: .06em; color: var(--accent); }
+.map-pin__call span { font-family: var(--font-display); font-weight: 700; font-size: calc(4.19cqw * var(--mapk, 1)); }
+.map-pin__call small { font-size: calc(3.352cqw * var(--mapk, 1)); opacity: .85; }
 .map-pin__btn[data-locked="true"] .map-pin__call { border-color: #8a97a5; filter: grayscale(1); opacity: .85; }
 .map-pin__btn[data-locked="true"] .map-pin__call b { color: #c0cad4; }
-.map-pin__btn[data-current="true"] .map-pin__call { box-shadow: 0 0 0 0.838cqw var(--accent), 0 0 5.028cqw var(--accent); }
+.map-pin__btn[data-current="true"] .map-pin__call { box-shadow: 0 0 0 calc(0.838cqw * var(--mapk, 1)) var(--accent), 0 0 calc(5.028cqw * var(--mapk, 1)) var(--accent); }
 :root[data-theme="day"] .map-pin__call { background: #fff; color: #231f20; }
 :root[data-theme="day"] .map-pin__call::after { background: #fff; }
 
@@ -221,7 +221,7 @@ canvas { image-rendering: auto; }
 
 #menu-avatar { width: calc(64px * var(--k)); height: calc(88px * var(--k)); } #avatar-preview { width: calc(160px * var(--k)); height: calc(220px * var(--k)); }
 
-.map-pin__stem { position: absolute; width: 0.838cqw; transform: translateX(-50%); background: var(--accent); border-radius: 0.559cqw; box-shadow: 0 0 2.235cqw var(--accent); pointer-events: none; }
+.map-pin__stem { position: absolute; width: calc(0.838cqw * var(--mapk, 1)); transform: translateX(-50%); background: var(--accent); border-radius: calc(0.559cqw * var(--mapk, 1)); box-shadow: 0 0 calc(2.235cqw * var(--mapk, 1)) var(--accent); pointer-events: none; }
 
 /* ----- Memory match (World 1) ----- */
 .screen--memory { gap: calc(12px * var(--k)); }
@@ -261,8 +261,8 @@ canvas { image-rendering: auto; }
 /* ===================================================================================================
    Layout helpers shared by every size
    =================================================================================================== */
-.menu-side, .menu-col, .game-left, .game-right, .mem-left { display: contents; }     /* phones: one column, original order */
-.player { order: 1; } .menu-col > section[aria-labelledby] { order: 2; }                    /* phones: avatar card after the world card, then topics and badges */
+.head, .menu-side, .map-cell, .side-col, .game-left, .game-right, .mem-left { display: contents; }     /* phones: one column, original order */
+.player { order: 1; } .topics-strip { order: 2; } .badges-block { order: 3; }                    /* phones: avatar card after the world card, then topics and badges */
 .btn-serve { position: sticky; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 3; }
 #btn-full[hidden] { display: none; }
 
@@ -274,34 +274,6 @@ canvas { image-rendering: auto; }
 .wide body { overflow: hidden; }
 .wide .screen { max-width: none; margin: 0; height: 100vh; height: 100dvh; padding: calc(14px * var(--k)) calc(26px * var(--k)); gap: calc(14px * var(--k)); overflow: hidden; }
 .wide .screen[hidden] { display: none; }
-
-/* --- Map screen: the tall map on the left; title, world card, avatar, topics and badges beside it --- */
-.wide .screen--menu { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr); column-gap: calc(34px * var(--k));
-  grid-template-areas: "top top" "map head" "map body"; }
-.wide .screen--menu .topline { grid-area: top; }
-.wide .screen--menu .map { grid-area: map; height: 100%; width: auto; aspect-ratio: 288 / 688; justify-self: start; min-height: 0; }
-.wide .screen--menu .map canvas { height: 100%; width: auto; aspect-ratio: 288 / 688; }
-.wide .menu-side { display: flex; flex-direction: column; gap: calc(14px * var(--k)); min-height: 0; }
-.wide .menu-side:not(.menu-side--lower) { grid-area: head; }
-.wide .menu-side--lower { grid-area: body; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: calc(14px * var(--k)) calc(24px * var(--k)); align-content: start; overflow-y: auto; padding: calc(8px * var(--k)) calc(10px * var(--k)) calc(14px * var(--k)) 0; }
-.wide .menu-col { display: flex; flex-direction: column; gap: calc(14px * var(--k)); min-width: 0; }
-.wide .menu-side--lower .topic-grid { grid-template-columns: repeat(3, 1fr); gap: calc(10px * var(--k)); }
-.wide .menu-side--lower .section-title { margin-bottom: calc(8px * var(--k)); }
-.wide .menu-side--lower .topic-card { padding: calc(8px * var(--k)) calc(6px * var(--k)); }
-.wide .menu-side--lower .topic-card svg { width: calc(30px * var(--k)); height: calc(30px * var(--k)); }
-.wide .menu-side--lower .badge-shelf { padding: calc(8px * var(--k)) calc(6px * var(--k)); gap: calc(8px * var(--k)) calc(6px * var(--k)); }
-.wide .menu-side--lower .badge canvas { width: calc(54px * var(--k)); height: calc(64px * var(--k)); }
-.wide .menu-side--lower .world-card { padding: calc(12px * var(--k)) calc(16px * var(--k)); gap: calc(2px * var(--k)); }
-.wide .menu-side--lower .world-card h2 { font-size: calc(30px * var(--k)); }
-.wide .menu-side--lower .world-card .btn-start { min-height: calc(50px * var(--k)); font-size: calc(22px * var(--k)); }
-.wide .menu-side--lower .shelf-note { display: none; }
-/* title block on one line to save height */
-.wide .menu-side:not(.menu-side--lower) { flex-direction: row; align-items: center; gap: calc(26px * var(--k)); }
-.wide .title br { display: none; }
-.wide .menu-side:not(.menu-side--lower) .title { font-size: calc(48px * var(--k)); }
-.wide .menu-side:not(.menu-side--lower) .badge-disc { width: calc(72px * var(--k)); height: calc(72px * var(--k)); }
-.wide .tagline { display: none; }
-.wide .menu-side:not(.menu-side--lower) .title { white-space: nowrap; }
 
 /* --- Ion Diner: scene and order on the left, counter, tray and Serve on the right --- */
 .wide .screen--game { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); column-gap: calc(30px * var(--k)); }
@@ -326,17 +298,60 @@ canvas { image-rendering: auto; }
 .wide .screen--avatar { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "title title" "stage options" "buttons options"; align-content: start; column-gap: calc(40px * var(--k)); overflow-y: auto; }
 .wide .screen--avatar > .title { grid-area: title; } .wide .avatar-stage { grid-area: stage; } .wide #avatar-options { grid-area: options; } .wide .screen--avatar > .row { grid-area: buttons; align-self: start; }
 
-/* --- Compact the map screen so nothing needs scrolling --- */
-.wide .menu-side:not(.menu-side--lower) .player { order: 0; margin-left: auto; padding: calc(6px * var(--k)) calc(14px * var(--k)); transform: none; flex-direction: row; gap: calc(12px * var(--k)); }
-.wide .menu-side:not(.menu-side--lower) .player canvas { width: calc(40px * var(--k)); height: calc(55px * var(--k)); }
-.wide .menu-side:not(.menu-side--lower) .player__label { font-size: calc(18px * var(--k)); }
-.wide .menu-side:not(.menu-side--lower) .player__stats { margin-bottom: calc(4px * var(--k)); font-size: calc(14px * var(--k)); }
-.wide .menu-side:not(.menu-side--lower) .player .sticker { min-height: calc(32px * var(--k)); padding: calc(2px * var(--k)) calc(14px * var(--k)); font-size: calc(15px * var(--k)); }
-.wide .menu-side--lower { padding: 0 calc(10px * var(--k)) calc(4px * var(--k)) 0; }
-.wide .menu-side--lower .badge-shelf { grid-template-columns: repeat(6, 1fr); }
-.wide .menu-side--lower .badge { font-size: calc(12px * var(--k)); }
-.wide .menu-side--lower .badge small { font-size: calc(11px * var(--k)); }
-@media (max-height: 820px) { .wide .menu-side--lower .topic-card small { display: none; } }
+/* --- Map screen: the map is the main attraction. It is the biggest thing on the page; everything else is compact around it. --- */
+.wide .screen--menu { display: grid; grid-template-columns: minmax(0, 1fr) calc(360px * var(--k)); grid-template-rows: auto minmax(0, 1fr) auto; column-gap: calc(22px * var(--k)); row-gap: calc(10px * var(--k));
+  grid-template-areas: "head head" "map side" "strip side"; padding-top: calc(8px * var(--k)); padding-bottom: calc(10px * var(--k)); }
+.wide .head { grid-area: head; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: calc(20px * var(--k)); }
+.wide .head .topline { display: contents; }
+.wide .head .logo-plate { grid-column: 1; grid-row: 1; height: calc(40px * var(--k)); }
+.wide .head .toolbar { grid-column: 3; grid-row: 1; }
+.wide .head .menu-side { grid-column: 2; grid-row: 1; display: flex; justify-content: center; }
+.wide .menu-side .hero { gap: calc(16px * var(--k)); }
+.wide .menu-side .hero .badge-disc { width: calc(52px * var(--k)); height: calc(52px * var(--k)); }
+.wide .menu-side .eyebrow { font-size: calc(12px * var(--k)); }
+.wide .menu-side .lime-rule { margin-bottom: calc(4px * var(--k)); }
+.wide .menu-side .title { font-size: calc(34px * var(--k)); white-space: nowrap; }
+.wide .menu-side .title br { display: none; }
+.wide .tagline { display: none; }
+.wide .map-cell { grid-area: map; container-type: size; display: grid; place-items: center; min-width: 0; min-height: 0; }
+.wide .map-cell .map { width: min(100cqw, calc(100cqh * 16 / 9)); }
+
+/* the panel beside the map */
+.wide .side-col { grid-area: side; display: flex; flex-direction: column; gap: calc(7px * var(--k)); min-height: 0; overflow-y: auto; padding: calc(2px * var(--k)) calc(10px * var(--k)) calc(6px * var(--k)) 0; }
+.wide .side-col .world-card { padding: calc(9px * var(--k)) calc(14px * var(--k)) calc(11px * var(--k)); gap: 0; }
+.wide .side-col .world-card h2 { font-size: calc(26px * var(--k)); }
+.wide .side-col .world-card .world-card__meta { font-size: calc(15px * var(--k)); }
+.wide .side-col .world-card .world-card__stars { font-size: calc(15px * var(--k)); letter-spacing: 0; }
+.wide .side-col .world-card .btn-start { min-height: calc(48px * var(--k)); font-size: calc(21px * var(--k)); margin-top: calc(4px * var(--k)); }
+.wide .side-col .says__avatar { width: calc(46px * var(--k)); height: calc(46px * var(--k)); }
+.wide .side-col .says__bubble { min-height: 0; padding: calc(8px * var(--k)) calc(12px * var(--k)); }
+.wide .side-col .says__text { font-size: calc(14px * var(--k)); line-height: 1.28; }
+.wide .side-col .says__name { font-size: calc(11px * var(--k)); }
+.wide .side-col .player { padding: calc(4px * var(--k)) calc(12px * var(--k)); transform: none; gap: calc(12px * var(--k)); }
+.wide .side-col .player canvas { width: calc(40px * var(--k)); height: calc(55px * var(--k)); }
+.wide .side-col .player { align-items: center; }
+.wide .side-col .player__label { font-size: calc(16px * var(--k)); }
+.wide .side-col .player__stats { font-size: calc(14px * var(--k)); margin-bottom: calc(4px * var(--k)); }
+.wide .side-col .player .sticker { min-height: calc(32px * var(--k)); padding: calc(2px * var(--k)) calc(14px * var(--k)); font-size: calc(15px * var(--k)); }
+.wide .side-col .section-title { font-size: calc(17px * var(--k)); margin-bottom: calc(4px * var(--k)); }
+.wide .side-col .num-disc { width: calc(24px * var(--k)); height: calc(24px * var(--k)); font-size: calc(12px * var(--k)); }
+.wide .side-col .badge-shelf { grid-template-columns: repeat(3, 1fr); padding: calc(6px * var(--k)) calc(4px * var(--k)); gap: calc(5px * var(--k)) calc(4px * var(--k)); }
+.wide .side-col .badge canvas { width: calc(40px * var(--k)); height: calc(47px * var(--k)); }
+.wide .side-col .badge { font-size: calc(11px * var(--k)); }
+.wide .side-col .badge small, .wide .side-col .shelf-note { display: none; }
+
+/* the six topic cards run in a row under the map */
+.wide .topics-strip { grid-area: strip; }
+.wide .topics-strip .section-title { display: none; }
+.wide .topics-strip .topic-grid { grid-template-columns: repeat(6, 1fr); gap: calc(10px * var(--k)); }
+.wide .topics-strip .topic-card { padding: calc(6px * var(--k)) calc(6px * var(--k)); gap: calc(2px * var(--k)); }
+.wide .topics-strip .topic-card svg { width: calc(26px * var(--k)); height: calc(26px * var(--k)); }
+.wide .topics-strip .topic-card b { font-size: calc(14px * var(--k)); }
+.wide .topics-strip .topic-card small { font-size: calc(11px * var(--k)); }
+@media (max-height: 960px) { .wide .topics-strip .topic-card small { display: none; } }
+
+/* Full screen is for laptops and projectors; on a phone it only crowds the top bar */
+html:not(.wide) #btn-full { display: none; }
 
 /* Narrow phones: compact buttons so the top bars (menu, game, memory) never run off the edge */
 @media (max-width: 430px) {

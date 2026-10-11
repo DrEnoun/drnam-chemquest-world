@@ -138,27 +138,31 @@ function pinSprite(w, st) {
   return (pinCache[key] = cv);
 }
 
-export function createOverworld({ canvas, pinsEl, worlds, map, getState, getAvatar, onSelect, onMonster = () => {} }) {
+export function createOverworld({ canvas, pinsEl, worlds, map: mapPortrait, mapWide, getState, getAvatar, onSelect, onMonster = () => {} }) {
   const ctx = canvas.getContext('2d');
-  const W = map.width * A, H = map.height * A;
-  canvas.width = W; canvas.height = H;
-  canvas.style.aspectRatio = `${map.width} / ${map.height}`;
-  const layer = pxCanvas(W, H), lctx = layer.getContext('2d');
+  // Two layouts of the same six islands: a tall one for phones and a landscape one for laptops and projectors.
+  worlds.forEach(w => { w.pinPortrait = w.pin; w.pinWide = w.pinWide || w.pin; });
+  let mode = 'portrait', map = mapPortrait, S = A, W = 0, H = 0, layer = null, lctx = null, water = null;
   const byId = Object.fromEntries(worlds.map(w => [w.id, w]));
   let cur = 1, walk = null, hero = { x: 0, y: 0 }, effects = [], bridgeAt = [];
   const heroSpot = w => ({ x: w.pin[0] - 46, y: w.pin[1] + 16 });          // feet position, left of the pin
 
   // ----- static backdrop: deep water, turquoise shallows round each island, cloud banks at the edges -----
-  const water = pxCanvas(W, H), wc = water.getContext('2d'); wc.scale(A, A);
-  wc.fillStyle = lin(wc, 0, 0, 0, map.height, [0, '#2a7fc4'], [0.18, '#1a8fc0'], [0.42, '#0f86ad'], [0.7, '#0a5a8c'], [1, '#07305d']); wc.fillRect(0, 0, map.width, map.height);
-  const haze = (x, y, r, rgba) => { const g = wc.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, rgba); g.addColorStop(1, rgba.replace(/[\d.]+\)$/, '0)')); wc.fillStyle = g; wc.fillRect(x - r, y - r, r * 2, r * 2); };
-  haze(30, 40, 170, 'rgba(150,100,255,.30)'); haze(270, 20, 150, 'rgba(255,170,110,.22)'); haze(250, 380, 150, 'rgba(60,220,200,.22)'); haze(30, 520, 160, 'rgba(60,160,255,.24)');
-  for (let i = 0; i < 70; i++) { const x = hash(i, 11) * map.width, y = hash(i, 12) * map.height, r = 10 + hash(i, 13) * 26; haze(x, y, r, `rgba(150,255,240,${0.05 + hash(i, 14) * 0.07})`); }
-  for (let i = 0; i < 4; i++) { const x = 20 + i * 80; wc.fillStyle = lin(wc, x, 0, x + 70, 300, [0, 'rgba(255,255,255,.10)'], [1, 'rgba(255,255,255,0)']); wc.beginPath(); wc.moveTo(x, 0); wc.lineTo(x + 26, 0); wc.lineTo(x + 100, map.height * 0.62); wc.lineTo(x + 62, map.height * 0.62); wc.fill(); }
-  worlds.forEach(w => { const g = wc.createRadialGradient(w.pin[0], w.pin[1] + 18, 20, w.pin[0], w.pin[1] + 18, 112); g.addColorStop(0, 'rgba(70,240,214,.62)'); g.addColorStop(.55, 'rgba(60,225,205,.22)'); g.addColorStop(1, 'rgba(45,212,191,0)'); wc.fillStyle = g; wc.fillRect(w.pin[0] - 120, w.pin[1] - 110, 240, 260); });
-  const puff = (x, y, s, tone) => { [[0, 0, 22, 12], [-18, 5, 16, 9], [18, 5, 16, 9], [-6, -6, 14, 9], [8, -5, 12, 8]].forEach(([dx, dy, rx, ry]) => { wc.fillStyle = tone; wc.beginPath(); wc.ellipse(x + dx * s, y + dy * s, rx * s, ry * s, 0, 0, 7); wc.fill(); }); };
-  [[8, 70, 1.5], [284, 160, 1.3], [4, 360, 1.2], [286, 410, 1.5], [10, 630, 1.4], [270, 672, 1.6], [150, 682, 1.3]].forEach(([x, y, s]) => { puff(x, y + 4, s, '#2b2a7a'); puff(x, y, s, '#4a4fb0'); puff(x - 3, y - 4 * s, s * 0.7, '#8a8fe6'); puff(x - 5, y - 6 * s, s * 0.4, '#ffc8e0'); });
-  const vg = wc.createRadialGradient(map.width / 2, map.height / 2, map.height * 0.3, map.width / 2, map.height / 2, map.height * 0.78); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(4,10,50,.4)'); wc.fillStyle = vg; wc.fillRect(0, 0, map.width, map.height);
+  function buildWater() {
+    water = pxCanvas(W, H); const wc = water.getContext('2d'); wc.scale(S, S);
+    const wide = mode === 'wide';
+    wc.fillStyle = lin(wc, 0, 0, 0, map.height, [0, '#2a7fc4'], [0.18, '#1a8fc0'], [0.42, '#0f86ad'], [0.7, '#0a5a8c'], [1, '#07305d']); wc.fillRect(0, 0, map.width, map.height);
+    const haze = (x, y, r, rgba) => { const g = wc.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, rgba); g.addColorStop(1, rgba.replace(/[\d.]+\)$/, '0)')); wc.fillStyle = g; wc.fillRect(x - r, y - r, r * 2, r * 2); };
+    (wide ? [[60, 40, 150, 'rgba(150,100,255,.30)'], [590, 30, 140, 'rgba(255,170,110,.24)'], [480, 330, 150, 'rgba(60,220,200,.22)'], [90, 330, 140, 'rgba(60,160,255,.24)']]
+      : [[30, 40, 170, 'rgba(150,100,255,.30)'], [270, 20, 150, 'rgba(255,170,110,.22)'], [250, 380, 150, 'rgba(60,220,200,.22)'], [30, 520, 160, 'rgba(60,160,255,.24)']]).forEach(h => haze(...h));
+    for (let i = 0; i < (wide ? 90 : 70); i++) { const x = hash(i, 11) * map.width, y = hash(i, 12) * map.height, r = 10 + hash(i, 13) * 26; haze(x, y, r, `rgba(150,255,240,${0.05 + hash(i, 14) * 0.07})`); }
+    for (let i = 0; i < (wide ? 6 : 4); i++) { const x = wide ? 40 + i * 110 : 20 + i * 80; wc.fillStyle = lin(wc, x, 0, x + 70, 300, [0, 'rgba(255,255,255,.10)'], [1, 'rgba(255,255,255,0)']); wc.beginPath(); wc.moveTo(x, 0); wc.lineTo(x + 26, 0); wc.lineTo(x + 100, map.height * 0.62); wc.lineTo(x + 62, map.height * 0.62); wc.fill(); }
+    worlds.forEach(w => { const g = wc.createRadialGradient(w.pin[0], w.pin[1] + 18, 20, w.pin[0], w.pin[1] + 18, 112); g.addColorStop(0, 'rgba(70,240,214,.62)'); g.addColorStop(.55, 'rgba(60,225,205,.22)'); g.addColorStop(1, 'rgba(45,212,191,0)'); wc.fillStyle = g; wc.fillRect(w.pin[0] - 120, w.pin[1] - 110, 240, 260); });
+    const puff = (x, y, k, tone) => { [[0, 0, 22, 12], [-18, 5, 16, 9], [-6, -6, 14, 9], [18, 5, 16, 9], [8, -5, 12, 8]].forEach(([dx, dy, rx, ry]) => { wc.fillStyle = tone; wc.beginPath(); wc.ellipse(x + dx * k, y + dy * k, rx * k, ry * k, 0, 0, 7); wc.fill(); }); };
+    (wide ? [[16, 50, 1.2], [628, 80, 1.05], [18, 338, 1.1], [622, 346, 1.25], [326, 356, 1.0], [320, 6, 0.95]]
+      : [[8, 70, 1.5], [284, 160, 1.3], [4, 360, 1.2], [286, 410, 1.5], [10, 630, 1.4], [270, 672, 1.6], [150, 682, 1.3]]).forEach(([x, y, k]) => { puff(x, y + 4, k, '#2b2a7a'); puff(x, y, k, '#4a4fb0'); puff(x - 3, y - 4 * k, k * 0.7, '#8a8fe6'); puff(x - 5, y - 6 * k, k * 0.4, '#ffc8e0'); });
+    const vg = wc.createRadialGradient(map.width / 2, map.height / 2, map.height * 0.3, map.width / 2, map.height / 2, map.height * (wide ? 0.85 : 0.78)); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(4,10,50,.4)'); wc.fillStyle = vg; wc.fillRect(0, 0, map.width, map.height);
+  }
 
   // ----- static layer: rope bridges, then islands back to front -----
   const rimDist = (ux, uy) => 1 / Math.sqrt((ux / RX) ** 2 + (uy / RY) ** 2);
@@ -180,13 +184,13 @@ export function createOverworld({ canvas, pinsEl, worlds, map, getState, getAvat
   }
   function drawLayer() {
     const states = getState();
-    lctx.setTransform(1, 0, 0, 1, 0, 0); lctx.clearRect(0, 0, W, H); lctx.scale(A, A);
+    lctx.setTransform(1, 0, 0, 1, 0, 0); lctx.clearRect(0, 0, W, H); lctx.scale(S, S); lctx.imageSmoothingQuality = 'high';
     bridgeAt = [];
     for (let i = 0; i < worlds.length - 1; i++) bridgeAt.push(bridge(lctx, worlds[i], worlds[i + 1], states[i].unlocked && states[i + 1].unlocked));
     effects = [];
     [...worlds].sort((a, b) => a.pin[1] - b.pin[1]).forEach(w => {
       const art = islandArt(w, !states[w.id - 1].unlocked);
-      lctx.imageSmoothingEnabled = false; lctx.drawImage(art.cv, w.pin[0] - CX, w.pin[1] - CY, IW, IH);
+      lctx.imageSmoothingEnabled = S < A; lctx.drawImage(art.cv, w.pin[0] - CX, w.pin[1] - CY, IW, IH);
       effects.push(...art.effects);
     });
   }
@@ -235,9 +239,7 @@ export function createOverworld({ canvas, pinsEl, worlds, map, getState, getAvat
 
   // ----- per-frame animation: water, glow, sparkles and roaming monsters -----
   const calm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const sparks = Array.from({ length: 60 }, (_, i) => [hash(i, 1) * map.width, hash(i, 2) * map.height, hash(i, 3)]);
-  const boats = [{ x: 252, y: 588, ph: 0 }, { x: 246, y: 404, ph: 2 }, { x: 40, y: 294, ph: 4 }];
-  const birds = [[0.0, 120, 0.7], [0.4, 450, 0.5], [0.7, 280, 0.6]];
+  let sparks = [], boats = [], birds = [], twinkles = [];
   const rgbOf = hex => { const n = parseInt(hex.slice(1), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
 
   // soft light sprites, drawn with additive blending so they really glow
@@ -257,11 +259,10 @@ export function createOverworld({ canvas, pinsEl, worlds, map, getState, getAvat
 
   // twinkling stars across the whole map
   const TW = ['255,255,255', '255,236,170', '170,255,240', '255,190,230'];
-  const twinkles = Array.from({ length: 70 }, (_, i) => ({ x: hash(i, 21) * map.width, y: hash(i, 22) * map.height, ph: hash(i, 23) * 6.28, sp: 1.2 + hash(i, 24) * 2.4, r: 1.8 + hash(i, 25) * 3.4, c: TW[i % 4] }));
 
   // monsters: friendly molecules that wander the map; tap one to meet it
   const monsters = MONSTERS.map((def, i) => ({ def, x: 44 + hash(i, 31) * 200, y: 90 + i * 100, tx: 0, ty: 0, v: 7 + hash(i, 32) * 6, dir: 1, ph: hash(i, 33) * 6.28, hop: 0, cheer: 0, delay: 0 }));
-  const pickTarget = m => { m.tx = 24 + Math.random() * 240; m.ty = 50 + Math.random() * (map.height - 100); };
+  const pickTarget = m => { m.tx = 24 + Math.random() * (map.width - 48); m.ty = 50 + Math.random() * (map.height - 100); };
   monsters.forEach(pickTarget);
   const parts = [];
   const burst = (x, y, n = 16) => { for (let i = 0; i < n; i++) { const a = (i / n) * 6.283 + Math.random(), sp = 18 + Math.random() * 30; parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 10, life: 0, max: 0.8 + Math.random() * 0.5, r: 1.6 + Math.random() * 2.4, c: TW[Math.floor(Math.random() * 4)] }); } };
@@ -313,7 +314,7 @@ export function createOverworld({ canvas, pinsEl, worlds, map, getState, getAvat
   }
 
   function draw(t) {
-    ctx.setTransform(A, 0, 0, A, 0, 0); ctx.imageSmoothingEnabled = false;
+    ctx.setTransform(S, 0, 0, S, 0, 0); ctx.imageSmoothingEnabled = S < A; ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(water, 0, 0, map.width, map.height);
     ctx.strokeStyle = 'rgba(160,230,255,.11)'; ctx.lineWidth = 1.4;
     for (let y = 12; y < map.height; y += 24) { ctx.beginPath(); for (let x = 0; x <= map.width; x += 8) { const yy = y + Math.sin(x * 0.07 + t * 1.2 + y) * 2; x ? ctx.lineTo(x, yy) : ctx.moveTo(x, yy); } ctx.stroke(); }
@@ -348,9 +349,10 @@ export function createOverworld({ canvas, pinsEl, worlds, map, getState, getAvat
     for (const m of monsters) {
       const sp = monsterSprite(m.def.id, m.hop > 0 ? 'cheer' : 'happy'), up = m.hop > 0 ? Math.sin((1 - m.hop / 0.7) * Math.PI) * 16 : 0;
       const by = Math.sin(t * 2.2 + m.ph) * 3 - up, sq = 1 + Math.sin(t * 4.4 + m.ph) * 0.05;
-      glowAt(m.x, m.y + by, 34, '120,255,230', 0.34);
-      ctx.fillStyle = 'rgba(2,14,32,.26)'; ctx.beginPath(); ctx.ellipse(m.x + 3, m.y + 22, 14 - up * 0.3, 4, 0, 0, 7); ctx.fill();
-      ctx.save(); ctx.translate(m.x, m.y + by); ctx.scale(m.dir * sq, 1 / sq); ctx.rotate(Math.sin(t * 1.8 + m.ph) * 0.07 * m.dir); ctx.drawImage(sp, -sp.lw / 2, -sp.lh / 2, sp.lw, sp.lh); ctx.restore();
+      const ms = mode === 'wide' ? 0.78 : 1;       // a bit smaller on the landscape map, where the islands are bigger
+      glowAt(m.x, m.y + by, 34 * ms, '120,255,230', 0.34);
+      ctx.fillStyle = 'rgba(2,14,32,.26)'; ctx.beginPath(); ctx.ellipse(m.x + 3, m.y + 22 * ms, (14 - up * 0.3) * ms, 4 * ms, 0, 0, 7); ctx.fill();
+      ctx.save(); ctx.translate(m.x, m.y + by); ctx.scale(m.dir * sq, 1 / sq); ctx.rotate(Math.sin(t * 1.8 + m.ph) * 0.07 * m.dir); ctx.drawImage(sp, (-sp.lw / 2) * ms, (-sp.lh / 2) * ms, sp.lw * ms, sp.lh * ms); ctx.restore();
     }
     ctx.fillStyle = 'rgba(0,0,0,.32)'; ctx.beginPath(); ctx.ellipse(Math.round(hero.x), Math.round(hero.y) + 1, 11, 3.2, 0, 0, 7); ctx.fill();
     drawAvatar(ctx, getAvatar(), hero.x - 16, hero.y - 41 - (walk ? Math.abs(Math.round(Math.sin(t * 14) * 2)) : 0), 1);
@@ -360,6 +362,28 @@ export function createOverworld({ canvas, pinsEl, worlds, map, getState, getAvat
     birds.forEach(([x0, y, sp], i) => { const x = ((x0 * map.width + t * 14 * sp) % (map.width + 30)) - 15, f = Math.sin(t * 7 + i) * 2; ctx.beginPath(); ctx.moveTo(x - 4, y + f); ctx.lineTo(x, y + 2); ctx.lineTo(x + 4, y + f); ctx.stroke(); });
   }
   let boatSprite = null; const SC_BOAT = () => (boatSprite ??= SC.boat());
+
+  // Switch between the tall (phone) and landscape (laptop, projector) layouts of the map.
+  function setMode(next) {
+    mode = next; map = next === 'wide' ? mapWide : mapPortrait; S = A;
+    worlds.forEach(w => { w.pin = next === 'wide' ? w.pinWide : w.pinPortrait; });
+    W = map.width * S; H = map.height * S;
+    canvas.width = W; canvas.height = H; canvas.style.aspectRatio = `${map.width} / ${map.height}`;
+    layer = pxCanvas(W, H); lctx = layer.getContext('2d');
+    pinsEl.parentElement.style.setProperty('--mapk', String(mapPortrait.width / map.width));   // callouts scale with the islands, not the page
+    buildWater();
+    const wide = next === 'wide';
+    sparks = Array.from({ length: wide ? 55 : 60 }, (_, i) => [hash(i, 1) * map.width, hash(i, 2) * map.height, hash(i, 3)]);
+    twinkles = Array.from({ length: wide ? 60 : 70 }, (_, i) => ({ x: hash(i, 21) * map.width, y: hash(i, 22) * map.height, ph: hash(i, 23) * 6.28, sp: 1.2 + hash(i, 24) * 2.4, r: 1.8 + hash(i, 25) * 3.4, c: TW[i % 4] }));
+    boats = wide ? [{ x: 34, y: 96, ph: 0 }, { x: 262, y: 50, ph: 2 }, { x: 604, y: 312, ph: 4 }, { x: 392, y: 338, ph: 1 }]
+      : [{ x: 252, y: 588, ph: 0 }, { x: 246, y: 404, ph: 2 }, { x: 40, y: 294, ph: 4 }];
+    birds = wide ? [[0.0, 60, 0.7], [0.4, 200, 0.5], [0.7, 330, 0.6]] : [[0.0, 120, 0.7], [0.4, 450, 0.5], [0.7, 280, 0.6]];
+    monsters.forEach(m => { m.x = Math.min(map.width - 30, Math.max(30, m.x)); m.y = Math.min(map.height - 50, Math.max(50, m.y)); pickTarget(m); });
+    walk = null; hero = { ...heroSpot(byId[cur]) };
+    buildPins();
+  }
+  addEventListener('drnam:layout', e => { const next = e.detail.wide ? 'wide' : 'portrait'; if (next !== mode) { setMode(next); drawLayer(); draw(performance.now() / 1000); } });
+  setMode(document.documentElement.classList.contains('wide') ? 'wide' : 'portrait');
 
   let raf = 0, last = 0, acc = 0, running = false;
   function frame(now) {
