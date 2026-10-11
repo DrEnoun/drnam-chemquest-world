@@ -154,6 +154,7 @@ export function createOrbital({ $, levels, getAvatar, says, sound, starsFor, onF
       return;
     }
     if (!r.moved) return;
+    $('screen-orbital').classList.add('played');
     history.push(before); if (history.length > 200) history.shift();
     if (r.pushed) {
       const v = vis.get(r.g.player);
@@ -192,13 +193,35 @@ export function createOrbital({ $, levels, getAvatar, says, sound, starsFor, onF
     if (e.key === 'r' || e.key === 'R') { restart(); e.preventDefault(); return; }
     const d = DIR_OF_KEY[e.key]; if (d) { move(d); e.preventDefault(); }
   });
+  // Swipe anywhere on the screen to move (phones). Keep dragging to keep walking: every STEP_PX of finger travel is one step.
+  // Buttons are left alone so they still work with a tap.
+  const STEP_PX = 34, screenEl = $('screen-orbital');
   let sw = null;
-  cv.addEventListener('touchstart', e => { const p = e.changedTouches[0]; sw = { x: p.clientX, y: p.clientY }; }, { passive: true });
-  cv.addEventListener('touchend', e => {
-    if (!sw) return; const p = e.changedTouches[0], dx = p.clientX - sw.x, dy = p.clientY - sw.y; sw = null;
-    if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
-    move(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'R' : 'L') : (dy > 0 ? 'D' : 'U'));
+  const dirOf = (dx, dy) => (Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'R' : 'L') : (dy > 0 ? 'D' : 'U'));
+  screenEl.addEventListener('touchstart', e => {
+    if (e.target.closest('button, a, .chip, .dpad') || e.touches.length > 1) { sw = null; return; }
+    const p = e.changedTouches[0]; sw = { x: p.clientX, y: p.clientY, moved: false };
   }, { passive: true });
+  screenEl.addEventListener('touchmove', e => {
+    if (!sw) return;
+    e.preventDefault();                                   // no scrolling or pull-to-refresh while playing
+    const p = e.changedTouches[0];
+    let dx = p.clientX - sw.x, dy = p.clientY - sw.y;
+    while (Math.max(Math.abs(dx), Math.abs(dy)) >= STEP_PX) {
+      const d = dirOf(dx, dy); move(d); sw.moved = true;
+      if (d === 'R') { sw.x += STEP_PX; } else if (d === 'L') { sw.x -= STEP_PX; } else if (d === 'D') { sw.y += STEP_PX; } else { sw.y -= STEP_PX; }
+      dx = p.clientX - sw.x; dy = p.clientY - sw.y;
+    }
+  }, { passive: false });
+  screenEl.addEventListener('touchend', e => {
+    if (!sw) return; const p = e.changedTouches[0], dx = p.clientX - sw.x, dy = p.clientY - sw.y, moved = sw.moved; sw = null;
+    if (!moved && Math.max(Math.abs(dx), Math.abs(dy)) >= 18) move(dirOf(dx, dy));     // a short flick still counts
+  }, { passive: true });
+  screenEl.addEventListener('touchcancel', () => { sw = null; }, { passive: true });
+  // The on-screen arrows are optional on phones: the "Pad" button shows or hides them (remembered on the device)
+  try { screenEl.classList.toggle('show-pad', localStorage.getItem('drnam-quest:pad') === '1'); } catch (e) { /* ignore */ }
+  $('orb-pad').onclick = () => { const on = screenEl.classList.toggle('show-pad'); try { localStorage.setItem('drnam-quest:pad', on ? '1' : '0'); } catch (e) { /* ignore */ } $('orb-pad').setAttribute('aria-pressed', String(on)); sound.pop(); };
+  $('orb-pad').setAttribute('aria-pressed', String(screenEl.classList.contains('show-pad')));
   document.querySelectorAll('#screen-orbital [data-move]').forEach(b => { b.onclick = () => move(b.dataset.move); });
   $('orb-undo').onclick = undo; $('orb-restart').onclick = restart; $('orb-hint').onclick = hint;
   $('orb-quit').onclick = () => { stop(); onExit(); };

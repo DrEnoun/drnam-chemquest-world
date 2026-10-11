@@ -375,7 +375,7 @@ html:not(.wide) #btn-full { display: none; }
 #orb-canvas { display: block; width: 100%; height: auto; aspect-ratio: var(--orb-ar, 9 / 8); border-radius: calc(16px * var(--k)); border: var(--stroke-doodle) solid var(--sticker-ink); box-shadow: var(--shadow-sticker); background: #3a2d22; touch-action: none; image-rendering: auto; }
 .orb-controls { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: calc(12px * var(--k)); }
 .orb-actions { display: flex; flex-wrap: wrap; gap: calc(8px * var(--k)); }
-.dpad { display: grid; grid-template-columns: repeat(3, calc(54px * var(--k))); grid-template-areas: ". up ." "left down right"; gap: calc(6px * var(--k)); }
+.dpad { display: none; grid-template-columns: repeat(3, calc(54px * var(--k))); grid-template-areas: ". up ." "left down right"; gap: calc(6px * var(--k)); }
 .dpad button { min-height: calc(50px * var(--k)); border-radius: calc(14px * var(--k)); border: var(--stroke-doodle) solid var(--sticker-ink); background: var(--sticker-fill); color: var(--sticker-ink); font-size: calc(20px * var(--k)); cursor: pointer; box-shadow: 0 calc(4px * var(--k)) 0 var(--sticker-ink); padding: 0; }
 .dpad button:active { transform: translateY(calc(4px * var(--k))); box-shadow: none; }
 .dpad [data-move="U"] { grid-area: up; } .dpad [data-move="L"] { grid-area: left; } .dpad [data-move="D"] { grid-area: down; } .dpad [data-move="R"] { grid-area: right; }
@@ -404,6 +404,50 @@ html:not(.wide) #btn-full { display: none; }
 .wide .orb-board { flex: 1 1 0; min-height: 0; display: grid; place-items: center; container-type: size; }
 .wide #orb-canvas { width: min(100cqw, calc(100cqh * var(--orb-w, 9) / var(--orb-h, 8))); height: auto; }
 .wide .orb-right { overflow-y: auto; }
-.wide .dpad { display: none; }
-@media (hover: none) and (pointer: coarse) { .wide .dpad { display: grid; } }
+.wide .orb-padbtn { display: none; }
+@media (hover: none) and (pointer: coarse) { .wide .orb-padbtn { display: inline-flex; } }
 .wide .orb-controls { grid-template-columns: 1fr; }
+
+/* On-screen arrows are optional: the "Arrows" button (or a saved choice) shows them */
+.screen--orbital.show-pad .dpad { display: grid; }
+.orb-board { position: relative; }
+.orb-swipe { display: none; }
+
+/* ===== Phones: the Orbital Ruins screen fits the display, so a swipe anywhere moves the player without scrolling ===== */
+@media (max-width: 700px) {
+  html:not(.wide) .screen--orbital { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; gap: 8px; padding-top: 10px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); touch-action: none; overscroll-behavior: none; }
+  html:not(.wide) .orb-left { display: flex; flex-direction: column; gap: 8px; flex: 1 1 0; min-height: 0; }
+  html:not(.wide) .orb-right { display: flex; flex-direction: column; gap: 8px; flex: 0 0 auto; }
+  html:not(.wide) .orb-board { flex: 1 1 0; min-height: 0; display: grid; place-items: center; container-type: size; }
+  html:not(.wide) #orb-canvas { width: min(100cqw, calc(100cqh * var(--orb-w, 9) / var(--orb-h, 8))); height: auto; }
+  html:not(.wide) .screen--orbital .ticket { padding: 6px 12px; transform: none; }
+  html:not(.wide) .screen--orbital .ticket__meta { display: none; }
+  html:not(.wide) .screen--orbital .ticket__order { font-size: 16px; margin: 0; }
+  html:not(.wide) .orb-controls { grid-template-columns: 1fr; gap: 6px; }
+  html:not(.wide) .orb-actions { gap: 6px; }
+  html:not(.wide) .orb-actions .chip { min-height: 36px; padding: 4px 12px; }
+  html:not(.wide) .screen--orbital .says__avatar { width: 38px; height: 38px; }
+  html:not(.wide) .screen--orbital .says__bubble { min-height: 0; padding: 6px 10px; }
+  html:not(.wide) .screen--orbital .says__name { display: none; }
+  html:not(.wide) .screen--orbital .says__text { font-size: 13.5px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  html:not(.wide) .screen--orbital .says__bubble[data-state] .says__text { -webkit-line-clamp: 6; }   /* a rule explanation after a mistake is shown in full */
+  /* the diagram: orbital boxes on the left, atom and configuration on the right */
+  html:not(.wide) .orb-diagram { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "rows head" "rows cfg" "rows cnt"; column-gap: 12px; row-gap: 2px; align-content: start; padding: 8px 12px; }
+  html:not(.wide) .orb-diagram h2 { grid-area: head; font-size: 16px; }
+  html:not(.wide) .orb-axis, html:not(.wide) .orb-configlabel { display: none; }
+  html:not(.wide) #orb-rows { grid-area: rows; }
+  html:not(.wide) .orb-config { grid-area: cfg; font-size: 20px; align-self: center; }
+  html:not(.wide) .orb-count { grid-area: cnt; font-size: 12px; align-self: end; }
+  html:not(.wide) .orb-row { grid-template-columns: 30px auto; padding: 1px 0; gap: 6px; }
+  html:not(.wide) .orb-row b { font-size: 15px; }
+  html:not(.wide) .orb-row small { display: none; }
+  html:not(.wide) .orb-box { width: 28px; height: 28px; border-width: 2px; border-radius: 6px; }
+  html:not(.wide) .orb-box i { font-size: 17px; }
+  html:not(.wide) .dpad { grid-template-columns: repeat(3, 46px); }
+  html:not(.wide) .dpad button { min-height: 40px; }
+  html:not(.wide) .screen--orbital.show-pad .orb-controls { grid-template-columns: 1fr auto; }
+}
+@media (hover: none) and (pointer: coarse) {
+  .orb-swipe { display: block; position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); padding: 4px 14px; border-radius: 999px; background: rgba(6, 13, 27, .78); color: #e3eef8; font: 700 13px var(--font-display); letter-spacing: .02em; pointer-events: none; transition: opacity .5s; white-space: nowrap; }
+  .screen--orbital.played .orb-swipe { opacity: 0; }
+}

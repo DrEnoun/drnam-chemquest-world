@@ -37,7 +37,7 @@ The game adapts to the screen it is on:
 
 - **Wide screens (16:9, 16:10, 3:2: laptops, projectors, TVs):** the map sits on the left and the world card, avatar, topics and badges beside it. Ion Diner shows the scene on the left and the counter, tray and **Serve** button on the right. The memory cards fill the window. Nothing needs scrolling, and text and buttons grow with the window height so they can be read from the back of a room.
 - **Square or upright screens (4:3 projectors, tablets held upright):** one column, scaled up for readability.
-- **Phones:** one column, with the Serve button pinned to the bottom of the screen.
+- **Phones:** one column, with the Serve button pinned to the bottom of the screen. In Orbital Ruins the whole screen fits the display and you **swipe anywhere** to move (keep dragging to keep walking); the optional **Arrows** button shows an on-screen pad.
 
 Press **Full screen** (top right of the map) before presenting. Click with a mouse or a presentation clicker, or touch a touchscreen board. Tab and Enter also work.
 
