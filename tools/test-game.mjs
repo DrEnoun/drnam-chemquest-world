@@ -10,6 +10,7 @@ import { SHAPES } from '../js/shapes.js';
 import { TRACKS, SCREEN_TRACK, MAJOR_SCALE, STEPS_PER_BAR, BARS, LOOP_STEPS, midiFreq, chordTones, eighth } from '../js/music.js';
 import { AUFBAU, BOXES, newState, check, legalTargets, place, configString, electronCount, crateCount, complete, lowestOpen, parseGrid, step, startGame, solve, liveCells } from '../js/orbital-logic.js';
 import { matches, matching, buildRound, describe, wrongText } from '../js/pop-logic.js';
+import { PROPS, promptFor, orderOf, minGap, relation, judge, wrongText as trendWrong, factText, ruleFor } from '../js/trend-logic.js';
 import { MONSTERS, GEOMETRY, ATOM, MOODS } from '../js/monsters.js';
 import { OPTIONS, DEFAULT_AVATAR, randomAvatar, WIDTH, HEIGHT } from '../js/avatar.js';
 
@@ -109,6 +110,7 @@ const W = wd.worlds;
 const mem = JSON.parse(readFileSync('data/memory.json', 'utf8'));
 const orb = JSON.parse(readFileSync('data/orbitals.json', 'utf8'));
 const fal = JSON.parse(readFileSync('data/falls.json', 'utf8'));
+const trn = JSON.parse(readFileSync('data/trends.json', 'utf8'));
 const EL = JSON.parse(readFileSync('data/elements.json', 'utf8')).elements;
 assert.deepEqual(W.map(w => w.id), [1, 2, 3, 4, 5, 6]);
 assert.equal(new Set(W.map(w => w.badge)).size, 6, 'badge names must be unique');
@@ -117,7 +119,7 @@ for (const w of W) {
   assert.ok(EMBLEMS[w.emblem], `world ${w.id}: unknown emblem ${w.emblem}`);
   assert.ok(w.pin[0] > 56 && w.pin[0] < wd.map.width - 56 && w.pin[1] > 60 && w.pin[1] < wd.map.height - 40, `world ${w.id}: pin too close to the map edge`);
   assert.ok(w.tip && w.topic && w.gameplay && w.callout);
-  if (w.playable) { assert.ok(w.blurb); w.levelIds.forEach(id => assert.ok((w.id === 6 ? d.levels : w.id === 2 ? orb.levels : w.id === 3 ? fal.levels : mem.levels).some(l => l.id === id), `world ${w.id}: unknown level ${id}`)); }
+  if (w.playable) { assert.ok(w.blurb); w.levelIds.forEach(id => assert.ok((w.id === 6 ? d.levels : w.id === 2 ? orb.levels : w.id === 3 ? fal.levels : w.id === 4 ? trn.levels : mem.levels).some(l => l.id === id), `world ${w.id}: unknown level ${id}`)); }
   else assert.ok(!w.levelIds, `world ${w.id}: unbuilt worlds have no levels yet`);
 }
 for (let i = 1; i < W.length; i++) assert.ok(W[i].pin[1] < W[i - 1].pin[1], 'worlds climb the map from bottom to top');
@@ -229,7 +231,7 @@ for (let i = 1; i <= 60; i++) for (const lv of mem.levels) { const sets = pickSe
 
 // ---------- Background music: the notes are data, so check the music theory ----------
 const inKey = (midi, tonic) => MAJOR_SCALE.includes(((midi - tonic) % 12 + 12) % 12);
-assert.deepEqual(Object.keys(TRACKS).sort(), ['diner', 'falls', 'map', 'memory', 'ruins']);
+assert.deepEqual(Object.keys(TRACKS).sort(), ['diner', 'falls', 'map', 'memory', 'peaks', 'ruins']);
 assert.equal(LOOP_STEPS, 32);
 for (const [id, t] of Object.entries(TRACKS)) {
   assert.ok(t.name && t.bpm >= 76 && t.bpm <= 130, `${id}: tempo`);
@@ -254,8 +256,8 @@ for (const [id, t] of Object.entries(TRACKS)) {
 }
 assert.ok(Math.abs(midiFreq(69) - 440) < 1e-9 && Math.abs(midiFreq(81) - 880) < 1e-9);
 // every screen has a track, and the three kinds of screen do not all play the same loop
-for (const screen of ['menu', 'shifts', 'avatar', 'game', 'memory', 'orbital', 'falls']) assert.ok(TRACKS[SCREEN_TRACK[screen]], `${screen}: no track`);
-assert.equal(new Set(Object.values(SCREEN_TRACK)).size, 5);
+for (const screen of ['menu', 'shifts', 'avatar', 'game', 'memory', 'orbital', 'falls', 'peaks']) assert.ok(TRACKS[SCREEN_TRACK[screen]], `${screen}: no track`);
+assert.equal(new Set(Object.values(SCREEN_TRACK)).size, 6);
 
 // ---------- World 2 Orbital Ruins: chemistry answer key, rules, and proof that every level can be solved ----------
 // Independent ground truth (written by hand from the periodic table, not computed): full ground-state configurations
@@ -402,4 +404,61 @@ console.log('Orbital Ruins OK');
   assert.match(wrongText(h, { noun: 'an alkali metal' }), /Hydrogen sits in group 1 but is a nonmetal/);
 }
 console.log('Periodic Falls OK');
+// ---------- World 4 Trend Peaks: climbing orders checked against position in the table, not against themselves ----------
+{
+  const bySym = Object.fromEntries(EL.map(e => [e.symbol, e]));
+  assert.deepEqual(trn.levels.map(l => l.id), [1, 2, 3, 4]);
+  // the value tables hold every element used, with positive numbers
+  for (const [s, v] of Object.entries(trn.values)) { assert.ok(bySym[s], `${s}: not in elements.json`); assert.ok(v.radius > 0 && v.ie > 0 && v.en > 0); }
+  // direction of each trend when moving DOWN a group (+1 = increases) and ACROSS a period left to right
+  const DOWN = { radius: 1, ie: -1, en: -1 }, ACROSS = { radius: -1, ie: 1, en: 1 };
+  const MAIN = [1, 2, 13, 14, 15, 16, 17];                       // the groups used (main-group elements; the data only uses these)
+  const seenPrompts = new Set();
+  for (const lv of trn.levels) {
+    assert.ok(lv.tip && lv.title && lv.subtitle); assert.equal(lv.boss === true, lv.id === 4); assert.ok(lv.rounds.length >= 4);
+    for (const r of lv.rounds) {
+      const id = `level ${lv.id} ${r.prop} ${r.dir} ${r.symbols.join(',')}`;
+      assert.ok(PROPS[r.prop] && ['asc', 'desc'].includes(r.dir) && ['group', 'period', 'mixed'].includes(r.kind), id);
+      assert.ok(r.symbols.length >= 4 && r.symbols.length <= 6 && new Set(r.symbols).size === r.symbols.length, `${id}: platform count`);
+      if (lv.id < 4) assert.equal(r.kind, ['group', 'period', 'mixed'][lv.id - 1], `${id}: wrong kind for this level`);
+      assert.equal(!!r.time, lv.id === 4, `${id}: only the boss is timed`);
+      assert.ok(minGap(r, trn.values) >= 0.06, `${id}: two neighbours are nearly tied (${(minGap(r, trn.values) * 100).toFixed(1)}%)`);
+      const els = r.symbols.map(s => bySym[s]), order = orderOf(r, trn.values).map(s => bySym[s]);
+      els.forEach(e => assert.ok(MAIN.includes(e.group), `${id}: ${e.symbol} is not a main-group element`));
+      // independent expectation from the position in the table
+      const sign = r.dir === 'asc' ? 1 : -1;
+      if (r.kind === 'group') {
+        assert.equal(new Set(els.map(e => e.group)).size, 1, `${id}: not one group`);
+        order.forEach((e, i) => { if (i) assert.ok((e.period - order[i - 1].period) * DOWN[r.prop] * sign > 0, `${id}: ${e.symbol} should not follow ${order[i - 1].symbol} down the group`); });
+      } else if (r.kind === 'period') {
+        assert.equal(new Set(els.map(e => e.period)).size, 1, `${id}: not one period`);
+        order.forEach((e, i) => { if (i) assert.ok((MAIN.indexOf(e.group) - MAIN.indexOf(order[i - 1].group)) * ACROSS[r.prop] * sign > 0, `${id}: ${e.symbol} should not follow ${order[i - 1].symbol} across the period`); });
+      } else {
+        order.forEach((e, i) => {
+          if (!i) return; const p = order[i - 1], rel = relation(p, e);
+          assert.ok(rel, `${id}: ${p.symbol} and ${e.symbol} share neither a group nor a period`);
+          const move = rel === 'group' ? (e.period - p.period) * DOWN[r.prop] : (MAIN.indexOf(e.group) - MAIN.indexOf(p.group)) * ACROSS[r.prop];
+          assert.ok(move * sign > 0, `${id}: the ${rel} rule disagrees with ${p.symbol} → ${e.symbol}`);
+        });
+      }
+      // prompts and texts
+      assert.match(promptFor(r), /^Climb from /); assert.ok(ruleFor(r).length > 60);
+      const f = factText(r, order.map(e => e.symbol), bySym); assert.ok(f.includes(order.map(e => e.symbol).join(' → ')), id);
+      // judging: only the next one in order is right
+      const o = order.map(e => e.symbol);
+      o.forEach((s, i) => r.symbols.forEach(x => assert.equal(judge(o, i, x), x === s)));
+      // a wrong hop explains the rule that applies to the pair
+      const w = trendWrong(r, o[1], o[0], bySym); assert.ok(w.includes(bySym[o[1]].name) && w.includes(bySym[o[0]].name) && /group|period/.test(w), id);
+    }
+  }
+  // spot checks written by hand from the textbook
+  const R = (prop, dir, symbols) => ({ prop, dir, symbols });
+  assert.deepEqual(orderOf(R('radius', 'asc', ['I', 'F', 'Br', 'Cl']), trn.values), ['F', 'Cl', 'Br', 'I']);
+  assert.deepEqual(orderOf(R('ie', 'desc', ['Cs', 'Li', 'K', 'Na']), trn.values), ['Li', 'Na', 'K', 'Cs']);
+  assert.deepEqual(orderOf(R('en', 'asc', ['Cl', 'Na', 'S', 'Al']), trn.values), ['Na', 'Al', 'S', 'Cl']);
+  assert.match(trendWrong(R('radius', 'asc', []), 'Br', 'Cl', bySym), /group 17.*increases down a group/s);
+  assert.match(trendWrong(R('ie', 'asc', []), 'Si', 'Na', bySym), /period 3.*increases across a period/s);
+}
+console.log('Trend Peaks OK');
+
 console.log(`ChemQuest data OK (${orders} orders, ${d.ions.length} ions)`);

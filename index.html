@@ -134,6 +134,40 @@
     </div>
   </main>
 
+  <!-- ================= Trend Peaks (World 4) ================= -->
+  <main class="screen screen--peaks" id="screen-peaks" hidden>
+    <header class="hud">
+      <button class="chip" id="peak-quit" type="button" aria-label="Back to the map">‹ Menu</button>
+      <div class="hud__hearts" id="peak-hearts" role="img" aria-label="Hearts"></div>
+      <div class="hud__coins"><span class="coin-dot" aria-hidden="true"></span><span id="peak-coins">0</span></div>
+      <button class="chip" id="peak-sound" type="button"></button>
+    </header>
+    <div class="peak-left">
+      <section class="ticket sticker-static" aria-live="polite">
+        <p class="ticket__meta" id="peak-meta"></p>
+        <p class="ticket__order fall-prompt"><strong id="peak-prompt"></strong> <span class="fall-count" id="peak-count"></span></p>
+        <p class="peak-ends" id="peak-ends"></p>
+        <div class="patience fall-progress" id="peak-progress" role="progressbar" aria-label="Climb progress" aria-valuemin="0" aria-valuemax="100"><span></span></div>
+        <div class="patience" id="peak-timer" role="progressbar" aria-label="Time left" aria-valuemin="0" aria-valuemax="100" hidden><span></span></div>
+      </section>
+      <div class="fall-arena peak-arena" id="peak-arena"><canvas id="peak-canvas" aria-label="Mountain ledges. Tap the ledges in the right order to climb to the summit."></canvas></div>
+      <div class="peak-keys" id="peak-keys" role="group" aria-label="Ledges (keyboard)"></div>
+      <div class="fall-actions"><button class="chip" id="peak-hint" type="button">Hint</button></div>
+    </div>
+    <div class="peak-right">
+      <aside class="says" id="peak-says" aria-live="polite"></aside>
+      <section class="fall-table peak-card sticker-static" aria-labelledby="trend-card-h">
+        <h2 id="trend-card-h">Trend card</h2>
+        <p class="trend-chain" id="trend-chain"></p>
+        <p class="trend-rule" id="trend-rule"></p>
+      </section>
+      <section class="fall-table sticker-static" aria-labelledby="peak-table-h">
+        <h2 id="peak-table-h">Where they live</h2>
+        <div class="pt-grid" id="peak-grid"></div>
+      </section>
+    </div>
+  </main>
+
   <!-- ================= Orbital Ruins (World 2) ================= -->
   <main class="screen screen--orbital" id="screen-orbital" hidden>
     <header class="hud">
