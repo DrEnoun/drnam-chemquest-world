@@ -169,6 +169,41 @@
     </div>
   </main>
 
+  <!-- ================= Bond Glacier (World 5) ================= -->
+  <main class="screen screen--bonds" id="screen-bonds" hidden>
+    <header class="hud">
+      <button class="chip" id="bond-quit" type="button" aria-label="Back to the map">‹ Menu</button>
+      <div class="hud__hearts" id="bond-hearts" role="img" aria-label="Hearts"></div>
+      <div class="hud__coins"><span class="coin-dot" aria-hidden="true"></span><span id="bond-coins">0</span></div>
+      <button class="chip" id="bond-sound" type="button"></button>
+    </header>
+    <div class="bond-left">
+      <section class="ticket sticker-static" aria-live="polite">
+        <p class="ticket__meta" id="bond-meta"></p>
+        <p class="ticket__order fall-prompt"><strong id="bond-prompt"></strong> <span class="fall-count" id="bond-count"></span></p>
+        <p class="peak-ends" id="bond-ends"></p>
+        <div class="patience fall-progress" id="bond-progress" role="progressbar" aria-label="Level progress" aria-valuemin="0" aria-valuemax="100"><span></span></div>
+        <div class="patience" id="bond-timer" role="progressbar" aria-label="Time left" aria-valuemin="0" aria-valuemax="100" hidden><span></span></div>
+      </section>
+      <div class="fall-arena bond-arena"><div class="bond-board" id="bond-board"></div></div>
+      <div class="bond-tray" id="bond-tray" role="group" aria-label="Chips: drag them onto the board, or tap a chip and then tap the board"></div>
+      <div class="bond-actions">
+        <button class="chip chip--go" id="bond-check" type="button">Check</button>
+        <button class="chip" id="bond-clear" type="button">Clear</button>
+        <button class="chip" id="bond-hint" type="button">Hint</button>
+      </div>
+    </div>
+    <div class="bond-right">
+      <aside class="says" id="bond-says" aria-live="polite"></aside>
+      <section class="fall-table bond-card sticker-static" aria-labelledby="bond-card-h">
+        <h2 id="bond-card-h">Lewis steps</h2>
+        <p class="trend-rule" id="bond-total"></p>
+        <ol class="bond-steps"><li>Count the valence electrons.</li><li>Join the atoms with bonds (2 electrons each).</li><li>Add lone pairs until every atom has 8 (hydrogen 2).</li><li>Spare electrons? Turn a lone pair into a double or triple bond.</li></ol>
+        <p class="trend-rule" id="bond-card-text"></p>
+      </section>
+    </div>
+  </main>
+
   <!-- ================= Orbital Ruins (World 2) ================= -->
   <main class="screen screen--orbital" id="screen-orbital" hidden>
     <header class="hud">

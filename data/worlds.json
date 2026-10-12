@@ -134,13 +134,20 @@
    ],
    "badge": "Bond Builder",
    "emblem": "bond",
-   "playable": false,
-   "callout": "Coming soon",
+   "playable": true,
+   "callout": "4 levels",
    "tip": "Try this: count the electron groups around the central atom. Lone pairs count too, and they change the shape.",
    "pinWide": [
     470,
     280
-   ]
+   ],
+   "levelIds": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "blurb": "Build Lewis structures by dragging bonds and lone pairs onto the ice, then name each molecule’s shape with VSEPR."
   },
   {
    "id": 6,
@@ -157,7 +164,6 @@
    "badge": "Ion Chef",
    "emblem": "flask",
    "playable": true,
-   "previewOpen": true,
    "levelIds": [
     1,
     2,

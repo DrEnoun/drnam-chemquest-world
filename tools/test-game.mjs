@@ -11,6 +11,7 @@ import { TRACKS, SCREEN_TRACK, MAJOR_SCALE, STEPS_PER_BAR, BARS, LOOP_STEPS, mid
 import { AUFBAU, BOXES, newState, check, legalTargets, place, configString, electronCount, crateCount, complete, lowestOpen, parseGrid, step, startGame, solve, liveCells } from '../js/orbital-logic.js';
 import { matches, matching, buildRound, describe, wrongText } from '../js/pop-logic.js';
 import { PROPS, promptFor, orderOf, minGap, relation, judge, wrongText as trendWrong, factText, ruleFor } from '../js/trend-logic.js';
+import { parseMolecule, evaluate, explain, lpSlots, solutions, shapeOf, shapeText, regionsOf, valenceTotal, centralIndex, SHAPE_IDS } from '../js/bond-logic.js';
 import { MONSTERS, GEOMETRY, ATOM, MOODS } from '../js/monsters.js';
 import { OPTIONS, DEFAULT_AVATAR, randomAvatar, WIDTH, HEIGHT } from '../js/avatar.js';
 
@@ -111,6 +112,7 @@ const mem = JSON.parse(readFileSync('data/memory.json', 'utf8'));
 const orb = JSON.parse(readFileSync('data/orbitals.json', 'utf8'));
 const fal = JSON.parse(readFileSync('data/falls.json', 'utf8'));
 const trn = JSON.parse(readFileSync('data/trends.json', 'utf8'));
+const bnd = JSON.parse(readFileSync('data/bonds.json', 'utf8'));
 const EL = JSON.parse(readFileSync('data/elements.json', 'utf8')).elements;
 assert.deepEqual(W.map(w => w.id), [1, 2, 3, 4, 5, 6]);
 assert.equal(new Set(W.map(w => w.badge)).size, 6, 'badge names must be unique');
@@ -119,7 +121,7 @@ for (const w of W) {
   assert.ok(EMBLEMS[w.emblem], `world ${w.id}: unknown emblem ${w.emblem}`);
   assert.ok(w.pin[0] > 56 && w.pin[0] < wd.map.width - 56 && w.pin[1] > 60 && w.pin[1] < wd.map.height - 40, `world ${w.id}: pin too close to the map edge`);
   assert.ok(w.tip && w.topic && w.gameplay && w.callout);
-  if (w.playable) { assert.ok(w.blurb); w.levelIds.forEach(id => assert.ok((w.id === 6 ? d.levels : w.id === 2 ? orb.levels : w.id === 3 ? fal.levels : w.id === 4 ? trn.levels : mem.levels).some(l => l.id === id), `world ${w.id}: unknown level ${id}`)); }
+  if (w.playable) { assert.ok(w.blurb); w.levelIds.forEach(id => assert.ok((w.id === 6 ? d.levels : w.id === 2 ? orb.levels : w.id === 3 ? fal.levels : w.id === 4 ? trn.levels : w.id === 5 ? bnd.levels : mem.levels).some(l => l.id === id), `world ${w.id}: unknown level ${id}`)); }
   else assert.ok(!w.levelIds, `world ${w.id}: unbuilt worlds have no levels yet`);
 }
 for (let i = 1; i < W.length; i++) assert.ok(W[i].pin[1] < W[i - 1].pin[1], 'worlds climb the map from bottom to top');
@@ -127,13 +129,15 @@ for (let i = 1; i < W.length; i++) assert.ok(W[i].pin[1] < W[i - 1].pin[1], 'wor
 assert.deepEqual(wd.mapWide, { width: 640, height: 360 });
 for (const w of W) assert.ok(w.pinWide[0] >= 60 && w.pinWide[0] <= wd.mapWide.width - 60 && w.pinWide[1] >= 110 && w.pinWide[1] <= wd.mapWide.height - 60, `world ${w.id}: landscape pin too close to the edge`);
 for (let i = 1; i < W.length; i++) { assert.ok(W[i].pinWide[0] - W[i - 1].pinWide[0] >= 95, 'landscape islands need room for a bridge between them'); assert.notEqual(W[i].pinWide[1], W[i - 1].pinWide[1], 'landscape islands zigzag so bridges are diagonal'); }
-// Fresh save: World 1 open, World 6 open as a preview, the rest locked
-assert.deepEqual(worldStates(W, {}).map(s => s.unlocked), [true, false, false, false, false, true]);
+// Fresh save: only World 1 is open (Ion Diner opens after World 5)
+assert.deepEqual(worldStates(W, {}).map(s => s.unlocked), [true, false, false, false, false, false]);
 assert.equal(starKey(6, 2), '6.2');
 assert.equal(worldStates(W, {}).filter(s => s.earned).length, 0);
 assert.ok(worldStates(W, {}, true).every(s => s.unlocked), 'Zen mode opens every world');
 assert.equal(worldStates(W, {}, true).filter(s => s.earned).length, 0, 'Zen mode earns no badges by itself');
-assert.deepEqual(worldStates(W, {}, false).map(s => s.unlocked), [true, false, false, false, false, true], 'Arcade is the default');
+assert.deepEqual(worldStates(W, {}, false).map(s => s.unlocked), [true, false, false, false, false, false], 'Arcade is the default');
+assert.equal(worldStates(W, { '1.1': 3, '1.2': 3, '1.3': 3, '1.4': 3, '2.1': 3, '2.2': 3, '2.3': 3, '2.4': 3, '3.1': 3, '3.2': 3, '3.3': 3, '3.4': 3, '4.1': 3, '4.2': 3, '4.3': 3, '4.4': 3 })[5].unlocked, false, 'Ion Diner stays shut until World 5 is cleared');
+assert.equal(worldStates(W, { '5.1': 1, '5.2': 1, '5.3': 1, '5.4': 1 })[5].unlocked, true, 'clearing World 5 opens World 6');
 // Clearing every Ion Diner shift earns the World 6 badge; one shift is not enough
 assert.equal(worldProgress(W[5], { '6.1': 3, '6.2': 2 }).cleared, false);
 assert.equal(worldProgress(W[5], { '6.1': 3, '6.2': 2, '6.3': 1 }).cleared, false, 'the boss shift must be cleared too');
@@ -234,7 +238,7 @@ for (let i = 1; i <= 60; i++) for (const lv of mem.levels) { const sets = pickSe
 
 // ---------- Background music: the notes are data, so check the music theory ----------
 const inKey = (midi, tonic) => MAJOR_SCALE.includes(((midi - tonic) % 12 + 12) % 12);
-assert.deepEqual(Object.keys(TRACKS).sort(), ['diner', 'falls', 'map', 'memory', 'peaks', 'ruins']);
+assert.deepEqual(Object.keys(TRACKS).sort(), ['diner', 'falls', 'glacier', 'map', 'memory', 'peaks', 'ruins']);
 assert.equal(LOOP_STEPS, 32);
 for (const [id, t] of Object.entries(TRACKS)) {
   assert.ok(t.name && t.bpm >= 76 && t.bpm <= 130, `${id}: tempo`);
@@ -259,8 +263,8 @@ for (const [id, t] of Object.entries(TRACKS)) {
 }
 assert.ok(Math.abs(midiFreq(69) - 440) < 1e-9 && Math.abs(midiFreq(81) - 880) < 1e-9);
 // every screen has a track, and the three kinds of screen do not all play the same loop
-for (const screen of ['menu', 'shifts', 'avatar', 'game', 'memory', 'orbital', 'falls', 'peaks']) assert.ok(TRACKS[SCREEN_TRACK[screen]], `${screen}: no track`);
-assert.equal(new Set(Object.values(SCREEN_TRACK)).size, 6);
+for (const screen of ['menu', 'shifts', 'avatar', 'game', 'memory', 'orbital', 'falls', 'peaks', 'bonds']) assert.ok(TRACKS[SCREEN_TRACK[screen]], `${screen}: no track`);
+assert.equal(new Set(Object.values(SCREEN_TRACK)).size, 7);
 
 // ---------- World 2 Orbital Ruins: chemistry answer key, rules, and proof that every level can be solved ----------
 // Independent ground truth (written by hand from the periodic table, not computed): full ground-state configurations
@@ -463,5 +467,72 @@ console.log('Periodic Falls OK');
   assert.match(trendWrong(R('ie', 'asc', []), 'Si', 'Na', bySym), /period 3.*increases across a period/s);
 }
 console.log('Trend Peaks OK');
+// ---------- World 5 Bond Glacier: Lewis structures and VSEPR, checked against hand-written chemistry ----------
+{
+  // Hand-written ground truth (not computed): valence-electron totals and shapes
+  const TOTAL = { HF: 8, H2O: 8, NH3: 8, CH4: 8, H2S: 8, CO2: 16, HCN: 10, O2: 12, CH2O: 12, C2H4: 12, BF3: 24, NF3: 26, CCl4: 32 };
+  const SHAPE = { HF: 'linear', H2O: 'bent', NH3: 'trigonal_pyramidal', CH4: 'tetrahedral', H2S: 'bent', CO2: 'linear', HCN: 'linear', O2: 'linear', CH2O: 'trigonal_planar', C2H4: 'trigonal_planar', BF3: 'trigonal_planar', NF3: 'trigonal_pyramidal', CCl4: 'tetrahedral' };
+  const V = bnd.valence, N = bnd.names;
+  assert.deepEqual(V, { H: 1, B: 3, C: 4, N: 5, O: 6, F: 7, P: 5, S: 6, Cl: 7 });
+  assert.deepEqual([...SHAPE_IDS].sort(), ['bent', 'linear', 'tetrahedral', 'trigonal_planar', 'trigonal_pyramidal']);
+  assert.deepEqual(Object.keys(bnd.molecules).sort(), Object.keys(TOTAL).sort());
+  for (const [id, raw] of Object.entries(bnd.molecules)) {
+    const mol = parseMolecule(raw), key = raw.key;
+    assert.equal(valenceTotal(mol, V), TOTAL[id], `${id}: valence electrons`);
+    assert.equal(raw.shape, SHAPE[id], `${id}: shape in data`);
+    assert.equal(shapeOf(mol, key.lps), SHAPE[id], `${id}: shape worked out from the structure`);
+    assert.ok(raw.fact.length > 50 && raw.name && raw.formula);
+    assert.equal(new Set(mol.atoms.map(a => `${a.x},${a.y}`)).size, mol.atoms.length, `${id}: two atoms on one spot`);
+    mol.atoms.forEach(a => assert.ok(V[a.e] && N[a.e], `${id}: unknown element ${a.e}`));
+    mol.links.forEach(([a, b]) => assert.ok(a !== b && a < mol.atoms.length && b < mol.atoms.length));
+    // the key is a complete, correct structure: octets (duet for H), the right total, and no charged atoms
+    const res = evaluate(mol, key.orders, key.lps, V);
+    if (raw.build === false) { assert.ok(res.used === TOTAL[id] && !res.charged, `${id}: key`); continue; }
+    assert.equal(res.ok, true, `${id}: the key is not a valid Lewis structure`);
+    assert.equal(res.used, TOTAL[id]);
+    // and it is the ONLY valid structure, so a player who builds a valid one has built the key
+    const sols = solutions(mol, V);
+    assert.equal(sols.length, 1, `${id}: ${sols.length} valid structures`);
+    assert.deepEqual(sols[0], { orders: key.orders, lps: key.lps }, `${id}: solver and key disagree`);
+    // every atom has room on the board for the lone pairs it needs
+    mol.atoms.forEach((a, i) => assert.ok(lpSlots(mol, i).length >= key.lps[i], `${id}: ${a.e}${i} has ${lpSlots(mol, i).length} slots for ${key.lps[i]} lone pairs`));
+  }
+  // levels
+  assert.deepEqual(bnd.levels.map(l => l.id), [1, 2, 3, 4]);
+  const used = new Set();
+  for (const lv of bnd.levels) {
+    assert.ok(lv.tip && lv.title && lv.subtitle && ['lone', 'bonds', 'shape', 'boss'].includes(lv.kind)); assert.equal(lv.boss === true, lv.id === 4); assert.ok(lv.rounds.length >= 5);
+    for (const r of lv.rounds) {
+      const m = bnd.molecules[r.mol]; assert.ok(m, `unknown molecule ${r.mol}`); assert.equal(!!r.time, lv.id === 4, 'only the boss is timed');
+      if (lv.kind !== 'shape') assert.notEqual(m.build, false, `${r.mol} cannot be built (octet exception)`);
+      if (lv.kind === 'lone') assert.ok(m.key.orders.every(o => o === 1), `${r.mol}: level 1 has single bonds only`);
+      if (lv.kind === 'bonds') assert.ok(m.key.orders.some(o => o > 1), `${r.mol}: level 2 needs a double or triple bond`);
+      used.add(r.mol);
+    }
+    assert.equal(new Set(lv.rounds.map(r => r.mol)).size, lv.rounds.length, 'no repeated molecule inside a level');
+  }
+  assert.ok(['tetrahedral', 'trigonal_pyramidal', 'bent', 'linear', 'trigonal_planar'].every(s => bnd.levels[2].rounds.some(r => SHAPE[r.mol] === s)), 'the shapes level covers all five shapes');
+  // the checker: right answer passes, and each mistake gets the right explanation
+  const co2 = parseMolecule(bnd.molecules.CO2), kk = bnd.molecules.CO2.key;
+  assert.equal(evaluate(co2, [0, 0], [0, 0, 0], V).complete, false); assert.match(explain(evaluate(co2, [0, 0], [0, 0, 0], V), co2, V, N), /Fill every bond/);
+  let r = evaluate(co2, [1, 1], [3, 0, 3], V);
+  assert.equal(r.ok, false); assert.match(explain(r, co2, V, N), /Carbon has 4 electrons.*needs 8.*Add a lone pair, or a higher bond order/);
+  r = evaluate(co2, [2, 2], [2, 1, 2], V); assert.match(explain(r, co2, V, N), /Carbon has 10 electrons.*too many/);
+  r = evaluate(co2, [3, 3], [0, 0, 0], V); assert.match(explain(r, co2, V, N), /Oxygen has 6 electrons around it/);
+  r = evaluate(co2, [1, 3], [3, 0, 1], V); assert.equal(r.ok, false); assert.match(explain(r, co2, V, N), /would carry a charge/);
+  const o2 = parseMolecule(bnd.molecules.O2); r = evaluate(o2, [1], [3, 3], V);
+  assert.equal(r.used, 14); assert.match(explain(r, o2, V, N), /used 14 electrons and O₂ has 12 valence electrons \(O 6 \+ O 6\)/);
+  const hf = parseMolecule(bnd.molecules.HF); r = evaluate(hf, [1], [1, 3], V); assert.match(explain(r, hf, V, N), /Hydrogen has 4 electrons around it\. Hydrogen needs 2 electrons \(a duet\)/);
+  assert.equal(evaluate(co2, kk.orders, kk.lps, V).ok, true);
+  // VSEPR wording
+  const nh3 = parseMolecule(bnd.molecules.NH3), t = shapeText(nh3, bnd.molecules.NH3.key.lps, N);
+  assert.match(t, /3 bonded atoms and 1 lone pair make 4 electron regions.*tetrahedral arrangement.*trigonal pyramidal shape.*about 107°/);
+  assert.match(shapeText(co2, kk.lps, N), /2 bonded atoms and no lone pairs make 2 electron regions.*linear arrangement.*180°/);
+  assert.deepEqual(regionsOf(parseMolecule(bnd.molecules.H2O), [2, 0, 0]), { central: 0, bonds: 2, lone: 2, total: 4 });
+  assert.equal(shapeOf(parseMolecule(bnd.molecules.H2O), [2, 0, 0]), 'bent');
+  assert.equal(centralIndex(parseMolecule(bnd.molecules.CH4)), 0);
+}
+console.log('Bond Glacier OK');
+
 
 console.log(`ChemQuest data OK (${orders} orders, ${d.ions.length} ions)`);
