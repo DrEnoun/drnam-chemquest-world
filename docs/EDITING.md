@@ -56,3 +56,11 @@ Each level is a list of rounds. A round is a sign ("Pop the halogens") and a rul
 - Neighbours must differ by at least 6% so no two ledges are nearly tied. Keep to main-group elements (groups 1, 2, 13 to 17), because the trends are cleaner there.
 - `time` (seconds) makes a climb timed; only the boss level is timed.
 - `npm test` checks every climb against the element's position in the table (down a group, across a period), not against the numbers, so a wrong value is caught.
+
+## Bond Glacier molecules and levels (`data/bonds.json`)
+
+A molecule has `atoms` (`[symbol, x, y]`, in a flat Lewis layout; 40 to 45 units apart works well), `links` (pairs of atom numbers), the answer `key` (`orders` for each link and `lps` lone pairs for each atom), its VSEPR `shape`, and a `fact`. Lone pairs sit on the four compass spots (up, right, down, left) of an atom that do not point at a bond, so lay atoms out on those directions.
+
+- Level kinds: `lone` (single bonds are drawn, add lone pairs), `bonds` (choose bond orders too), `shape` (name the shape of a finished structure) and `boss` (build, then name the shape; needs `time` on each round).
+- Only add a molecule to a `lone`, `bonds` or `boss` level if it has exactly one neutral structure where every atom has an octet (hydrogen a duet). `npm test` solves each molecule by search and fails if there are none or several, and checks that the key matches. Octet exceptions such as BF₃ must be marked `"build": false` and can only be used in `shape` levels.
+- Shapes available: linear, bent, trigonal planar, trigonal pyramidal and tetrahedral. The test works the shape out from the key (bonded atoms and lone pairs on the central atom) and compares it with the `shape` you wrote.

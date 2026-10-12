@@ -10,7 +10,7 @@ Travel across a map of six islands. Each world teaches one chemistry topic with 
 | 2 | Orbital Ruins | Push puzzle | Electron configuration | **Playable** (4 levels) |
 | 3 | Periodic Falls | Pop and shoot | Periodic table (families, groups, periods) | **Playable** (4 levels) |
 | 4 | Trend Peaks | Platform jumper | Periodic trends (radius, ionisation energy, electronegativity) | **Playable** (4 levels) |
-| 5 | Bond Glacier | Drag and drop | Lewis structures and VSEPR | Coming soon |
+| 5 | Bond Glacier | Drag and drop | Lewis structures and VSEPR | **Playable** (4 levels) |
 | 6 | Ion Diner | Diner dash | Ionic compounds and formulae | **Playable** (4 shifts) |
 
 Friendly molecule monsters (H₂O, CO₂, NH₃, CH₄, O₂ and NaCl) roam the map. Tap one to learn its real shape and bonding.
@@ -60,6 +60,7 @@ All questions, levels and worlds are in `data/`:
 | `data/diner.json` | Ion Diner: the ions and every shift (orders, customers, patience, tips, boss) |
 | `data/memory.json` | Lab Meadow: every card set, level and the timed boss |
 | `data/falls.json` | Periodic Falls: every round (the sign, the rule, how many bubbles) |
+| `data/bonds.json` | Bond Glacier: the molecules (layout, answer, shape, fact) and every level |
 | `data/trends.json` | Trend Peaks: element values and every climb (the property, the direction, the elements) |
 | `data/elements.json` | The 45 elements used (group, period, block, category, family) |
 | `data/orbitals.json` | Orbital Ruins: each level's element, board layout and tip |
@@ -85,6 +86,7 @@ More detail on adding Ion Diner shifts and memory levels is in [`docs/EDITING.md
 - `js/overworld.js` and `js/scenery.js`: the map. `js/monsters.js`: the molecule monsters.
 - `js/diner.js` and `js/diner-logic.js`: Ion Diner. `js/memory.js` and `js/memory-logic.js`: Lab Meadow.
 - `js/falls.js` and `js/pop-logic.js`: Periodic Falls (the bubbles and the rules for each round).
+- `js/bonds.js` and `js/bond-logic.js`: Bond Glacier (drag and drop board, Lewis checker, VSEPR shapes).
 - `js/peaks.js` and `js/trend-logic.js`: Trend Peaks (the ledges, hopping, and the trend rules and explanations).
 - `js/orbital.js` and `js/orbital-logic.js`: Orbital Ruins (the board and the Aufbau, Hund and Pauli rules).
 - `js/progress.js`: unlocking worlds and earning badges. `js/avatar.js`: the avatar creator.
