@@ -63,6 +63,7 @@ export function createFalls({ $, levels, elements, getAvatar, says, sound, onFin
     });
     timeLeft = round.time || 0;
     $('fall-timer').hidden = !round.time; renderStatus(); paintTable();
+    if (ri > 0) says($('fall-says'), { text: `New round: ${round.prompt}. Read the sign, then tap only the bubbles that match.` });
   }
   const renderHearts = () => { $('fall-hearts').innerHTML = [0, 1, 2].map(i => `<span class="${i < hearts ? '' : 'gone'}">${i < hearts ? '♥' : '♡'}</span>`).join(''); $('fall-hearts').setAttribute('aria-label', `${hearts} of 3 hearts`); };
   function renderStatus() {

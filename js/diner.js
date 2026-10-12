@@ -301,6 +301,7 @@ function nextCustomer() {
   g.order = order; g.counts = {}; g.patience = g.level.patience; g.busy = false;
   g.cust = { opts: randomAvatar(Math.random), x: -80, mood: 'wait' };
   $('cust-n').textContent = g.idx + 1;
+  if (g.idx > 0) says($('says'), { text: 'New customer! Read the order, then tap ions to build the compound and press Serve.' });
   $('order-name').textContent = orderName(order.cat, order.an);
   renderTray(); renderCounter(); renderPatience();
 }

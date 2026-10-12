@@ -76,6 +76,7 @@ export function createPeaks({ $, levels, values, elements, getAvatar, says, soun
     place(); stand = { ...start };
     timeLeft = round.time || 0;
     $('peak-timer').hidden = !round.time; renderStatus(); paintTable();
+    if (ri > 0) says($('peak-says'), { text: `New climb: ${promptFor(round)} (${titleFor(round).toLowerCase()}). Tap the ${PROPS[round.prop].ends[round.dir === 'asc' ? 0 : 1]} first.` });
   }
   const renderHearts = () => { $('peak-hearts').innerHTML = [0, 1, 2].map(i => `<span class="${i < hearts ? '' : 'gone'}">${i < hearts ? '♥' : '♡'}</span>`).join(''); $('peak-hearts').setAttribute('aria-label', `${hearts} of 3 hearts`); };
   function renderStatus() {

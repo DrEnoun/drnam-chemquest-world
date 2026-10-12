@@ -33,6 +33,7 @@ export function createBonds({ $, levels, data, says, sound, onFinish, onExit }) 
     phase = hasBuildStep() ? 'build' : 'shape';
     timeLeft = round.time || 0; $('bond-timer').hidden = !round.time;
     computeBox(); renderAll();
+    if (ri > 0) { const m = data.molecules[round.mol]; says($('bond-says'), { text: phase === 'shape' ? `Next molecule: ${m.formula} (${m.name}). What shape is it? Count the electron regions on the central atom.` : `Next molecule: ${m.formula} (${m.name}). ${level.kind === 'boss' ? 'Count the valence electrons yourself, then build it.' : 'Count the valence electrons, then build the structure and press Check.'}` }); }
   }
   function fillFromKey() {
     filled = new Set();
