@@ -1,0 +1,49 @@
+{
+ "values": {
+  "Li": { "radius": 152, "ie": 520, "en": 0.98 }, "Be": { "radius": 112, "ie": 900, "en": 1.57 },
+  "B": { "radius": 85, "ie": 801, "en": 2.04 }, "C": { "radius": 77, "ie": 1086, "en": 2.55 },
+  "N": { "radius": 75, "ie": 1402, "en": 3.04 }, "O": { "radius": 73, "ie": 1314, "en": 3.44 },
+  "F": { "radius": 72, "ie": 1681, "en": 3.98 }, "Na": { "radius": 186, "ie": 496, "en": 0.93 },
+  "Mg": { "radius": 160, "ie": 738, "en": 1.31 }, "Al": { "radius": 143, "ie": 578, "en": 1.61 },
+  "Si": { "radius": 118, "ie": 787, "en": 1.90 }, "P": { "radius": 110, "ie": 1012, "en": 2.19 },
+  "S": { "radius": 103, "ie": 1000, "en": 2.58 }, "Cl": { "radius": 99, "ie": 1251, "en": 3.16 },
+  "K": { "radius": 227, "ie": 419, "en": 0.82 }, "Ca": { "radius": 197, "ie": 590, "en": 1.00 },
+  "Br": { "radius": 114, "ie": 1140, "en": 2.96 }, "I": { "radius": 133, "ie": 1008, "en": 2.66 },
+  "Cs": { "radius": 262, "ie": 376, "en": 0.79 }, "Ba": { "radius": 253, "ie": 503, "en": 0.89 }
+ },
+ "levels": [
+  { "id": 1, "title": "Down the group", "subtitle": "Climb a column of the table", "kind": "group",
+    "tip": "Try this: tap the platforms in order, from the first step to the last. A group is a column, so every element in a round shares one. Hop to the wrong platform and it crumbles.",
+    "rounds": [
+     { "prop": "radius", "dir": "asc", "kind": "group", "symbols": ["F", "Cl", "Br", "I"] },
+     { "prop": "ie", "dir": "desc", "kind": "group", "symbols": ["F", "Cl", "Br", "I"] },
+     { "prop": "en", "dir": "asc", "kind": "group", "symbols": ["Ba", "Ca", "Mg", "Be"] },
+     { "prop": "radius", "dir": "desc", "kind": "group", "symbols": ["Cs", "K", "Na", "Li"] }
+    ] },
+  { "id": 2, "title": "Across the period", "subtitle": "Climb a row of the table", "kind": "period",
+    "tip": "Try this: now every element in a round sits in one period, which is a row. Think about how many protons each atom has, and how tightly they pull on the outer electrons.",
+    "rounds": [
+     { "prop": "radius", "dir": "desc", "kind": "period", "symbols": ["Na", "Mg", "Al", "Si", "Cl"] },
+     { "prop": "en", "dir": "asc", "kind": "period", "symbols": ["Na", "Al", "Si", "S", "Cl"] },
+     { "prop": "ie", "dir": "asc", "kind": "period", "symbols": ["Li", "B", "C", "F"] },
+     { "prop": "radius", "dir": "asc", "kind": "period", "symbols": ["F", "C", "B", "Be", "Li"] }
+    ] },
+  { "id": 3, "title": "Mixed trails", "subtitle": "Down and across in one climb", "kind": "mixed",
+    "tip": "Try this: this trail zig-zags. Each step shares a group or a period with the step next to it, so use the column rule for one hop and the row rule for the next.",
+    "rounds": [
+     { "prop": "radius", "dir": "desc", "kind": "mixed", "symbols": ["Ca", "Mg", "Al", "Si", "Cl"] },
+     { "prop": "ie", "dir": "asc", "kind": "mixed", "symbols": ["Cs", "Na", "Mg", "Si", "Cl", "F"] },
+     { "prop": "en", "dir": "asc", "kind": "mixed", "symbols": ["Cs", "Na", "Mg", "Si", "Cl", "F"] },
+     { "prop": "radius", "dir": "asc", "kind": "mixed", "symbols": ["F", "Cl", "Si", "Mg", "Ca"] }
+    ] },
+  { "id": 4, "title": "Trend Summit", "subtitle": "Boss: beat the clock", "kind": "mixed", "boss": true,
+    "tip": "Boss climb! Fifty seconds a round, and if the clock runs out you lose a heart. The rules are the same: down a group, then across a period.",
+    "rounds": [
+     { "prop": "ie", "dir": "desc", "kind": "mixed", "symbols": ["F", "Cl", "Si", "Mg", "Ca"], "time": 50 },
+     { "prop": "radius", "dir": "desc", "kind": "mixed", "symbols": ["Cs", "K", "Na", "Mg", "Al", "Cl"], "time": 50 },
+     { "prop": "radius", "dir": "desc", "kind": "period", "symbols": ["Na", "Mg", "Al", "Si", "P", "S"], "time": 50 },
+     { "prop": "en", "dir": "asc", "kind": "period", "symbols": ["Li", "Be", "B", "C", "N", "O"], "time": 50 },
+     { "prop": "ie", "dir": "asc", "kind": "mixed", "symbols": ["Cs", "K", "Ca", "Mg", "Be"], "time": 50 }
+    ] }
+ ]
+}

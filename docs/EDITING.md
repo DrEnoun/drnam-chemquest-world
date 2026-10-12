@@ -47,3 +47,12 @@ Each level is a list of rounds. A round is a sign ("Pop the halogens") and a rul
 - `targets`: how many matching bubbles appear (and must be popped). `total`: all bubbles on screen (14 at most). Half of the wrong bubbles are "near misses" from the same period or the next group.
 - `fact`: shown when the round is cleared. `time` (seconds) makes a round timed; only the boss level is timed.
 - The elements are in `data/elements.json`. If you add one, `npm test` checks its group, period and block against its electron configuration, and each prompt's matching elements against a hand-written answer (`ANSWER` in `tools/test-game.mjs`), so add the new prompt there.
+
+## Trend Peaks climbs (`data/trends.json`)
+
+`values` holds radius (pm), first ionisation energy (kJ/mol) and electronegativity for each element used; they are only used to put the elements in order and are never shown. Each level is a list of climbs: `{ "prop": "radius" | "ie" | "en", "dir": "asc" | "desc", "kind": "group" | "period" | "mixed", "symbols": [...] }`. The game works out the correct order from `values`, so list the symbols in any order.
+
+- `kind: group` means every element is in one group, `period` one period, `mixed` means each neighbour in the climb order shares a group or a period with the one before it.
+- Neighbours must differ by at least 6% so no two ledges are nearly tied. Keep to main-group elements (groups 1, 2, 13 to 17), because the trends are cleaner there.
+- `time` (seconds) makes a climb timed; only the boss level is timed.
+- `npm test` checks every climb against the element's position in the table (down a group, across a period), not against the numbers, so a wrong value is caught.
