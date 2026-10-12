@@ -16,11 +16,12 @@ export function worldProgress(world, stars = {}) {
 
 // World n opens when world n-1 is cleared. World 1 is always open; `previewOpen` lets a finished
 // prototype world (Ion Diner) be played before the worlds ahead of it exist.
-export function worldStates(worlds, stars = {}) {
+// Zen mode (zen = true) opens every world; Arcade mode (the default) uses the rule above.
+export function worldStates(worlds, stars = {}, zen = false) {
   return worlds.map((w, i) => {
     const prog = worldProgress(w, stars);
     const prevCleared = i === 0 || worldProgress(worlds[i - 1], stars).cleared;
-    return { ...prog, id: w.id, unlocked: i === 0 || prevCleared || !!w.previewOpen, earned: prog.cleared };
+    return { ...prog, id: w.id, unlocked: zen || i === 0 || prevCleared || !!w.previewOpen, earned: prog.cleared };
   });
 }
 

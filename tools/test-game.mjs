@@ -129,6 +129,9 @@ for (let i = 1; i < W.length; i++) { assert.ok(W[i].pinWide[0] - W[i - 1].pinWid
 assert.deepEqual(worldStates(W, {}).map(s => s.unlocked), [true, false, false, false, false, true]);
 assert.equal(starKey(6, 2), '6.2');
 assert.equal(worldStates(W, {}).filter(s => s.earned).length, 0);
+assert.ok(worldStates(W, {}, true).every(s => s.unlocked), 'Zen mode opens every world');
+assert.equal(worldStates(W, {}, true).filter(s => s.earned).length, 0, 'Zen mode earns no badges by itself');
+assert.deepEqual(worldStates(W, {}, false).map(s => s.unlocked), [true, false, false, false, false, true], 'Arcade is the default');
 // Clearing every Ion Diner shift earns the World 6 badge; one shift is not enough
 assert.equal(worldProgress(W[5], { '6.1': 3, '6.2': 2 }).cleared, false);
 assert.equal(worldProgress(W[5], { '6.1': 3, '6.2': 2, '6.3': 1 }).cleared, false, 'the boss shift must be cleared too');
