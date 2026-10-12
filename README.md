@@ -96,3 +96,10 @@ More detail on adding Ion Diner shifts and memory levels is in [`docs/EDITING.md
 Created by Chemistry with Dr. NAM (Dr. Nur ’Ainun Mokhtar, UiTM Cawangan Pulau Pinang). The avatar is a generic student-scientist; Dr. NAM appears only as her official badge.
 
 This game grew out of the [Dr. NAM Virtual Secret Lab](https://github.com/DrEnoun/dr-nam-virtual-secret-lab) project.
+
+## Arcade and Zen modes
+
+The button at the top of the map switches between two ways to play (saved on the device):
+
+- **Arcade** (default): worlds and levels unlock one by one. World 2 opens when World 1 is cleared, and so on.
+- **Zen**: every world and every level is open, so players can play whichever they like (useful for STEM tours, demos and revision). Stars still save in both modes, and badges are only earned by clearing a world's levels.

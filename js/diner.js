@@ -23,7 +23,7 @@ const KEY = 'drnam-quest:v1';
 const LOGO = 'brand/logos/chemistry-with-dr-nam-logo.jpg';
 
 // ---------- Saved progress (localStorage may be blocked, so every access is guarded) ----------
-const defaults = () => ({ world: 1, coins: 0, xp: 0, stars: {}, avatar: { ...DEFAULT_AVATAR }, theme: 'night', mute: false, music: true });
+const defaults = () => ({ world: 1, coins: 0, xp: 0, stars: {}, avatar: { ...DEFAULT_AVATAR }, theme: 'night', mute: false, music: true, mode: 'arcade' });
 let save = defaults();
 try { save = { ...defaults(), ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch (e) { /* use defaults */ }
 const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) { /* ignore */ } };
@@ -53,6 +53,10 @@ function show(name) {
   screens.forEach(s => { $('screen-' + s).hidden = s !== name; });
   window.scrollTo(0, 0);
 }
+function applyMode() {
+  $('btn-mode-menu').textContent = zen() ? 'Zen mode' : 'Arcade mode';
+  $('btn-mode-menu').setAttribute('aria-label', zen() ? 'Zen mode: every world is open. Tap to switch to Arcade mode.' : 'Arcade mode: unlock worlds one by one. Tap to switch to Zen mode.');
+}
 function applyTheme() {
   document.documentElement.dataset.theme = save.theme;
   $('btn-theme-menu').textContent = save.theme === 'day' ? 'Night mode' : 'Day mode';
@@ -76,6 +80,10 @@ musicButtons.forEach(b => { b.onclick = toggleMusic; });
 ['pointerdown', 'touchend', 'keydown'].forEach(ev => addEventListener(ev, () => sound.unlock(), { passive: true }));
 const toggleSound = () => { sound.enabled = !sound.enabled; save.mute = !sound.enabled; persist(); applySound(); sound.unlock(); sound.select(); };
 $('btn-sound').onclick = $('btn-sound-menu').onclick = $('mem-sound').onclick = $('orb-sound').onclick = $('fall-sound').onclick = $('peak-sound').onclick = toggleSound;
+$('btn-mode-menu').onclick = () => {
+  save.mode = zen() ? 'arcade' : 'zen'; persist(); sound.pop(); renderMenu();
+  says($('menu-says'), { text: zen() ? 'Zen mode: every world is open, so play whichever you like, in any order. Your stars still count.' : 'Arcade mode: clear each world to unlock the next. Your stars are kept.', status: zen() ? 'Zen mode on' : 'Arcade mode on' });
+};
 $('btn-theme-menu').onclick = () => { save.theme = save.theme === 'day' ? 'night' : 'day'; persist(); applyTheme(); };
 
 // ---------- Dr. NAM Says bubble (uses her real badge, never a drawn likeness) ----------
@@ -100,7 +108,8 @@ function drawPortrait(canvas, opts) {
   drawAvatar(c, opts, 0, 0, canvas.width / WIDTH);
 }
 const starString = n => '★'.repeat(n) + '☆'.repeat(3 - n);
-const states = () => worldStates(worlds, save.stars);
+const zen = () => save.mode === 'zen';
+const states = () => worldStates(worlds, save.stars, zen());
 let selected = save.world;
 
 const overworld = createOverworld({
@@ -119,7 +128,7 @@ function renderWorldCard() {
   const w = worlds.find(x => x.id === selected), st = states()[selected - 1];
   const card = $('world-card');
   const play = w.playable && st.unlocked;
-  const status = !st.unlocked ? `Locked. Clear World ${w.id - 1} to open it.` : w.playable ? `${st.got} of ${st.total} ${unitOf(w.id)}s cleared` : 'Still being built: coming soon!';
+  const status = !st.unlocked ? `Locked in Arcade mode. Clear World ${w.id - 1} to open it, or switch to Zen mode.` : w.playable ? `${st.got} of ${st.total} ${unitOf(w.id)}s cleared` : 'Still being built: coming soon!';
   card.innerHTML = `<p class="world-card__eyebrow">World ${w.id} · ${w.gameplay}</p>
     <h2>${w.name}</h2><p class="world-card__meta">${w.topic}</p>
     <p class="world-card__meta">${status}</p>
@@ -155,7 +164,7 @@ function renderMenu() {
   overworld.setCurrent(save.world); selected = save.world;
   renderWorldCard(); renderTopics(); renderBadges();
   overworld.start();
-  applyTheme(); applySound();
+  overworld.rebuild(); applyTheme(); applyMode(); applySound();
 }
 
 // ---------- Level picker (any playable world) ----------
@@ -168,7 +177,7 @@ function renderShifts(worldId) {
   const list = $('level-list'); list.innerHTML = '';
   levels.forEach((lv, i) => {
     const star = id => save.stars[starKey(worldId, id)] || 0;
-    const unlocked = i === 0 || star(levels[i - 1].id) > 0, stars = star(lv.id);
+    const unlocked = zen() || i === 0 || star(levels[i - 1].id) > 0, stars = star(lv.id);
     const b = document.createElement('button');
     b.className = 'sticker level-card'; b.type = 'button'; b.disabled = !unlocked;
     b.innerHTML = `<span class="level-card__num">${unlocked ? (lv.boss ? 'B' : lv.id) : '🔒'}</span>
