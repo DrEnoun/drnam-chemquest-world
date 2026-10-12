@@ -20,7 +20,7 @@ export function createBonds({ $, levels, data, says, sound, onFinish, onExit }) 
 
   // ----- levels and rounds -----
   function startLevel(levelId) {
-    level = levels.find(l => l.id === levelId); ri = 0; hearts = 3; coins = 0; xp = 0; renderHearts();
+    $('bond-next').hidden = true; level = levels.find(l => l.id === levelId); ri = 0; hearts = 3; coins = 0; xp = 0; renderHearts();
     says($('bond-says'), { text: level.tip });
     startRound();
     if (!running) { running = true; last = performance.now(); raf = requestAnimationFrame(frame); }
@@ -187,7 +187,7 @@ export function createBonds({ $, levels, data, says, sound, onFinish, onExit }) 
   }
   function finishRound(ok, text, status) {
     if (ok && mistakes === 0) coins += ROUND_BONUS;
-    showSolution(); phase = 'between'; phaseT = 0; selected = null; solved = ok; renderAll();
+    showSolution(); phase = 'between'; phaseT = 0; selected = null; solved = ok; renderAll(); showNext();
     cardText();
     says($('bond-says'), { text: text, state: 'correct', status: ok && mistakes === 0 ? `${status} +5 bonus.` : status });
   }
@@ -197,11 +197,12 @@ export function createBonds({ $, levels, data, says, sound, onFinish, onExit }) 
     key = data.molecules[round.mol].key; showSolution(); phaseT = 0; selected = null; renderAll();
     cardText();
     says($('bond-says'), { text: `${data.molecules[round.mol].fact} ${shapeText(mol, key.lps, NAMES)} The finished structure is on the board.`, state: 'wrong', status: '✗ Time’s up! −1 heart.' });
-    if (hearts <= 0) { phase = 'over'; setTimeout(() => finish(false), 2000); }
+    if (hearts <= 0) { phase = 'over'; setTimeout(() => finish(false), 2000); } else showNext();
   }
-  function nextRound() { ri++; if (ri >= level.rounds.length) { phase = 'over'; finish(true); return; } startRound(); }
+  function showNext() { const n = $('bond-next'); n.textContent = ri + 1 >= level.rounds.length ? 'Finish ›' : 'Next molecule ›'; n.hidden = false; }
+  function nextRound() { $('bond-next').hidden = true; ri++; if (ri >= level.rounds.length) { phase = 'over'; finish(true); return; } startRound(); }
   function finish(win) {
-    phase = 'over';
+    phase = 'over'; $('bond-next').hidden = true;
     onFinish({
       win, hearts, coins, xp, levelId: level.id,
       title: win ? 'Glacier conquered!' : hearts <= 0 ? 'Out of hearts' : 'Level over',
@@ -247,16 +248,17 @@ export function createBonds({ $, levels, data, says, sound, onFinish, onExit }) 
   $('bond-check').onclick = check;
   $('bond-clear').onclick = () => { if (phase !== 'build') return; sound.select(); filled = new Set(); if (level.kind !== 'lone') orders = mol.links.map(() => 0); renderAll(); };
   $('bond-hint').onclick = hint;
+  $('bond-next').onclick = () => { if (phase === 'between') { sound.unlock(); sound.select(); nextRound(); } };
   document.querySelector('#screen-bonds .ticket').addEventListener('click', hint);
   $('bond-quit').onclick = () => { stop(); onExit(); };
   function frame(now) {
     if (!running) return;
     const dt = Math.min(0.1, (now - last) / 1000); last = now;
     if ((phase === 'build' || phase === 'shape') && round.time) { timeLeft -= dt; tickTimer(); if (timeLeft <= 0) { timeLeft = 0; tickTimer(); timeUp(); } }
-    else if (phase === 'between') { phaseT += dt; if (phaseT > 12) nextRound(); }
+    else if (phase === 'between') { phaseT += dt; }
     raf = requestAnimationFrame(frame);
   }
-  function stop() { running = false; cancelAnimationFrame(raf); phase = 'over'; }
+  function stop() { running = false; cancelAnimationFrame(raf); phase = 'over'; $('bond-next').hidden = true; }
   // Test hook (only reachable with ?test in the address)
   const debug = {
     snapshot: () => ({ phase, round: ri, hearts, mol: round && round.mol, timeLeft, orders: [...orders], lps: lpCount(), kind: level && level.kind }),

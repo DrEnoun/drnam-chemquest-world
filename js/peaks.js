@@ -60,7 +60,7 @@ export function createPeaks({ $, levels, values, elements, getAvatar, says, soun
 
   // ----- levels and rounds -----
   function startLevel(levelId) {
-    level = levels.find(l => l.id === levelId); ri = 0; hearts = 3; coins = 0; xp = 0; climbed = 0; seen.clear(); parts = []; rings = [];
+    $('peak-next').hidden = true; level = levels.find(l => l.id === levelId); ri = 0; hearts = 3; coins = 0; xp = 0; climbed = 0; seen.clear(); parts = []; rings = [];
     buildTable(); renderHearts(); resize();
     says($('peak-says'), { text: level.tip });
     $('trend-chain').textContent = 'Finish a climb to fill in the trend card.'; $('trend-rule').textContent = '';
@@ -152,7 +152,7 @@ export function createPeaks({ $, levels, values, elements, getAvatar, says, soun
       const fact = factText(round, order, byS);
       says($('peak-says'), { text: fact, state: 'correct', status: mistakes === 0 ? '✓ Summit! +5 bonus.' : '✓ Summit!' });
       $('trend-chain').textContent = `${titleFor(round)}: ${order.join(' → ')}`; $('trend-rule').textContent = ruleFor(round);
-      phase = 'between'; phaseT = 0;
+      phase = 'between'; phaseT = 0; showNext();
     }, 0.4);
   }
   function timeUp() {
@@ -160,15 +160,17 @@ export function createPeaks({ $, levels, values, elements, getAvatar, says, soun
     for (const p of plats) if (p.step === 0) { p.missed = true; p.step = -1; }
     paintTable();
     says($('peak-says'), { text: `${factText(round, order, byS)} The climb order is shown on the ledges.`, state: 'wrong', status: '✗ Time’s up! −1 heart.' });
-    if (hearts <= 0) { phase = 'over'; setTimeout(() => finish(false), 2000); }
+    if (hearts <= 0) { phase = 'over'; setTimeout(() => finish(false), 2000); } else showNext();
   }
+  function showNext() { const b = $('peak-next'); b.textContent = ri + 1 >= level.rounds.length ? 'Finish ›' : 'Next climb ›'; b.hidden = false; }
   function nextRound() {
+    $('peak-next').hidden = true;
     ri++;
     if (ri >= level.rounds.length) { phase = 'over'; finish(true); return; }
     startRound();
   }
   function finish(win) {
-    phase = 'over';
+    phase = 'over'; $('peak-next').hidden = true;
     onFinish({
       win, hearts, coins, xp, levelId: level.id,
       title: win ? 'You reached the summit!' : hearts <= 0 ? 'Out of hearts' : 'Level over',
@@ -238,7 +240,7 @@ export function createPeaks({ $, levels, values, elements, getAvatar, says, soun
     const dt = Math.min(0.1, (now - last) / 1000); last = now; t += dt;
     if (anim && t - anim.t0 >= anim.dur) { stand = { x: anim.x1, y: anim.y1 }; const cb = anim.then; anim = null; if (cb) cb(); }
     if (phase === 'play' && round.time) { timeLeft -= dt; tickTimer(); if (timeLeft <= 0) { timeLeft = 0; tickTimer(); timeUp(); } }
-    else if (phase === 'between') { phaseT += dt; if (phaseT > 7) nextRound(); }
+    else if (phase === 'between') { phaseT += dt; }
     for (const p of plats) p.shake = Math.max(0, p.shake - dt);
     for (const q of parts) { q.life += dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vy += 240 * dt; } parts = parts.filter(q => q.life < q.max);
     rings = rings.filter(r => t - r.t0 < 0.45);
@@ -260,9 +262,10 @@ export function createPeaks({ $, levels, values, elements, getAvatar, says, soun
   // ----- input and controls -----
   cv.addEventListener('pointerdown', e => { const r = cv.getBoundingClientRect(); tap((e.clientX - r.left) * (W / r.width), (e.clientY - r.top) * (H / r.height)); e.preventDefault(); });
   $('peak-hint').onclick = hint;
+  $('peak-next').onclick = () => { if (phase === 'between') { sound.unlock(); sound.select(); nextRound(); } };
   document.querySelector('#screen-peaks .ticket').addEventListener('click', hint);
   $('peak-quit').onclick = () => { stop(); onExit(); };
-  function stop() { running = false; cancelAnimationFrame(raf); phase = 'over'; }
+  function stop() { running = false; cancelAnimationFrame(raf); phase = 'over'; $('peak-next').hidden = true; }
   // Test hook (only reachable with ?test in the address): where the platforms are and what the right order is.
   const debug = {
     snapshot: () => ({ W, H, phase, round: ri, hearts, done, timeLeft, order: [...order], plats: plats.map(p => ({ symbol: p.sym, x: p.x, y: p.y, step: p.step })) }),

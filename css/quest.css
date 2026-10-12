@@ -560,5 +560,12 @@ html:not(.wide) .bond-actions .chip { padding: 8px 16px; }
 @media (max-width: 700px) and (max-height: 620px) { html:not(.wide) .screen--bonds .peak-ends { display: none; } }
 html:not(.wide) .screen--bonds:not([data-phase="build"]) .bond-actions { display: none; }
 html:not(.wide) .bond-tray { flex-wrap: nowrap; gap: 5px; }
-html:not(.wide) .bond-chip { flex: 1 1 0; min-width: 0; padding: 3px 2px; font-size: 10px; line-height: 1.1; text-align: center; }
+html:not(.wide) .bond-chip { flex: 1 1 0; max-width: 96px; min-width: 0; padding: 3px 2px; font-size: 10px; line-height: 1.1; text-align: center; }
 html:not(.wide) .bond-chip svg { max-width: 100%; }
+
+/* "Next ›" after a finished round (Worlds 3 to 5) and after a served customer (Ion Diner) */
+.btn-next { width: 100%; animation: nextpulse 1.4s ease-in-out infinite; }
+.btn-next[hidden] { display: none; }
+.btn-serve[data-next="true"] { animation: nextpulse 1.4s ease-in-out infinite; }
+@keyframes nextpulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.025); } }
+@media (prefers-reduced-motion: reduce) { .btn-next, .btn-serve[data-next="true"] { animation: none; } }

@@ -295,6 +295,7 @@ function renderHearts() {
 const renderCoins = () => { $('coins').textContent = save.coins + g.coins; };
 
 function nextCustomer() {
+  resetServe();
   if (g.idx >= g.orders.length) return finish(true);
   const order = g.orders[g.idx];
   g.order = order; g.counts = {}; g.patience = g.level.patience; g.busy = false;
@@ -359,7 +360,14 @@ function loseHeart() {
   g.hearts--; g.flash = 0.35; renderHearts();
 }
 
+// After a customer is done the Serve button becomes "Next customer ›" and waits for a tap, so players can read the feedback.
+function waitForNext() {
+  g.waitNext = true;
+  $('btn-serve').textContent = g.idx >= g.orders.length ? 'Finish shift ›' : 'Next customer ›'; $('btn-serve').dataset.next = 'true';
+}
+function resetServe() { if (g) g.waitNext = false; $('btn-serve').textContent = 'Serve!'; delete $('btn-serve').dataset.next; }
 $('btn-serve').onclick = () => {
+  if (g && g.waitNext && !g.over) { sound.unlock(); sound.select(); resetServe(); nextCustomer(); return; }
   if (!g || g.busy || g.over) return;
   sound.unlock();
   const res = checkServe(g.order, g.counts);
@@ -371,7 +379,7 @@ $('btn-serve').onclick = () => {
     react('cheer', 1.7); sound.correct(); renderCoins();
     says($('says'), { text: res.message, state: 'correct', status: `✓ Correct! +${tip} coins.`, fact: g.order.fact || '' });
     g.idx++;
-    setTimeout(() => { if (g && !g.over) nextCustomer(); }, 1400);
+    waitForNext();
   } else if (res.kind === 'empty') {
     says($('says'), { text: res.message });
   } else {
@@ -386,10 +394,8 @@ function timeUp() {
   sound.wrong(); loseHeart();
   says($('says'), { text: revealAnswer(g.order), state: 'wrong', status: '✗ Time’s up!' });
   g.idx++;
-  setTimeout(() => {
-    if (!g || g.over) return;
-    if (g.hearts <= 0) finish(false); else nextCustomer();
-  }, 2400);
+  if (g.hearts <= 0) setTimeout(() => { if (g && !g.over) finish(false); }, 2400);
+  else waitForNext();
 }
 
 function finish(win) {

@@ -47,7 +47,7 @@ export function createFalls({ $, levels, elements, getAvatar, says, sound, onFin
 
   // ----- rounds -----
   function startLevel(levelId) {
-    level = levels.find(l => l.id === levelId); ri = 0; hearts = 3; coins = 0; xp = 0; known.clear(); reveal.clear(); parts = []; rings = []; beams = [];
+    $('fall-next').hidden = true; level = levels.find(l => l.id === levelId); ri = 0; hearts = 3; coins = 0; xp = 0; known.clear(); reveal.clear(); parts = []; rings = []; beams = [];
     buildTable(); paintTable(); renderHearts(); resize();
     says($('fall-says'), { text: level.tip });
     startRound();
@@ -111,14 +111,17 @@ export function createFalls({ $, levels, elements, getAvatar, says, sound, onFin
     }
     for (const b of bubbles) burst(b.x, b.y, rgbOf(b.target ? '#d4ff3a' : '#ffffff'), 6);
     bubbles = [];
+    showNext();
   }
+  function showNext() { const b = $('fall-next'); b.textContent = ri + 1 >= level.rounds.length ? 'Finish ›' : 'Next ›'; b.hidden = false; }
   function nextRound() {
+    $('fall-next').hidden = true;
     ri++;
     if (ri >= level.rounds.length) { phase = 'over'; finish(true); return; }
     startRound();
   }
   function finish(win) {
-    phase = 'over';
+    phase = 'over'; $('fall-next').hidden = true;
     const n = known.size;
     onFinish({
       win, hearts, coins, xp, levelId: level.id,
@@ -177,7 +180,7 @@ export function createFalls({ $, levels, elements, getAvatar, says, sound, onFin
         if (d < min) { const push = (min - d) / 2, nx = dx / d, ny = dy / d; a.x -= nx * push; a.y -= ny * push; c.x += nx * push; c.y += ny * push; const dvx = a.vx - c.vx, dvy = a.vy - c.vy, dot = dvx * nx + dvy * ny; if (dot > 0) { a.vx -= dot * nx; a.vy -= dot * ny; c.vx += dot * nx; c.vy += dot * ny; } }
       }
       if (round.time) { timeLeft -= dt; tickTimer(); if (timeLeft <= 0) { timeLeft = 0; tickTimer(); hearts--; renderHearts(); sound.wrong(); if (hearts <= 0) { phase = 'over'; endRound(false, 'time'); setTimeout(() => finish(false), 1800); } else endRound(false, 'time'); } }
-    } else if (phase === 'between') { phaseT += dt; if (phaseT > 2.4) nextRound(); }
+    } else if (phase === 'between') { phaseT += dt; }
     for (const p of parts) { p.life += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 220 * dt; } parts = parts.filter(p => p.life < p.max);
     beams = beams.filter(b => t - b.t0 < 0.16); rings = rings.filter(r => t - r.t0 < 0.45);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
@@ -196,9 +199,10 @@ export function createFalls({ $, levels, elements, getAvatar, says, sound, onFin
   // ----- input and controls -----
   cv.addEventListener('pointerdown', e => { const r = cv.getBoundingClientRect(); tap((e.clientX - r.left) * (W / r.width), (e.clientY - r.top) * (H / r.height)); e.preventDefault(); });
   $('fall-hint').onclick = hint;
+  $('fall-next').onclick = () => { if (phase === 'between') { sound.unlock(); sound.select(); nextRound(); } };
   document.querySelector('#screen-falls .ticket').addEventListener('click', hint);       // on phones the sign doubles as the hint button
   $('fall-quit').onclick = () => { stop(); onExit(); };
-  function stop() { running = false; cancelAnimationFrame(raf); phase = 'over'; }
+  function stop() { running = false; cancelAnimationFrame(raf); phase = 'over'; $('fall-next').hidden = true; }
   // Test hook (only reachable with ?test in the address): where the bubbles are, and a way to burn round time.
   const debug = {
     snapshot: () => ({ W, H, R, phase, round: ri, hearts, timeLeft, bubbles: bubbles.map(b => ({ symbol: b.el.symbol, x: b.x, y: b.y, target: b.target, bad: b.bad })) }),
