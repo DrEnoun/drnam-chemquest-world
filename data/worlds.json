@@ -1,7 +1,7 @@
 {
  "map": {
   "width": 288,
-  "height": 688
+  "height": 778
  },
  "worlds": [
   {
@@ -14,7 +14,7 @@
    "icon": "molecule",
    "pin": [
     84,
-    592
+    682
    ],
    "badge": "Memory Master",
    "emblem": "cards",
@@ -29,7 +29,7 @@
    ],
    "blurb": "Flip the cards to match names, formulae and shapes.",
    "pinWide": [
-    70,
+    68,
     280
    ]
   },
@@ -43,7 +43,7 @@
    "icon": "atom",
    "pin": [
     204,
-    502
+    592
    ],
    "badge": "Orbital Ace",
    "emblem": "orbit",
@@ -51,7 +51,7 @@
    "callout": "4 levels",
    "tip": "Try this: electrons fill the lowest-energy orbitals first (Aufbau), and spread out one by one before pairing up (Hund’s rule).",
    "pinWide": [
-    170,
+    165,
     140
    ],
    "levelIds": [
@@ -72,7 +72,7 @@
    "icon": "target",
    "pin": [
     84,
-    412
+    502
    ],
    "badge": "Table Topper",
    "emblem": "grid",
@@ -80,7 +80,7 @@
    "callout": "4 levels",
    "tip": "Did you know? The halogens are the elements in Group 17 of the periodic table.",
    "pinWide": [
-    270,
+    262,
     280
    ],
    "levelIds": [
@@ -101,7 +101,7 @@
    "icon": "sparkle",
    "pin": [
     204,
-    322
+    412
    ],
    "badge": "Trend Jumper",
    "emblem": "arrow",
@@ -109,7 +109,7 @@
    "callout": "4 levels",
    "tip": "Try this: ionisation energy generally increases across a period and decreases down a group.",
    "pinWide": [
-    370,
+    359,
     140
    ],
    "levelIds": [
@@ -130,7 +130,7 @@
    "icon": "electron",
    "pin": [
     84,
-    232
+    322
    ],
    "badge": "Bond Builder",
    "emblem": "bond",
@@ -138,7 +138,7 @@
    "callout": "4 levels",
    "tip": "Try this: count the electron groups around the central atom. Lone pairs count too, and they change the shape.",
    "pinWide": [
-    470,
+    456,
     280
    ],
    "levelIds": [
@@ -159,7 +159,7 @@
    "icon": "flask",
    "pin": [
     204,
-    142
+    232
    ],
    "badge": "Ion Chef",
    "emblem": "flask",
@@ -175,13 +175,42 @@
    "calloutLift": 26,
    "blurb": "Combine ions to serve ionic compounds before your customers lose patience.",
    "pinWide": [
-    570,
+    553,
     140
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Reaction Volcano",
+   "gameplay": "Walk and collect",
+   "topic": "Chemical reactions and equations",
+   "biome": "volcano",
+   "accent": "#ff8a4c",
+   "icon": "testtube",
+   "pin": [
+    84,
+    142
+   ],
+   "badge": "Equation Explorer",
+   "emblem": "flame",
+   "playable": true,
+   "callout": "4 levels",
+   "tip": "Did you know? In a balanced equation every atom on the left turns up on the right. Atoms are rearranged, never made or destroyed.",
+   "levelIds": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "blurb": "Walk round the island, collect reactant molecules and mix them in the cauldron. The number you bring of each molecule is its coefficient.",
+   "pinWide": [
+    650,
+    280
    ]
   }
  ],
  "mapWide": {
-  "width": 640,
+  "width": 720,
   "height": 360
  }
 }

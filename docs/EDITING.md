@@ -64,3 +64,16 @@ A molecule has `atoms` (`[symbol, x, y]`, in a flat Lewis layout; 40 to 45 units
 - Level kinds: `lone` (single bonds are drawn, add lone pairs), `bonds` (choose bond orders too), `shape` (name the shape of a finished structure) and `boss` (build, then name the shape; needs `time` on each round).
 - Only add a molecule to a `lone`, `bonds` or `boss` level if it has exactly one neutral structure where every atom has an octet (hydrogen a duet). `npm test` solves each molecule by search and fails if there are none or several, and checks that the key matches. Octet exceptions such as BF₃ must be marked `"build": false` and can only be used in `shape` levels.
 - Shapes available: linear, bent, trigonal planar, trigonal pyramidal and tetrahedral. The test works the shape out from the key (bonded atoms and lone pairs on the central atom) and compares it with the `shape` you wrote.
+
+## Reaction Volcano quests (`data/reactions.json`)
+
+Players walk round the island, collect reactant molecules and mix them in the cauldron. The number of each molecule they bring is its coefficient, so a quest is just an equation.
+
+- **A quest:** `reactants` and `products` are formulae written plainly (`H2SO4`, `Ca(OH)2`). `coeffs` lists the balanced coefficients, reactants first and then products, in the smallest whole numbers. For example `"reactants": ["CH4", "O2"], "products": ["CO2", "H2O"], "coeffs": [1, 2, 1, 2]`.
+- `ask` is what the quest giver says, `hint` is shown when the player presses Hint or answers a question wrongly, and `fact` is shown after a correct answer.
+- `decoys` are molecules that are not in the equation (a product can be a decoy too: players learn that products come out of the cauldron, not in). `spare` sets how many extra copies of each reactant lie on the island (1 if left out), so players have to count rather than collect everything.
+- **Reaction-type levels** (`"askType": true`): each quest also needs `type`, one of the names in `types`.
+- **Limiting-reactant levels** (`"limiting": true`): give `field` instead of decoys, the exact molecules on the island, e.g. `{ "H2": 5, "O2": 2 }`. Players collect them all, and the game works out what reacts and what is left over.
+- **The island** is the grid of characters in `island`: `~` water, `s` sand, `g` grass, `@` start, `C` cauldron, `N` quest giver, `V` volcano (a 2 × 2 block), `L` lava, `T` palm or tree, `B` bush, `R` rock. Every row must be the same length and the edge must be water.
+
+The cauldron checks the atoms itself, so a wrong `coeffs` entry is caught by `npm test`, which also compares every equation with a hand-written answer key (add your new equation to `KEY` in `tools/test-game.mjs`) and checks that every molecule can be reached on foot.

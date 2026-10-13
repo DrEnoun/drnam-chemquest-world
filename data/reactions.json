@@ -1,0 +1,95 @@
+{
+  "about": "World 7, Reaction Volcano. Walk round the island, collect reactant molecules and mix them in the cauldron. The number of each molecule you bring is its coefficient. coeffs lists the balanced coefficients: reactants first, then products, in the smallest whole numbers. spare = extra copies of each reactant left on the island (default 1). decoys = molecules that are not in the equation. field (limiting reactant levels) = exactly what is on the island. Map key: ~ water, s sand, g grass, @ start, C cauldron, N quest giver, V volcano, L lava, T palm, B bush, R rock.",
+  "island": [
+    "~~~~~~~~~~~~~~~~~~~~",
+    "~~~~ssssssss~~~~~~~~",
+    "~~~ssggggTgsssss~~~~",
+    "~~ssgggVVgggggggss~~",
+    "~~sgggRVVggggTgggs~~",
+    "~ssgTgggggggggggggs~",
+    "~sggggggCNgggggRggs~",
+    "~sggBgggggggggggggs~",
+    "~ssgggLLgggg@ggTgss~",
+    "~~sgggLLgggggggggs~~",
+    "~~ssgTggggggRggsss~~",
+    "~~~sssggggggssss~~~~",
+    "~~~~~~ssssss~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~"
+  ],
+  "types": ["Synthesis", "Decomposition", "Combustion", "Single displacement", "Neutralisation"],
+  "levels": [
+    {
+      "id": 1,
+      "title": "Make it balance",
+      "subtitle": "Synthesis",
+      "tip": "Did you know? A coefficient is just a count of molecules. Collect 2 H₂ and you have written “2H₂”.",
+      "quests": [
+        { "ask": "My garden needs water! Can you make H₂O?", "reactants": ["H2", "O2"], "products": ["H2O"], "coeffs": [2, 1, 2], "decoys": ["N2"],
+          "hint": "Count the oxygen atoms. O₂ brings 2 O, but each H₂O holds only 1 O. How many H₂O do you need, and how much H₂ does that take?",
+          "fact": "2H₂ + O₂ → 2H₂O. Hydrogen fuel cells use this reaction to make electricity, with water as the only product." },
+        { "ask": "Fertiliser time! Please make ammonia, NH₃.", "reactants": ["N2", "H2"], "products": ["NH3"], "coeffs": [1, 3, 2], "decoys": ["O2"],
+          "hint": "N₂ has 2 N, so it makes 2 NH₃. Two NH₃ hold 6 H. How many H₂ is that?",
+          "fact": "N₂ + 3H₂ → 2NH₃ is the Haber process, which makes the ammonia in most of the world’s fertilisers." },
+        { "ask": "I need table salt, NaCl, for the kitchen!", "reactants": ["Na", "Cl2"], "products": ["NaCl"], "coeffs": [2, 1, 2], "decoys": ["H2"],
+          "hint": "Cl₂ brings 2 chlorine atoms, and each NaCl needs one sodium for every chlorine.",
+          "fact": "2Na + Cl₂ → 2NaCl. Sodium gives one electron to each chlorine atom, making Na⁺ and Cl⁻ ions." }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Fire and air",
+      "subtitle": "Combustion",
+      "tip": "Try this: balance the atom that appears in only one product first (C goes to CO₂, H goes to H₂O), and leave oxygen until last.",
+      "quests": [
+        { "ask": "The camp stove burns methane, CH₄. Burn it completely!", "reactants": ["CH4", "O2"], "products": ["CO2", "H2O"], "coeffs": [1, 2, 1, 2], "decoys": ["N2"],
+          "hint": "One CH₄ gives 1 CO₂ and 2 H₂O. Now count the O atoms on the right: 2 + 2 = 4. How many O₂ is that?",
+          "fact": "CH₄ + 2O₂ → CO₂ + 2H₂O. Natural gas burns like this in gas cookers." },
+        { "ask": "Light up the fireworks! Burn magnesium to make MgO.", "reactants": ["Mg", "O2"], "products": ["MgO"], "coeffs": [2, 1, 2], "decoys": ["H2"],
+          "hint": "O₂ brings 2 O atoms, and each MgO holds just one. So you need 2 MgO, and 2 Mg to make them.",
+          "fact": "2Mg + O₂ → 2MgO, with a dazzling white flame. That is why magnesium is used in flares and sparklers." },
+        { "ask": "The barbecue runs on propane, C₃H₈. Can you burn it?", "reactants": ["C3H8", "O2"], "products": ["CO2", "H2O"], "coeffs": [1, 5, 3, 4], "decoys": ["CO2"],
+          "hint": "C₃H₈ gives 3 CO₂ (3 C) and 4 H₂O (8 H). Oxygen on the right: 3 × 2 + 4 × 1 = 10 O atoms.",
+          "fact": "C₃H₈ + 5O₂ → 3CO₂ + 4H₂O. Bottled LPG gas is mostly propane and butane." }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Name that reaction",
+      "subtitle": "Reaction types",
+      "askType": true,
+      "tip": "Try this: one reactant splitting up is decomposition; two things joining into one is synthesis; an element swapping places is single displacement; acid + base is neutralisation.",
+      "quests": [
+        { "ask": "My first-aid kit has hydrogen peroxide, H₂O₂. It is fizzing! What does it break down into?", "reactants": ["H2O2"], "products": ["H2O", "O2"], "coeffs": [2, 2, 1], "decoys": ["H2"], "type": "Decomposition",
+          "hint": "O₂ has 2 O atoms, so you need an even number of O atoms in total. Try 2 H₂O₂.",
+          "fact": "2H₂O₂ → 2H₂O + O₂. The bubbles you see on a cut are oxygen gas, released by an enzyme in your blood." },
+        { "ask": "Drop zinc into hydrochloric acid and watch the bubbles!", "reactants": ["Zn", "HCl"], "products": ["ZnCl2", "H2"], "coeffs": [1, 2, 1, 1], "decoys": ["Cl2"], "type": "Single displacement",
+          "hint": "ZnCl₂ needs 2 Cl atoms, and each HCl brings only one.",
+          "fact": "Zn + 2HCl → ZnCl₂ + H₂. Zinc is more reactive than hydrogen, so it pushes hydrogen out of the acid." },
+        { "ask": "Neutralise this sulfuric acid spill with sodium hydroxide!", "reactants": ["H2SO4", "NaOH"], "products": ["Na2SO4", "H2O"], "coeffs": [1, 2, 1, 2], "decoys": ["NaCl"], "type": "Neutralisation",
+          "hint": "Na₂SO₄ needs 2 Na. Each NaOH brings one Na, and one OH that becomes water.",
+          "fact": "H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O. Acid + base gives a salt and water. Antacid tablets neutralise extra stomach acid the same way." },
+        { "ask": "The old iron gate is rusting. Make iron(III) oxide, Fe₂O₃!", "reactants": ["Fe", "O2"], "products": ["Fe2O3"], "coeffs": [4, 3, 2], "decoys": ["H2O"], "type": "Synthesis",
+          "hint": "O₂ comes in 2s and Fe₂O₃ needs 3 O, so the oxygen total must be a multiple of 6. Try 2 Fe₂O₃.",
+          "fact": "4Fe + 3O₂ → 2Fe₂O₃. Real rusting also needs water, which is why iron rusts faster in humid air." }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Who runs out first?",
+      "subtitle": "Limiting reactant",
+      "limiting": true,
+      "tip": "Did you know? The reactant that runs out first is the limiting reactant. It decides how much product you can make; the other reactant is left over.",
+      "quests": [
+        { "ask": "Collect every molecule on the island and mix them all. Then tell me: which reactant ran out first?", "reactants": ["H2", "O2"], "products": ["H2O"], "coeffs": [2, 1, 2], "field": { "H2": 5, "O2": 2 },
+          "hint": "Each O₂ needs 2 H₂. You have 2 O₂, so they need 4 H₂, and you have 5.",
+          "fact": "2 O₂ react with 4 H₂ to make 4 H₂O. One H₂ is left over, so O₂ was the limiting reactant." },
+        { "ask": "Ammonia again! Collect them all, mix, and find the limiting reactant.", "reactants": ["N2", "H2"], "products": ["NH3"], "coeffs": [1, 3, 2], "field": { "N2": 2, "H2": 3 },
+          "hint": "One N₂ needs 3 H₂. You have only 3 H₂, enough for just 1 N₂.",
+          "fact": "3 H₂ react with 1 N₂ to make 2 NH₃. One N₂ is left over, so H₂ was the limiting reactant." },
+        { "ask": "The stove is hungry for oxygen. Collect it all and find what runs out.", "reactants": ["CH4", "O2"], "products": ["CO2", "H2O"], "coeffs": [1, 2, 1, 2], "field": { "CH4": 3, "O2": 4 },
+          "hint": "Each CH₄ needs 2 O₂. Three CH₄ would need 6 O₂, but there are only 4.",
+          "fact": "4 O₂ burn 2 CH₄ to make 2 CO₂ and 4 H₂O. One CH₄ is left over, so O₂ was the limiting reactant." }
+      ]
+    }
+  ]
+}

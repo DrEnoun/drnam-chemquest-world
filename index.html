@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>DR NAM’s CHEMQUEST</title>
-  <meta name="description" content="DR NAM’s CHEMQUEST: a chemistry game by Chemistry with Dr. NAM. Match names, formulae and shapes, and serve ionic compounds at the Ion Diner.">
+  <meta name="description" content="DR NAM’s CHEMQUEST: a chemistry game by Chemistry with Dr. NAM. Match names, formulae and shapes, serve ionic compounds at the Ion Diner, and balance equations on Reaction Volcano.">
   <meta name="theme-color" content="#060d1b">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
@@ -43,13 +43,13 @@
         <h1 class="title" aria-label="DR NAM’s CHEMQUEST"><span class="lime-rule" aria-hidden="true"></span><span aria-hidden="true">DR NAM’s <br>CHEM<span class="hl">QUEST</span></span></h1>
       </div>
     </section>
-    <p class="tagline">Six worlds of chemistry. Tap a pin to travel!</p>
+    <p class="tagline">Seven worlds of chemistry. Tap a pin to travel!</p>
     </div>
     </header>
 
     <div class="map-cell">
       <div class="map" id="map">
-        <canvas id="map-canvas" aria-label="World map with six islands"></canvas>
+        <canvas id="map-canvas" aria-label="World map with seven islands"></canvas>
         <div class="map__pins" id="map-pins"></div>
       </div>
     </div>
@@ -245,6 +245,49 @@
         <p class="orb-configlabel">Electron configuration</p>
         <p class="orb-config" id="orb-config"></p>
         <p class="orb-count" id="orb-count"></p>
+      </section>
+    </div>
+  </main>
+
+  <!-- ================= Reaction Volcano (World 7) ================= -->
+  <main class="screen screen--reactions" id="screen-reactions" hidden>
+    <header class="hud">
+      <button class="chip" id="rx-quit" type="button" aria-label="Back to the map">‹ Menu</button>
+      <div class="hud__hearts" id="rx-hearts" role="img" aria-label="Hearts"></div>
+      <div class="hud__coins"><span class="coin-dot" aria-hidden="true"></span><span id="rx-coins">0</span></div>
+      <button class="chip" id="rx-sound" type="button"></button>
+    </header>
+    <div class="rx-main">
+      <section class="ticket sticker-static" aria-live="polite">
+        <p class="ticket__meta" id="rx-meta"></p>
+        <p class="ticket__order" id="rx-goal"></p>
+      </section>
+      <div class="rx-board"><canvas id="rx-canvas" aria-label="Island map. Walk with the arrow keys, drag on the map like a joystick, or tap where you want to go. Walk over molecules to collect them."></canvas><p class="orb-swipe rx-swipe">Drag or tap to walk</p></div>
+      <div class="rx-controls">
+        <div class="orb-actions">
+          <button class="chip chip--go" id="rx-mix" type="button">Mix!</button>
+          <button class="chip" id="rx-hint" type="button">Hint</button>
+          <button class="chip orb-padbtn" id="rx-pad" type="button" aria-pressed="false">Arrows</button>
+        </div>
+        <div class="dpad" role="group" aria-label="Walk (hold)">
+          <button type="button" data-walk="0,-1" aria-label="Walk up">▲</button>
+          <button type="button" data-walk="-1,0" aria-label="Walk left">◀</button>
+          <button type="button" data-walk="0,1" aria-label="Walk down">▼</button>
+          <button type="button" data-walk="1,0" aria-label="Walk right">▶</button>
+        </div>
+      </div>
+    </div>
+    <div class="rx-side">
+      <aside class="says" id="rx-says" aria-live="polite"></aside>
+      <section class="rx-card sticker-static" aria-labelledby="rx-card-h">
+        <h2 id="rx-card-h">Cauldron</h2>
+        <p class="rx-eq" id="rx-eq" aria-live="polite"></p>
+        <p class="rx-atoms" id="rx-atoms"></p>
+        <p class="rx-baglabel">Your bag <small>(tap one to drop it)</small></p>
+        <div class="rx-bag" id="rx-bag"></div>
+        <p class="rx-count" id="rx-left"></p>
+        <div class="rx-choices" id="rx-choices" hidden></div>
+        <button class="btn-start btn-next" id="rx-next" type="button" hidden>Next ›</button>
       </section>
     </div>
   </main>
