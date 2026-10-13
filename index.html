@@ -43,13 +43,13 @@
         <h1 class="title" aria-label="DR NAM’s CHEMQUEST"><span class="lime-rule" aria-hidden="true"></span><span aria-hidden="true">DR NAM’s <br>CHEM<span class="hl">QUEST</span></span></h1>
       </div>
     </section>
-    <p class="tagline">Eight worlds of chemistry. Tap a pin to travel!</p>
+    <p class="tagline">Nine worlds of chemistry. Tap a pin to travel!</p>
     </div>
     </header>
 
     <div class="map-cell">
       <div class="map" id="map">
-        <canvas id="map-canvas" aria-label="World map with eight islands"></canvas>
+        <canvas id="map-canvas" aria-label="World map with nine islands"></canvas>
         <div class="map__pins" id="map-pins"></div>
       </div>
     </div>
@@ -322,6 +322,36 @@
         <div class="run-preview"><canvas id="run-preview" width="320" height="240" aria-label="Camera preview with your body outline"></canvas><video id="run-video" playsinline muted hidden></video></div>
         <p class="run-camstat" id="run-camstat" aria-live="polite">Camera off</p>
         <div class="row row--wrap"><button class="chip chip--go" id="run-cam" type="button" aria-pressed="false">Use my body (camera)</button><button class="chip" id="run-recal" type="button">Recalibrate</button></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ================= Puzzle Pier (World 9) ================= -->
+  <main class="screen screen--jigsaw" id="screen-jigsaw" hidden>
+    <header class="hud">
+      <button class="chip" id="jig-quit" type="button" aria-label="Back to the map">‹ Menu</button>
+      <div class="hud__hearts" id="jig-hearts" role="img" aria-label="Hearts"></div>
+      <div class="hud__coins"><span class="coin-dot" aria-hidden="true"></span><span id="jig-coins">0</span></div>
+      <button class="chip" id="jig-sound" type="button"></button>
+    </header>
+    <div class="jig-main">
+      <section class="ticket sticker-static" aria-live="polite">
+        <p class="ticket__meta" id="jig-meta"></p>
+        <p class="ticket__order" id="jig-goal"></p>
+      </section>
+      <div class="jig-board" id="jig-board" role="group" aria-label="Puzzle board, 3 columns and 2 rows"></div>
+      <div class="jig-actions">
+        <button class="chip chip--go" id="jig-check" type="button">Check</button>
+        <button class="chip" id="jig-hint" type="button">Hint</button>
+        <button class="btn-start btn-next" id="jig-finish" type="button" hidden>Finish ›</button>
+      </div>
+    </div>
+    <div class="jig-side">
+      <aside class="says" id="jig-says" aria-live="polite"></aside>
+      <section class="jig-traycard sticker-static" aria-labelledby="jig-tray-h">
+        <h2 id="jig-tray-h">Pieces <small id="jig-count"></small></h2>
+        <p class="jig-how">Pieces fit where the touching edges make a pair. Drag a piece onto the board, or tap it and then tap a space.</p>
+        <div class="jig-tray" id="jig-tray" role="group" aria-label="Pieces tray"></div>
       </section>
     </div>
   </main>

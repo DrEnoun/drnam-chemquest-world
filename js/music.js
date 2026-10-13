@@ -120,7 +120,7 @@ export const midiFreq = m => 440 * 2 ** ((m - 69) / 12);
 export const chordTones = c => TRIAD[c.q].map(i => c.root + i);
 
 // Which of the three loops each screen plays.
-export const SCREEN_TRACK = { menu: 'map', shifts: 'map', avatar: 'map', game: 'diner', memory: 'memory', orbital: 'ruins', falls: 'falls', peaks: 'peaks', bonds: 'glacier', reactions: 'ruins', runner: 'falls' };
+export const SCREEN_TRACK = { menu: 'map', shifts: 'map', avatar: 'map', game: 'diner', memory: 'memory', orbital: 'ruins', falls: 'falls', peaks: 'peaks', bonds: 'glacier', reactions: 'ruins', runner: 'falls', jigsaw: 'memory' };
 
 // ---------- sound building blocks ----------
 const noiseCache = new WeakMap();

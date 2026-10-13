@@ -2,7 +2,7 @@
 
 **Chemistry with Dr. NAM** · a pixel-art chemistry game for phones.
 
-Travel across a map of eight islands. Each world teaches one chemistry topic with a different style of game. Clear a world to earn its badge and open the next. Played in a phone browser, with no login and no app to install.
+Travel across a map of nine islands. Each world teaches one chemistry topic with a different style of game. Clear a world to earn its badge and open the next. Played in a phone browser, with no login and no app to install.
 
 | # | World | Game | Topic | Status |
 |---|---|---|---|---|
@@ -14,6 +14,7 @@ Travel across a map of eight islands. Each world teaches one chemistry topic wit
 | 6 | Ion Diner | Diner dash | Ionic compounds and formulae | **Playable** (4 shifts) |
 | 7 | Reaction Volcano | Walk and collect | Chemical reactions: balancing equations, reaction types, limiting reactant | **Playable** (4 levels) |
 | 8 | Thermo Track | Body runner | Energy changes: exothermic and endothermic, ΔH, bonds and energy | **Playable** (4 levels) |
+| 9 | Puzzle Pier | Jigsaw | Revision of every topic: match-the-edges (Tarsia) puzzles | **Playable** (8 puzzles) |
 
 Friendly molecule monsters (H₂O, CO₂, NH₃, CH₄, O₂ and NaCl) roam the map. Tap one to learn its real shape and bonding.
 
@@ -66,6 +67,7 @@ All questions, levels and worlds are in `data/`:
 | `data/trends.json` | Trend Peaks: element values and every climb (the property, the direction, the elements) |
 | `data/elements.json` | The 45 elements used (group, period, block, category, family) |
 | `data/orbitals.json` | Orbital Ruins: each level's element, board layout and tip |
+| `data/jigsaw.json` | Puzzle Pier: one jigsaw per topic (7 matching pairs and a few decoys each) |
 | `data/energy.json` | Thermo Track: the energy changes (exothermic or endothermic, ΔH), the gate questions and each run |
 | `data/reactions.json` | Reaction Volcano: the island map, every quest (equation, balanced coefficients, decoys, hint, fact) and the reaction types |
 | `data/worlds.json` | The map: world names, topics, colours, pin positions, badges, tips |
@@ -95,6 +97,7 @@ More detail on adding Ion Diner shifts and memory levels is in [`docs/EDITING.md
 - `js/orbital.js` and `js/orbital-logic.js`: Orbital Ruins (the board and the Aufbau, Hund and Pauli rules).
 - `js/reactions.js` and `js/reaction-logic.js`: Reaction Volcano (the walkable island, and the equation, cauldron and limiting-reactant rules).
 - `js/runner.js` and `js/runner-logic.js`: Thermo Track (the 3-lane track, judging, and turning body poses into lane, jump and slide). `js/body.js`: the webcam and MediaPipe Pose.
+- `js/jigsaw.js` and `js/jigsaw-logic.js`: Puzzle Pier (the board and tray, and the edge-matching rules).
 - `js/progress.js`: unlocking worlds and earning badges. `js/avatar.js`: the avatar creator.
 - Game rules live in the `*-logic.js` and `progress.js` files, with no screen code, so they can be tested in Node.
 - Style: the Dr. NAM design system in `brand-kit/` (night and day themes, League Spartan and Questrial, electric-lime accent).
