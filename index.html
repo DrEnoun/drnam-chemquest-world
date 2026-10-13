@@ -43,13 +43,13 @@
         <h1 class="title" aria-label="DR NAM’s CHEMQUEST"><span class="lime-rule" aria-hidden="true"></span><span aria-hidden="true">DR NAM’s <br>CHEM<span class="hl">QUEST</span></span></h1>
       </div>
     </section>
-    <p class="tagline">Seven worlds of chemistry. Tap a pin to travel!</p>
+    <p class="tagline">Eight worlds of chemistry. Tap a pin to travel!</p>
     </div>
     </header>
 
     <div class="map-cell">
       <div class="map" id="map">
-        <canvas id="map-canvas" aria-label="World map with seven islands"></canvas>
+        <canvas id="map-canvas" aria-label="World map with eight islands"></canvas>
         <div class="map__pins" id="map-pins"></div>
       </div>
     </div>
@@ -288,6 +288,40 @@
         <p class="rx-count" id="rx-left"></p>
         <div class="rx-choices" id="rx-choices" hidden></div>
         <button class="btn-start btn-next" id="rx-next" type="button" hidden>Next ›</button>
+      </section>
+    </div>
+  </main>
+
+  <!-- ================= Thermo Track (World 8) ================= -->
+  <main class="screen screen--runner" id="screen-runner" hidden>
+    <header class="hud">
+      <button class="chip" id="run-quit" type="button" aria-label="Back to the map">‹ Menu</button>
+      <div class="hud__hearts" id="run-hearts" role="img" aria-label="Hearts"></div>
+      <div class="hud__coins"><span class="coin-dot" aria-hidden="true"></span><span id="run-coins">0</span></div>
+      <button class="chip" id="run-sound" type="button"></button>
+    </header>
+    <div class="run-main">
+      <section class="ticket sticker-static" aria-live="polite">
+        <p class="ticket__meta" id="run-meta"></p>
+        <p class="ticket__order run-rule" id="run-rule"></p>
+        <div class="patience fall-progress" id="run-progress" role="progressbar" aria-label="Distance to the finish" aria-valuemin="0" aria-valuemax="100"><span></span></div>
+      </section>
+      <div class="run-board"><canvas id="run-canvas" aria-label="Running track. Change lanes with left and right, jump with up, slide with down. Or swipe, or move your body in front of the camera."></canvas>
+        <button class="btn-start run-startbtn" id="run-start" type="button">Start running</button></div>
+      <p class="run-keys">Keys: ← → change lane · ↑ jump · ↓ slide · or swipe on the track</p>
+    </div>
+    <div class="run-side">
+      <aside class="says" id="run-says" aria-live="polite"></aside>
+      <section class="run-card sticker-static" aria-labelledby="run-now-h">
+        <h2 id="run-now-h">Up ahead</h2>
+        <div id="run-now" aria-live="polite"></div>
+      </section>
+      <section class="run-camwrap sticker-static" id="run-camwrap" data-state="off" aria-labelledby="run-cam-h">
+        <h2 id="run-cam-h">Play with your body</h2>
+        <p class="run-camnote">Stand back so the camera sees your shoulders and hips. Lean or step left and right, jump, and squat. The video stays on this device and is never uploaded.</p>
+        <div class="run-preview"><canvas id="run-preview" width="320" height="240" aria-label="Camera preview with your body outline"></canvas><video id="run-video" playsinline muted hidden></video></div>
+        <p class="run-camstat" id="run-camstat" aria-live="polite">Camera off</p>
+        <div class="row row--wrap"><button class="chip chip--go" id="run-cam" type="button" aria-pressed="false">Use my body (camera)</button><button class="chip" id="run-recal" type="button">Recalibrate</button></div>
       </section>
     </div>
   </main>

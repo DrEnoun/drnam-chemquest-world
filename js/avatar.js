@@ -98,3 +98,46 @@ export function randomAvatar(rng = Math.random, { goggles = false } = {}) {
     hair: pick(OPTIONS.hair.length), coat: pick(OPTIONS.coat.length), goggles,
   };
 }
+
+// Back view for the runner (World 8): the same student seen from behind, with a running step.
+// step: 0 or 1 swaps which leg is forward; pose 'run' | 'jump' | 'slide'.
+function paintBack(c, o, step, pose) {
+  const { E, R, P } = shapes(c);
+  const skin = OPTIONS.skin[o.skin] ?? OPTIONS.skin[0], skinSh = shade(skin, 0.16);
+  const hair = OPTIONS.hair[o.hair] ?? OPTIONS.hair[0], hairHi = tint(hair, 0.22), hairSh = shade(hair, 0.3);
+  const coat = OPTIONS.coat[o.coat] ?? OPTIONS.coat[0], coatSh = shade(coat, 0.16);
+  const tudung = o.hairStyle === 'tudung';
+  c.translate(0, 4);
+  const crouch = pose === 'slide' ? 9 : 0;
+  c.translate(0, crouch);
+  // legs: one forward (lower, shorter on screen), one back
+  if (pose === 'slide') { R(9, 28, 6, 5, 2, TROUSERS); R(17, 28, 6, 5, 2, TROUSERS); E(12, 33, 3.6, 1.6, SHOE); E(20, 33, 3.6, 1.6, SHOE); }
+  else {
+    const a = pose === 'jump' ? 0 : step ? 2.4 : -2.4;
+    R(10.5, 29, 4.6, 8 + a, 1.6, TROUSERS); R(16.9, 29, 4.6, 8 - a, 1.6, TROUSERS);
+    E(12.8, 37.2 + a, 3.4, 1.8, SHOE); E(19.2, 37.2 - a, 3.4, 1.8, SHOE);
+  }
+  // arms swing opposite to the legs (raised when jumping)
+  const sw = pose === 'jump' ? -7 : step ? 1.6 : -1.6;
+  R(4.6, 19.5 + sw, 4.8, 11, 2.3, coatSh); R(22.6, 19.5 - (pose === 'jump' ? 7 : sw), 4.8, 11, 2.3, coatSh);
+  E(7, 31 + sw, 2.3, 2.3, skinSh); E(25, 31 - (pose === 'jump' ? 7 : sw), 2.3, 2.3, skinSh);
+  // coat back with a centre seam and a belt tab
+  R(8, 18.5, 16, 15, 3.2, coat); R(19.6, 19.2, 4.4, 14, 2, coatSh);
+  c.strokeStyle = shade(coat, 0.3); c.lineWidth = 0.8; c.beginPath(); c.moveTo(16, 21); c.lineTo(16, 33); c.stroke();
+  R(12.6, 27.4, 6.8, 2, 0.8, coatSh, false);
+  // head from behind
+  if (tudung) { P([[5, 15], [27, 15], [28.6, 26], [16, 28], [3.4, 26]], hair); E(16, 11, 10.6, 10.8, hair); E(12, 6, 3.4, 1.6, hairHi, false); P([[5, 15], [27, 15], [28.6, 26], [16, 28], [3.4, 26]], 'rgba(0,0,0,.12)', false); }
+  else {
+    E(7.9, 11, 1.7, 2.1, skin); E(24.1, 11, 1.7, 2.1, skin); R(13.6, 15, 4.8, 4, 1.4, skinSh);
+    E(16, 10, 8.6, 8.6, hair); E(12, 5.4, 3.4, 1.4, hairHi, false); E(16, 13.6, 6.4, 3, hairSh, false);
+    if (o.hairStyle === 'bun') { E(16, 2.6, 3.8, 3.6, hair); E(14.8, 1.6, 1.3, 1, hairHi, false); }
+  }
+  if (o.goggles) { R(7.2, 9.6, 17.6, 1.8, 0.9, TEAL, false); }
+}
+const backCache = new Map();
+export function avatarBackCanvas(opts = DEFAULT_AVATAR, step = 0, pose = 'run') {
+  const o = { ...DEFAULT_AVATAR, ...opts }, key = JSON.stringify([o, step, pose]);
+  let cv = backCache.get(key);
+  if (!cv) { cv = pxCanvas(WIDTH * SS, HEIGHT * SS); const c = cv.getContext('2d'); c.scale(SS, SS); paintBack(c, o, step, pose); crisp(cv, INK, 110, 2); backCache.set(key, cv); }
+  return cv;
+}

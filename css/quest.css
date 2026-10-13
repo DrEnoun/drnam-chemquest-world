@@ -343,7 +343,7 @@ canvas { image-rendering: auto; }
 /* the six topic cards run in a row under the map */
 .wide .topics-strip { grid-area: strip; }
 .wide .topics-strip .section-title { display: none; }
-.wide .topics-strip .topic-grid { grid-template-columns: repeat(7, 1fr); gap: calc(10px * var(--k)); }
+.wide .topics-strip .topic-grid { grid-template-columns: repeat(8, 1fr); gap: calc(10px * var(--k)); }
 .wide .topics-strip .topic-card { padding: calc(6px * var(--k)) calc(6px * var(--k)); gap: calc(2px * var(--k)); }
 .wide .topics-strip .topic-card svg { width: calc(26px * var(--k)); height: calc(26px * var(--k)); }
 .wide .topics-strip .topic-card b { font-size: calc(14px * var(--k)); }
@@ -656,3 +656,52 @@ html:not(.wide) .bond-chip svg { max-width: 100%; }
 .rx-term .rx-co { align-self: center; }
 #rx-mix:disabled { opacity: .55; cursor: default; filter: saturate(.6); }
 .rx-f { white-space: nowrap; }
+
+/* ===================================================================================================
+   World 8 — Thermo Track: the runner on the left; what is coming up and the camera on the right
+   =================================================================================================== */
+.screen--runner { gap: calc(12px * var(--k)); }
+.run-main, .run-side { display: contents; }
+.run-board { position: relative; container-type: inline-size; }
+#run-canvas { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; border-radius: calc(16px * var(--k)); border: var(--stroke-doodle) solid var(--sticker-ink); box-shadow: var(--shadow-sticker); background: #3f8fc8; touch-action: none; }
+.run-startbtn { position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%); width: auto; padding-inline: calc(28px * var(--k)); }
+.run-startbtn[hidden] { display: none; }
+.run-keys { font-size: calc(13px * var(--k)); opacity: .75; text-align: center; }
+.run-rule { font-size: calc(17px * var(--k)); line-height: 1.35; }
+.run-rule b { font-family: var(--font-display); font-weight: 800; padding: 0 .25em; border-radius: .3em; }
+.run-rule b.hot { background: #ffd0b0; color: #8a2a00; } .run-rule b.cold { background: #cdeeff; color: #0a4a7a; }
+.run-card, .run-camwrap { padding: calc(10px * var(--k)) calc(14px * var(--k)) calc(12px * var(--k)); border-radius: var(--radius-md); display: grid; gap: calc(6px * var(--k)); align-content: start; }
+.run-card h2, .run-camwrap h2 { font-size: calc(19px * var(--k)); font-weight: 800; }
+#run-now:empty::before { content: "Keep running…"; opacity: .6; font-size: calc(15px * var(--k)); }
+.run-q { font: 800 calc(19px * var(--k)) var(--font-display); line-height: 1.25; }
+.run-hintline { font-size: calc(14px * var(--k)); opacity: .8; }
+.run-opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(6px * var(--k)); margin-top: calc(4px * var(--k)); }
+.run-opts span { display: grid; gap: 2px; padding: calc(6px * var(--k)); border: calc(2px * var(--k)) solid #231f20; border-radius: calc(10px * var(--k)); background: #fffdf2; font: 800 calc(15px * var(--k)) var(--font-display); text-align: center; color: #14202e; }
+.run-opts small { font: 400 calc(11px * var(--k)) var(--font-body); opacity: .7; }
+.run-camnote { font-size: calc(13px * var(--k)); line-height: 1.35; opacity: .85; }
+.run-preview { position: relative; width: min(100%, calc(260px * var(--k))); }
+#run-preview { display: none; width: 100%; height: auto; aspect-ratio: 4 / 3; border-radius: calc(10px * var(--k)); border: calc(2px * var(--k)) solid #231f20; background: #0a1628; }
+.run-camwrap[data-state="on"] #run-preview, .run-camwrap[data-state="loading"] #run-preview { display: block; }
+.run-camstat { font: 700 calc(14px * var(--k)) var(--font-display); color: #0d5c63; }
+:root[data-theme="day"] .run-camstat { color: #0063ab; }
+.run-camwrap[data-state="nocam"] .run-camstat { color: #a12a2a; }
+
+.wide .screen--runner { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); column-gap: calc(28px * var(--k)); }
+.wide .screen--runner .hud { grid-column: 1 / -1; }
+.wide .run-main, .wide .run-side { display: flex; flex-direction: column; gap: calc(10px * var(--k)); min-height: 0; }
+.wide .run-board { flex: 1 1 0; min-height: 0; display: grid; place-items: center; container-type: size; }
+.wide #run-canvas { width: min(100cqw, calc(100cqh * 4 / 3)); }
+.wide .run-side { overflow-y: auto; padding-right: calc(6px * var(--k)); }
+
+@media (max-width: 700px) {
+  html:not(.wide) .screen--runner { display: flex; flex-direction: column; min-height: 100dvh; gap: 8px; padding-top: 10px; }
+  html:not(.wide) .run-main, html:not(.wide) .run-side { display: flex; flex-direction: column; gap: 8px; }
+  html:not(.wide) .screen--runner .ticket { padding: 6px 12px; transform: none; }
+  html:not(.wide) .screen--runner .ticket__meta { display: none; }
+  html:not(.wide) .run-rule { font-size: 14px; }
+  html:not(.wide) .run-keys { display: none; }
+  html:not(.wide) .screen--runner .says__name { display: none; }
+  html:not(.wide) .screen--runner .says__text { font-size: 13.5px; line-height: 1.25; }
+  html:not(.wide) .run-q { font-size: 16px; }
+  html:not(.wide) .run-opts span { font-size: 13px; }
+}

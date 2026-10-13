@@ -1,0 +1,56 @@
+{
+  "about": "World 8, Thermo Track: a three-lane runner. Change lanes, jump and slide with the keys, swipes, or your body (webcam). changes = energy changes that float above the track; exo = true for exothermic (gives out heat), false for endothermic (takes in heat); dh = enthalpy change in kJ/mol where given (negative means exothermic). questions = gates across the track; run through the lane with the right answer (answer = 0, 1 or 2). In each level, collect says which kind of change to grab ('exo' or 'endo'); the other kind must be dodged. obstacles = how many barriers to jump, slide under or dodge. speed = track speed (1 is normal).",
+  "changes": {
+    "wood":      { "label": "Burning wood", "exo": true, "why": "Combustion gives out heat and light, so burning wood is exothermic." },
+    "freeze":    { "label": "Water freezing", "exo": true, "why": "Water gives out energy as its molecules lock into ice, so freezing is exothermic." },
+    "respire":   { "label": "Respiration", "exo": true, "why": "Your cells break down glucose and release energy, so respiration is exothermic." },
+    "warmer":    { "label": "Hand warmer", "exo": true, "why": "Iron powder rusting inside a hand warmer releases heat: exothermic." },
+    "condense":  { "label": "Steam condensing", "exo": true, "why": "Steam gives out energy as it turns back into liquid water, so condensing is exothermic. That is why steam burns are so painful." },
+    "neutral":   { "label": "Acid + alkali", "exo": true, "why": "Neutralisation gives out heat: the mixture gets warmer, so it is exothermic." },
+    "melt":      { "label": "Ice melting", "exo": false, "why": "Ice takes in heat from its surroundings to melt, so melting is endothermic." },
+    "boil":      { "label": "Water boiling", "exo": false, "why": "Boiling takes in energy to pull the water molecules apart, so it is endothermic." },
+    "photo":     { "label": "Photosynthesis", "exo": false, "why": "Plants absorb light energy to make glucose, so photosynthesis is endothermic." },
+    "coldpack":  { "label": "Cold pack", "exo": false, "why": "Ammonium nitrate dissolving in water takes in heat, so the pack feels cold: endothermic." },
+    "sweat":     { "label": "Sweat drying", "exo": false, "why": "Evaporating sweat takes heat from your skin, which cools you down: endothermic." },
+    "bake":      { "label": "Baking a cake", "exo": false, "why": "Baking needs a steady supply of heat from the oven, so it is endothermic." },
+    "ch4":       { "label": "CH₄ burns", "exo": true, "dh": -890, "why": "ΔH = −890 kJ/mol. A negative ΔH means energy is given out: exothermic." },
+    "carbon":    { "label": "Carbon burns", "exo": true, "dh": -394, "why": "ΔH = −394 kJ/mol. Negative, so exothermic." },
+    "h2":        { "label": "H₂ burns", "exo": true, "dh": -286, "why": "ΔH = −286 kJ/mol. Negative, so exothermic." },
+    "naoh":      { "label": "NaOH dissolves", "exo": true, "dh": -44, "why": "ΔH = −44 kJ/mol. Negative, so dissolving sodium hydroxide warms the water: exothermic." },
+    "icemelt":   { "label": "Ice melts", "exo": false, "dh": 6, "why": "ΔH = +6 kJ/mol. Positive, so energy is taken in: endothermic." },
+    "waterboil": { "label": "Water boils", "exo": false, "dh": 41, "why": "ΔH = +41 kJ/mol at 100 °C. Positive, so endothermic." },
+    "caco3":     { "label": "CaCO₃ splits", "exo": false, "dh": 178, "why": "ΔH = +178 kJ/mol. Breaking down limestone needs strong heating: endothermic." },
+    "nh4no3":    { "label": "NH₄NO₃ dissolves", "exo": false, "dh": 26, "why": "ΔH = +26 kJ/mol. Positive, so the water gets colder: endothermic." }
+  },
+  "questions": {
+    "breakbond": { "q": "Breaking a chemical bond…", "options": ["Takes in energy", "Gives out energy", "Needs no energy"], "answer": 0, "why": "Breaking bonds always takes in energy, because atoms must be pulled apart against their attraction." },
+    "makebond":  { "q": "Making a chemical bond…", "options": ["Takes in energy", "Gives out energy", "Needs no energy"], "answer": 1, "why": "Making bonds always gives out energy. Exothermic reactions release more energy making bonds than they used breaking them." },
+    "exoprod":   { "q": "In an exothermic reaction, the products have…", "options": ["More energy", "Less energy", "The same energy"], "answer": 1, "why": "The products have less energy than the reactants; the difference is given out as heat, so ΔH is negative." },
+    "exosurr":   { "q": "An exothermic reaction makes its surroundings…", "options": ["Warmer", "Colder", "No change"], "answer": 0, "why": "Exothermic reactions give out heat, so the surroundings (the test tube, the water, your hand) get warmer." },
+    "endosign":  { "q": "For an endothermic reaction, ΔH is…", "options": ["Negative (−)", "Zero", "Positive (+)"], "answer": 2, "why": "Endothermic reactions take in energy, so the products have more energy than the reactants and ΔH is positive." },
+    "activation":{ "q": "Activation energy is the energy…", "options": ["Given out", "Needed to start", "In the products"], "answer": 1, "why": "Activation energy is the minimum energy colliding particles need for a reaction to start. Even exothermic reactions need it, like a match to light paper." }
+  },
+  "levels": [
+    {
+      "id": 1, "title": "Hot or cold?", "subtitle": "Exothermic and endothermic", "collect": "exo", "speed": 1, "obstacles": 6,
+      "tip": "Grab the changes that GIVE OUT heat (exothermic). Dodge the ones that TAKE IN heat (endothermic).",
+      "changes": ["wood", "melt", "respire", "boil", "warmer", "photo", "freeze", "coldpack", "condense", "sweat"]
+    },
+    {
+      "id": 2, "title": "Read the ΔH", "subtitle": "Enthalpy change signs", "collect": "endo", "speed": 1.1, "obstacles": 7,
+      "tip": "This time grab the ENDOTHERMIC changes: ΔH is positive (+). Dodge the negative ones.",
+      "changes": ["icemelt", "ch4", "caco3", "carbon", "nh4no3", "h2", "waterboil", "naoh"]
+    },
+    {
+      "id": 3, "title": "Energy gates", "subtitle": "Bonds and energy", "speed": 1.1, "obstacles": 8,
+      "tip": "Read the question at the top, then run through the gate with the right answer.",
+      "questions": ["breakbond", "makebond", "exoprod", "exosurr", "endosign", "activation"]
+    },
+    {
+      "id": 4, "title": "Energy Express", "subtitle": "Boss: everything, faster", "boss": true, "collect": "exo", "speed": 1.3, "obstacles": 10,
+      "tip": "Boss run! Grab exothermic changes, dodge endothermic ones, and answer the gates. It gets faster!",
+      "changes": ["neutral", "bake", "condense", "melt", "ch4", "icemelt", "freeze", "photo"],
+      "questions": ["exoprod", "activation", "endosign"]
+    }
+  ]
+}
