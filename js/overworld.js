@@ -1,4 +1,4 @@
-// Overworld map: six organic islands (meadow, ruins, falls, peaks, glacier, diner) joined by rope bridges, with glossy
+// Overworld map: seven organic islands (meadow, ruins, falls, peaks, glacier, diner, volcano) joined by rope bridges, with glossy
 // numbered pins and the player's avatar. Drawn at 2x then crisped into hard pixels, with animated water, waterfalls,
 // smoke, lit windows, an orbiting atom, snow, neon and boats.
 import { drawAvatar } from './avatar.js';
@@ -18,6 +18,7 @@ const PAL = {
   peaks:   { top: '#8b9caf', hi: '#b8c7d7', sh: '#697a8d', edge: '#dce7f1', cliff: '#566378', cliff2: '#363f50' },
   glacier: { top: '#d6f3ff', hi: '#ffffff', sh: '#a5d3ec', edge: '#ffffff', cliff: '#86bde6', cliff2: '#4f86b0' },
   diner:   { top: '#33b9ad', hi: '#6ee9db', sh: '#1f8e88', edge: '#aaffef', cliff: '#10666c', cliff2: '#0a4048' },
+  volcano: { top: '#5fb862', hi: '#8fdc7c', sh: '#3f9a52', edge: '#c4f5a4', cliff: '#9a6b45', cliff2: '#5c3a24' },
 };
 
 const hash = (a, b = 0) => { let h = (a * 374761393 + b * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
@@ -31,13 +32,14 @@ const SCENERY = {
   falls:  [['tealTree', -50, 4], ['pine', -40, 12], ['wall', 32, 5], ['tealTree', 54, 13], ['bushB', -28, 17], ['rocks', 8, 21], ['blossom', -58, 16]],
   peaks:  [['mtn', -34, 6], ['mtnS', -14, 16], ['castle', 36, 4], ['pine', -54, 14], ['rocks', 54, 16]],
   glacier:[['crystal', -36, 6], ['snowPine', -52, 12], ['crystalS', -14, 18], ['iceHall', 33, 4], ['snowPine', 55, 13], ['snowPine', -46, 17]],
+  volcano:[['volcano', -22, 6], ['palm', -54, 12], ['palm', 48, 8], ['cauldron', 30, 16], ['rocks', 54, 18], ['bushB', -36, 19], ['palm', -60, 18]],
   diner:  [['pylonP', -46, 8], ['pylonM', -34, 15], ['diner', 33, 3], ['lamp', -12, 20], ['lamp', 58, 14], ['crystalS', 8, 22]],
 };
 const MAKE = {
   roundTree: () => SC.roundTree(), blossom: () => SC.roundTree(SC.TREES.blossom), tealTree: () => SC.roundTree(SC.TREES.teal), limeTree: () => SC.roundTree(SC.TREES.lime), autumn: () => SC.roundTree(SC.TREES.autumn), bushB: () => SC.bush(['#2f9a8a', '#52d1b8']), pine: () => SC.pine(false), snowPine: () => SC.pine(true), palm: SC.palm, bush: () => SC.bush(), rocks: () => SC.rocks(),
   fence: SC.fence, cottage: SC.cottage, ziggurat: SC.ziggurat, pillar: SC.pillar, wall: SC.tableWall, castle: SC.castle,
   mtn: () => SC.mountain(64, 54), mtnS: () => SC.mountain(40, 34), crystal: SC.crystal, crystalS: () => SC.crystalS(), iceHall: SC.iceHall,
-  diner: SC.diner, lamp: SC.lamp, pylonP: () => SC.pylon(), pylonM: () => SC.pylon(['#d98bff', '#9a45d1', '#f3d2ff']),
+  diner: SC.diner, lamp: SC.lamp, pylonP: () => SC.pylon(), pylonM: () => SC.pylon(['#d98bff', '#9a45d1', '#f3d2ff']), volcano: SC.volcano, cauldron: SC.cauldron,
 };
 const cache = {};
 const sprite = k => (cache[k] ??= MAKE[k]());
@@ -78,6 +80,7 @@ function texture(c, w, p) {
   if (w.biome === 'falls') { spot(14, (x, y) => { c.fillStyle = 'rgba(20,100,60,.35)'; c.beginPath(); c.ellipse(x, y, 6, 2.4, 0, 0, 7); c.fill(); }); }
   if (w.biome === 'peaks') { c.strokeStyle = 'rgba(40,52,70,.35)'; c.lineWidth = 0.9; spot(14, (x, y) => { c.beginPath(); c.moveTo(x, y); c.lineTo(x + 5, y + 2); c.lineTo(x + 7, y + 6); c.stroke(); }); spot(8, (x, y) => { c.fillStyle = 'rgba(255,255,255,.7)'; c.beginPath(); c.ellipse(x, y, 5, 2, 0, 0, 7); c.fill(); }); }
   if (w.biome === 'glacier') { c.strokeStyle = 'rgba(79,134,176,.45)'; c.lineWidth = 0.9; spot(12, (x, y) => { c.beginPath(); c.moveTo(x, y); c.lineTo(x + 7, y - 2); c.lineTo(x + 9, y + 3); c.stroke(); }); c.fillStyle = '#9fe0ff'; c.beginPath(); c.ellipse(CX - 16, CY + 14, 11, 4, 0, 0, 7); c.fill(); }
+  if (w.biome === 'volcano') { c.fillStyle = '#f0d49a'; c.beginPath(); c.ellipse(CX + 26, CY + 12, 24, 7, 0, 0, 7); c.fill(); spot(10, (x, y) => { c.fillStyle = 'rgba(30,110,50,.35)'; c.beginPath(); c.ellipse(x, y, 5, 2, 0, 0, 7); c.fill(); }); c.fillStyle = '#ff7a2e'; c.beginPath(); c.ellipse(CX - 40, CY + 14, 7, 3, 0, 0, 7); c.fill(); c.fillStyle = '#ffe066'; c.fillRect(CX - 42, CY + 13, 3, 1.2); }
   if (w.biome === 'diner') { c.strokeStyle = 'rgba(255,255,255,.2)'; c.lineWidth = 0.8; for (let x = CX - RX; x < CX + RX; x += 9) { c.beginPath(); c.moveTo(x, CY - RY); c.lineTo(x + 4, CY + RY); c.stroke(); } for (let y = CY - RY; y < CY + RY; y += 7) { c.beginPath(); c.moveTo(CX - RX, y); c.lineTo(CX + RX, y + 2); c.stroke(); } }
 }
 
@@ -109,7 +112,7 @@ function islandArt(w, locked) {
     (an.windows || []).forEach(([x, y, ww, hh]) => effects.push({ type: 'window', x: sx + x, y: sy + y, w: ww, h: hh }));
     if (an.orb) effects.push({ type: 'orb', x: sx + an.orb[0], y: sy + an.orb[1] });
     if (an.neon) effects.push({ type: 'neon', x: sx + an.neon[0], y: sy + an.neon[1], w: an.neon[2], h: an.neon[3] });
-    if (an.glow) effects.push({ type: 'glow', x: sx + an.glow[0], y: sy + an.glow[1], c: w.biome === 'glacier' ? '143,245,255' : w.biome === 'diner' && name !== 'lamp' ? '94,234,212' : '255,240,170' });
+    if (an.glow) effects.push({ type: 'glow', x: sx + an.glow[0], y: sy + an.glow[1], c: name === 'volcano' ? '255,150,60' : name === 'cauldron' ? '157,255,90' : w.biome === 'glacier' ? '143,245,255' : w.biome === 'diner' && name !== 'lamp' ? '94,234,212' : '255,240,170' });
   }
   if (w.biome === 'glacier') effects.push({ type: 'snow', x: ox + CX - RX, y: oy + CY - 54, w: RX * 2, h: 90 });
   lightPass(c, IW, IH, 0.2, 0.3);
@@ -140,7 +143,7 @@ function pinSprite(w, st) {
 
 export function createOverworld({ canvas, pinsEl, worlds, map: mapPortrait, mapWide, getState, getAvatar, onSelect, onMonster = () => {} }) {
   const ctx = canvas.getContext('2d');
-  // Two layouts of the same six islands: a tall one for phones and a landscape one for laptops and projectors.
+  // Two layouts of the same seven islands: a tall one for phones and a landscape one for laptops and projectors.
   worlds.forEach(w => { w.pinPortrait = w.pin; w.pinWide = w.pinWide || w.pin; });
   let mode = 'portrait', map = mapPortrait, S = A, W = 0, H = 0, layer = null, lctx = null, water = null;
   const byId = Object.fromEntries(worlds.map(w => [w.id, w]));
@@ -150,17 +153,17 @@ export function createOverworld({ canvas, pinsEl, worlds, map: mapPortrait, mapW
   // ----- static backdrop: deep water, turquoise shallows round each island, cloud banks at the edges -----
   function buildWater() {
     water = pxCanvas(W, H); const wc = water.getContext('2d'); wc.scale(S, S);
-    const wide = mode === 'wide';
+    const wide = mode === 'wide', kx = wide ? map.width / 640 : 1, dy = wide ? 0 : map.height - 688;   // decorations were laid out for a 640-wide / 688-tall map
     wc.fillStyle = lin(wc, 0, 0, 0, map.height, [0, '#2a7fc4'], [0.18, '#1a8fc0'], [0.42, '#0f86ad'], [0.7, '#0a5a8c'], [1, '#07305d']); wc.fillRect(0, 0, map.width, map.height);
     const haze = (x, y, r, rgba) => { const g = wc.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, rgba); g.addColorStop(1, rgba.replace(/[\d.]+\)$/, '0)')); wc.fillStyle = g; wc.fillRect(x - r, y - r, r * 2, r * 2); };
     (wide ? [[60, 40, 150, 'rgba(150,100,255,.30)'], [590, 30, 140, 'rgba(255,170,110,.24)'], [480, 330, 150, 'rgba(60,220,200,.22)'], [90, 330, 140, 'rgba(60,160,255,.24)']]
-      : [[30, 40, 170, 'rgba(150,100,255,.30)'], [270, 20, 150, 'rgba(255,170,110,.22)'], [250, 380, 150, 'rgba(60,220,200,.22)'], [30, 520, 160, 'rgba(60,160,255,.24)']]).forEach(h => haze(...h));
+      : [[30, 40, 170, 'rgba(150,100,255,.30)'], [270, 20, 150, 'rgba(255,170,110,.22)'], [250, 380, 150, 'rgba(60,220,200,.22)'], [30, 520, 160, 'rgba(60,160,255,.24)']]).forEach(([x, y, r, c]) => haze(x * kx, y + (y > 60 ? dy : 0), r, c));
     for (let i = 0; i < (wide ? 90 : 70); i++) { const x = hash(i, 11) * map.width, y = hash(i, 12) * map.height, r = 10 + hash(i, 13) * 26; haze(x, y, r, `rgba(150,255,240,${0.05 + hash(i, 14) * 0.07})`); }
     for (let i = 0; i < (wide ? 6 : 4); i++) { const x = wide ? 40 + i * 110 : 20 + i * 80; wc.fillStyle = lin(wc, x, 0, x + 70, 300, [0, 'rgba(255,255,255,.10)'], [1, 'rgba(255,255,255,0)']); wc.beginPath(); wc.moveTo(x, 0); wc.lineTo(x + 26, 0); wc.lineTo(x + 100, map.height * 0.62); wc.lineTo(x + 62, map.height * 0.62); wc.fill(); }
     worlds.forEach(w => { const g = wc.createRadialGradient(w.pin[0], w.pin[1] + 18, 20, w.pin[0], w.pin[1] + 18, 112); g.addColorStop(0, 'rgba(70,240,214,.62)'); g.addColorStop(.55, 'rgba(60,225,205,.22)'); g.addColorStop(1, 'rgba(45,212,191,0)'); wc.fillStyle = g; wc.fillRect(w.pin[0] - 120, w.pin[1] - 110, 240, 260); });
     const puff = (x, y, k, tone) => { [[0, 0, 22, 12], [-18, 5, 16, 9], [-6, -6, 14, 9], [18, 5, 16, 9], [8, -5, 12, 8]].forEach(([dx, dy, rx, ry]) => { wc.fillStyle = tone; wc.beginPath(); wc.ellipse(x + dx * k, y + dy * k, rx * k, ry * k, 0, 0, 7); wc.fill(); }); };
-    (wide ? [[16, 50, 1.2], [628, 80, 1.05], [18, 338, 1.1], [622, 346, 1.25], [326, 356, 1.0], [320, 6, 0.95]]
-      : [[8, 70, 1.5], [284, 160, 1.3], [4, 360, 1.2], [286, 410, 1.5], [10, 630, 1.4], [270, 672, 1.6], [150, 682, 1.3]]).forEach(([x, y, k]) => { puff(x, y + 4, k, '#2b2a7a'); puff(x, y, k, '#4a4fb0'); puff(x - 3, y - 4 * k, k * 0.7, '#8a8fe6'); puff(x - 5, y - 6 * k, k * 0.4, '#ffc8e0'); });
+    (wide ? [[16, 50, 1.2], [628, 80, 1.05], [18, 338, 1.1], [622, 346, 1.25], [326, 356, 1.0], [320, 6, 0.95]].map(([x, y, k]) => [x * kx, y, k])
+      : [[8, 70, 1.5], [284, 160, 1.3], [4, 360, 1.2], [286, 410, 1.5], [10, 630, 1.4], [270, 672, 1.6], [150, 682, 1.3]].map(([x, y, k]) => [x, y + dy, k]).concat([[282, 40, 1.2]])).forEach(([x, y, k]) => { puff(x, y + 4, k, '#2b2a7a'); puff(x, y, k, '#4a4fb0'); puff(x - 3, y - 4 * k, k * 0.7, '#8a8fe6'); puff(x - 5, y - 6 * k, k * 0.4, '#ffc8e0'); });
     const vg = wc.createRadialGradient(map.width / 2, map.height / 2, map.height * 0.3, map.width / 2, map.height / 2, map.height * (wide ? 0.85 : 0.78)); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(4,10,50,.4)'); wc.fillStyle = vg; wc.fillRect(0, 0, map.width, map.height);
   }
 
@@ -370,14 +373,16 @@ export function createOverworld({ canvas, pinsEl, worlds, map: mapPortrait, mapW
     W = map.width * S; H = map.height * S;
     canvas.width = W; canvas.height = H; canvas.style.aspectRatio = `${map.width} / ${map.height}`;
     layer = pxCanvas(W, H); lctx = layer.getContext('2d');
-    pinsEl.parentElement.style.setProperty('--mapk', String(mapPortrait.width / map.width));   // callouts scale with the islands, not the page
+    pinsEl.parentElement.style.setProperty('--mapk', String(mapPortrait.width / map.width));
+    pinsEl.parentElement.style.setProperty('--map-ar', String(map.width / map.height));   // callouts scale with the islands, not the page
     buildWater();
     const wide = next === 'wide';
     sparks = Array.from({ length: wide ? 55 : 60 }, (_, i) => [hash(i, 1) * map.width, hash(i, 2) * map.height, hash(i, 3)]);
     twinkles = Array.from({ length: wide ? 60 : 70 }, (_, i) => ({ x: hash(i, 21) * map.width, y: hash(i, 22) * map.height, ph: hash(i, 23) * 6.28, sp: 1.2 + hash(i, 24) * 2.4, r: 1.8 + hash(i, 25) * 3.4, c: TW[i % 4] }));
-    boats = wide ? [{ x: 34, y: 96, ph: 0 }, { x: 262, y: 50, ph: 2 }, { x: 604, y: 312, ph: 4 }, { x: 392, y: 338, ph: 1 }]
-      : [{ x: 252, y: 588, ph: 0 }, { x: 246, y: 404, ph: 2 }, { x: 40, y: 294, ph: 4 }];
-    birds = wide ? [[0.0, 60, 0.7], [0.4, 200, 0.5], [0.7, 330, 0.6]] : [[0.0, 120, 0.7], [0.4, 450, 0.5], [0.7, 280, 0.6]];
+    const dy = wide ? 0 : map.height - 688;
+    boats = wide ? [{ x: 34, y: 96, ph: 0 }, { x: 262, y: 50, ph: 2 }, { x: 476, y: 50, ph: 4 }, { x: 392, y: 338, ph: 1 }]
+      : [{ x: 252, y: 588 + dy, ph: 0 }, { x: 246, y: 404 + dy, ph: 2 }, { x: 40, y: 294 + dy, ph: 4 }];
+    birds = wide ? [[0.0, 60, 0.7], [0.4, 200, 0.5], [0.7, 330, 0.6]] : [[0.0, 120 + dy, 0.7], [0.4, 450 + dy, 0.5], [0.7, 280 + dy, 0.6]];
     monsters.forEach(m => { m.x = Math.min(map.width - 30, Math.max(30, m.x)); m.y = Math.min(map.height - 50, Math.max(50, m.y)); pickTarget(m); });
     walk = null; hero = { ...heroSpot(byId[cur]) };
     buildPins();

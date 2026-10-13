@@ -2,7 +2,7 @@
 
 **Chemistry with Dr. NAM** · a pixel-art chemistry game for phones.
 
-Travel across a map of six islands. Each world teaches one chemistry topic with a different style of game. Clear a world to earn its badge and open the next. Played in a phone browser, with no login and no app to install.
+Travel across a map of seven islands. Each world teaches one chemistry topic with a different style of game. Clear a world to earn its badge and open the next. Played in a phone browser, with no login and no app to install.
 
 | # | World | Game | Topic | Status |
 |---|---|---|---|---|
@@ -12,6 +12,7 @@ Travel across a map of six islands. Each world teaches one chemistry topic with 
 | 4 | Trend Peaks | Platform jumper | Periodic trends (radius, ionisation energy, electronegativity) | **Playable** (4 levels) |
 | 5 | Bond Glacier | Drag and drop | Lewis structures and VSEPR | **Playable** (4 levels) |
 | 6 | Ion Diner | Diner dash | Ionic compounds and formulae | **Playable** (4 shifts) |
+| 7 | Reaction Volcano | Walk and collect | Chemical reactions: balancing equations, reaction types, limiting reactant | **Playable** (4 levels) |
 
 Friendly molecule monsters (H₂O, CO₂, NH₃, CH₄, O₂ and NaCl) roam the map. Tap one to learn its real shape and bonding.
 
@@ -64,6 +65,7 @@ All questions, levels and worlds are in `data/`:
 | `data/trends.json` | Trend Peaks: element values and every climb (the property, the direction, the elements) |
 | `data/elements.json` | The 45 elements used (group, period, block, category, family) |
 | `data/orbitals.json` | Orbital Ruins: each level's element, board layout and tip |
+| `data/reactions.json` | Reaction Volcano: the island map, every quest (equation, balanced coefficients, decoys, hint, fact) and the reaction types |
 | `data/worlds.json` | The map: world names, topics, colours, pin positions, badges, tips |
 
 Formulae in Ion Diner are worked out from the ion charges, so they cannot be typed wrongly. In the memory game, formulae are written like `SO4^2-` and shapes come from a fixed list with their bond angles.
@@ -89,6 +91,7 @@ More detail on adding Ion Diner shifts and memory levels is in [`docs/EDITING.md
 - `js/bonds.js` and `js/bond-logic.js`: Bond Glacier (drag and drop board, Lewis checker, VSEPR shapes).
 - `js/peaks.js` and `js/trend-logic.js`: Trend Peaks (the ledges, hopping, and the trend rules and explanations).
 - `js/orbital.js` and `js/orbital-logic.js`: Orbital Ruins (the board and the Aufbau, Hund and Pauli rules).
+- `js/reactions.js` and `js/reaction-logic.js`: Reaction Volcano (the walkable island, and the equation, cauldron and limiting-reactant rules).
 - `js/progress.js`: unlocking worlds and earning badges. `js/avatar.js`: the avatar creator.
 - Game rules live in the `*-logic.js` and `progress.js` files, with no screen code, so they can be tested in Node.
 - Style: the Dr. NAM design system in `brand-kit/` (night and day themes, League Spartan and Questrial, electric-lime accent).

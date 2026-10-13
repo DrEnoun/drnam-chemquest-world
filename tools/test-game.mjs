@@ -14,6 +14,7 @@ import { PROPS, promptFor, orderOf, minGap, relation, judge, wrongText as trendW
 import { parseMolecule, evaluate, explain, lpSlots, solutions, shapeOf, shapeText, regionsOf, valenceTotal, centralIndex, SHAPE_IDS } from '../js/bond-logic.js';
 import { MONSTERS, GEOMETRY, ATOM, MOODS } from '../js/monsters.js';
 import { OPTIONS, DEFAULT_AVATAR, randomAvatar, WIDTH, HEIGHT } from '../js/avatar.js';
+import { parseFormula, atomsOf, pretty, equation, isBalanced, checkMix, limiting, parseIsland, spawnTiles, questTokens, scatter } from '../js/reaction-logic.js';
 
 const d = JSON.parse(readFileSync('data/diner.json', 'utf8'));
 const byId = Object.fromEntries(d.ions.map(i => [i.id, i]));
@@ -105,7 +106,7 @@ for (let i = 0; i < 50; i++) {
   assert.ok(a.skin < OPTIONS.skin.length && a.hair < OPTIONS.hair.length && a.coat < OPTIONS.coat.length && OPTIONS.hairStyle.includes(a.hairStyle));
 }
 
-// Overworld: six worlds in order, pins on the map, unique badges, sensible unlock rules
+// Overworld: seven worlds in order, pins on the map, unique badges, sensible unlock rules
 const wd = JSON.parse(readFileSync('data/worlds.json', 'utf8'));
 const W = wd.worlds;
 const mem = JSON.parse(readFileSync('data/memory.json', 'utf8'));
@@ -114,30 +115,33 @@ const fal = JSON.parse(readFileSync('data/falls.json', 'utf8'));
 const trn = JSON.parse(readFileSync('data/trends.json', 'utf8'));
 const bnd = JSON.parse(readFileSync('data/bonds.json', 'utf8'));
 const EL = JSON.parse(readFileSync('data/elements.json', 'utf8')).elements;
-assert.deepEqual(W.map(w => w.id), [1, 2, 3, 4, 5, 6]);
-assert.equal(new Set(W.map(w => w.badge)).size, 6, 'badge names must be unique');
-assert.equal(new Set(W.map(w => w.accent)).size, 6, 'world colours must be unique');
+const rxd = JSON.parse(readFileSync('data/reactions.json', 'utf8'));
+assert.deepEqual(W.map(w => w.id), [1, 2, 3, 4, 5, 6, 7]);
+assert.equal(new Set(W.map(w => w.badge)).size, 7, 'badge names must be unique');
+assert.equal(new Set(W.map(w => w.accent)).size, 7, 'world colours must be unique');
 for (const w of W) {
   assert.ok(EMBLEMS[w.emblem], `world ${w.id}: unknown emblem ${w.emblem}`);
   assert.ok(w.pin[0] > 56 && w.pin[0] < wd.map.width - 56 && w.pin[1] > 60 && w.pin[1] < wd.map.height - 40, `world ${w.id}: pin too close to the map edge`);
   assert.ok(w.tip && w.topic && w.gameplay && w.callout);
-  if (w.playable) { assert.ok(w.blurb); w.levelIds.forEach(id => assert.ok((w.id === 6 ? d.levels : w.id === 2 ? orb.levels : w.id === 3 ? fal.levels : w.id === 4 ? trn.levels : w.id === 5 ? bnd.levels : mem.levels).some(l => l.id === id), `world ${w.id}: unknown level ${id}`)); }
+  if (w.playable) { assert.ok(w.blurb); w.levelIds.forEach(id => assert.ok((w.id === 6 ? d.levels : w.id === 2 ? orb.levels : w.id === 3 ? fal.levels : w.id === 4 ? trn.levels : w.id === 5 ? bnd.levels : w.id === 7 ? rxd.levels : mem.levels).some(l => l.id === id), `world ${w.id}: unknown level ${id}`)); }
   else assert.ok(!w.levelIds, `world ${w.id}: unbuilt worlds have no levels yet`);
 }
 for (let i = 1; i < W.length; i++) assert.ok(W[i].pin[1] < W[i - 1].pin[1], 'worlds climb the map from bottom to top');
 // landscape layout for wide screens: every world has a position, they run left to right, and nothing touches the edges
-assert.deepEqual(wd.mapWide, { width: 640, height: 360 });
+assert.deepEqual(wd.mapWide, { width: 720, height: 360 });
 for (const w of W) assert.ok(w.pinWide[0] >= 60 && w.pinWide[0] <= wd.mapWide.width - 60 && w.pinWide[1] >= 110 && w.pinWide[1] <= wd.mapWide.height - 60, `world ${w.id}: landscape pin too close to the edge`);
 for (let i = 1; i < W.length; i++) { assert.ok(W[i].pinWide[0] - W[i - 1].pinWide[0] >= 95, 'landscape islands need room for a bridge between them'); assert.notEqual(W[i].pinWide[1], W[i - 1].pinWide[1], 'landscape islands zigzag so bridges are diagonal'); }
 // Fresh save: only World 1 is open (Ion Diner opens after World 5)
-assert.deepEqual(worldStates(W, {}).map(s => s.unlocked), [true, false, false, false, false, false]);
+assert.deepEqual(worldStates(W, {}).map(s => s.unlocked), [true, false, false, false, false, false, false]);
 assert.equal(starKey(6, 2), '6.2');
 assert.equal(worldStates(W, {}).filter(s => s.earned).length, 0);
 assert.ok(worldStates(W, {}, true).every(s => s.unlocked), 'Zen mode opens every world');
 assert.equal(worldStates(W, {}, true).filter(s => s.earned).length, 0, 'Zen mode earns no badges by itself');
-assert.deepEqual(worldStates(W, {}, false).map(s => s.unlocked), [true, false, false, false, false, false], 'Arcade is the default');
+assert.deepEqual(worldStates(W, {}, false).map(s => s.unlocked), [true, false, false, false, false, false, false], 'Arcade is the default');
 assert.equal(worldStates(W, { '1.1': 3, '1.2': 3, '1.3': 3, '1.4': 3, '2.1': 3, '2.2': 3, '2.3': 3, '2.4': 3, '3.1': 3, '3.2': 3, '3.3': 3, '3.4': 3, '4.1': 3, '4.2': 3, '4.3': 3, '4.4': 3 })[5].unlocked, false, 'Ion Diner stays shut until World 5 is cleared');
 assert.equal(worldStates(W, { '5.1': 1, '5.2': 1, '5.3': 1, '5.4': 1 })[5].unlocked, true, 'clearing World 5 opens World 6');
+assert.equal(worldStates(W, { '5.1': 1, '5.2': 1, '5.3': 1, '5.4': 1 })[6].unlocked, false, 'Reaction Volcano waits for Ion Diner');
+assert.equal(worldStates(W, { '6.1': 1, '6.2': 1, '6.3': 1, '6.4': 1 })[6].unlocked, true, 'clearing World 6 opens World 7');
 // Clearing every Ion Diner shift earns the World 6 badge; one shift is not enough
 assert.equal(worldProgress(W[5], { '6.1': 3, '6.2': 2 }).cleared, false);
 assert.equal(worldProgress(W[5], { '6.1': 3, '6.2': 2, '6.3': 1 }).cleared, false, 'the boss shift must be cleared too');
@@ -263,7 +267,7 @@ for (const [id, t] of Object.entries(TRACKS)) {
 }
 assert.ok(Math.abs(midiFreq(69) - 440) < 1e-9 && Math.abs(midiFreq(81) - 880) < 1e-9);
 // every screen has a track, and the three kinds of screen do not all play the same loop
-for (const screen of ['menu', 'shifts', 'avatar', 'game', 'memory', 'orbital', 'falls', 'peaks', 'bonds']) assert.ok(TRACKS[SCREEN_TRACK[screen]], `${screen}: no track`);
+for (const screen of ['menu', 'shifts', 'avatar', 'game', 'memory', 'orbital', 'falls', 'peaks', 'bonds', 'reactions']) assert.ok(TRACKS[SCREEN_TRACK[screen]], `${screen}: no track`);
 assert.equal(new Set(Object.values(SCREEN_TRACK)).size, 7);
 
 // ---------- World 2 Orbital Ruins: chemistry answer key, rules, and proof that every level can be solved ----------
@@ -533,6 +537,79 @@ console.log('Trend Peaks OK');
   assert.equal(centralIndex(parseMolecule(bnd.molecules.CH4)), 0);
 }
 console.log('Bond Glacier OK');
+
+// ---------- World 7 Reaction Volcano: equations, the cauldron, limiting reactants and the island ----------
+{
+  const rx = JSON.parse(readFileSync('data/reactions.json', 'utf8'));
+  assert.deepEqual(parseFormula('Ca(OH)2'), { Ca: 1, O: 2, H: 2 });
+  assert.deepEqual(parseFormula('Al2(SO4)3'), { Al: 2, S: 3, O: 12 });
+  assert.deepEqual(parseFormula('C3H8'), { C: 3, H: 8 });
+  assert.deepEqual(atomsOf({ H2: 2, O2: 1 }), { H: 4, O: 2 });
+  assert.equal(pretty('C3H8'), 'C₃H₈');
+  // Independent answer key, balanced by hand: reactants → products with the smallest whole-number coefficients
+  const KEY = {
+    'H2+O2>H2O': '2H2 + O2 → 2H2O', 'N2+H2>NH3': 'N2 + 3H2 → 2NH3', 'Na+Cl2>NaCl': '2Na + Cl2 → 2NaCl',
+    'CH4+O2>CO2+H2O': 'CH4 + 2O2 → CO2 + 2H2O', 'Mg+O2>MgO': '2Mg + O2 → 2MgO', 'C3H8+O2>CO2+H2O': 'C3H8 + 5O2 → 3CO2 + 4H2O',
+    'H2O2>H2O+O2': '2H2O2 → 2H2O + O2', 'Zn+HCl>ZnCl2+H2': 'Zn + 2HCl → ZnCl2 + H2',
+    'H2SO4+NaOH>Na2SO4+H2O': 'H2SO4 + 2NaOH → Na2SO4 + 2H2O', 'Fe+O2>Fe2O3': '4Fe + 3O2 → 2Fe2O3',
+  };
+  const TYPE = { 'H2O2>H2O+O2': 'Decomposition', 'Zn+HCl>ZnCl2+H2': 'Single displacement', 'H2SO4+NaOH>Na2SO4+H2O': 'Neutralisation', 'Fe+O2>Fe2O3': 'Synthesis' };
+  const LIMIT = { 'H2+O2>H2O': 'O2', 'N2+H2>NH3': 'H2', 'CH4+O2>CO2+H2O': 'O2' };
+  assert.deepEqual(rx.levels.map(l => l.id), [1, 2, 3, 4]);
+  rx.types.forEach(t => assert.ok(typeof t === 'string'));
+  let quests = 0;
+  for (const lv of rx.levels) {
+    assert.ok(lv.title && lv.subtitle && lv.tip && lv.quests.length >= 3, `reactions level ${lv.id}`);
+    for (const q of lv.quests) {
+      quests++;
+      const sig = `${q.reactants.join('+')}>${q.products.join('+')}`, rc = q.coeffs.slice(0, q.reactants.length), pc = q.coeffs.slice(q.reactants.length);
+      assert.equal(q.coeffs.length, q.reactants.length + q.products.length, `${sig}: one coefficient per formula`);
+      assert.equal(equation(q.reactants, rc, q.products, pc), KEY[sig], `${sig}: coefficients disagree with the answer key`);
+      assert.ok(isBalanced(q.reactants, rc, q.products, pc), `${sig}: not balanced`);
+      assert.ok(q.ask && q.hint && q.fact, `${sig}: needs ask, hint and fact`);
+      // the cauldron accepts exactly the balanced amounts, and works out the same products
+      const bag = Object.fromEntries(q.reactants.map((f, i) => [f, rc[i]]));
+      const ok = checkMix(q, bag);
+      assert.ok(ok.ok, `${sig}: balanced bag rejected: ${ok.message}`); assert.deepEqual(ok.products, pc, `${sig}: wrong products`);
+      // doubled amounts balance but are not the smallest numbers
+      assert.equal(checkMix(q, Object.fromEntries(q.reactants.map((f, i) => [f, rc[i] * 2]))).kind, 'notSmallest', `${sig}: doubled`);
+      assert.equal(checkMix(q, {}).kind, 'empty');
+      if (q.reactants.length > 1) {
+        assert.equal(checkMix(q, { [q.reactants[0]]: rc[0] }).kind, 'missing', `${sig}: missing`);
+        const off = { ...bag, [q.reactants[0]]: rc[0] + 1 }, r = checkMix(q, off);
+        assert.equal(r.kind, 'unbalanced', `${sig}: one extra ${q.reactants[0]} must not balance`);
+        assert.ok(Object.keys(r.left).length && /left over/.test(r.message), `${sig}: says which atoms are left over`);
+      }
+      (q.decoys || []).forEach(f => { assert.ok(!q.reactants.includes(f), `${sig}: decoy ${f} is a reactant`); assert.equal(checkMix(q, { ...bag, [f]: 1 }).kind, 'stranger'); });
+      if (lv.askType) { assert.equal(q.type, TYPE[sig], `${sig}: reaction type`); assert.ok(rx.types.includes(q.type)); }
+      if (lv.limiting) {
+        assert.ok(q.field, `${sig}: limiting quests list the field`);
+        const L = limiting(q.reactants, rc, q.field);
+        assert.deepEqual(L.limiting, [LIMIT[sig]], `${sig}: limiting reactant`);
+        assert.ok(L.extent >= 1 && Object.keys(L.leftover).length === 1, `${sig}: exactly one reactant is left over`);
+        const made = Object.fromEntries(q.products.map((p, j) => [p, pc[j] * L.extent]));
+        assert.deepEqual(atomsOf({ ...made, ...L.leftover }), atomsOf(q.field), `${sig}: atoms conserved with leftovers`);
+      }
+    }
+  }
+  assert.ok(checkMix({ reactants: ['C3H8', 'O2'], products: ['CO2', 'H2O'] }, { C3H8: 1, O2: 5, CO2: 1 }).message.includes('is a product'));
+  // the island: a rectangle with one start, one cauldron and one quest giver, and room for every molecule
+  const isl = parseIsland(rx.island);
+  rx.island.forEach((row, i) => assert.equal(row.length, isl.w, `island row ${i}`));
+  ['@', 'C', 'N'].forEach(ch => assert.equal(rx.island.join('').split(ch).length - 1, 1, `island needs exactly one ${ch}`));
+  rx.island[0].split('').concat(rx.island[isl.h - 1].split('')).forEach(ch => assert.equal(ch, '~', 'island is surrounded by water'));
+  const tiles = spawnTiles(isl);
+  for (const lv of rx.levels) for (const q of lv.quests) assert.ok(questTokens(q).length <= tiles.length, 'room for every molecule');
+  // every spawn tile can be reached on foot from the start
+  const seen = new Set([`${isl.start.x},${isl.start.y}`]), todo = [isl.start];
+  while (todo.length) { const p = todo.pop(); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const x = p.x + dx, y = p.y + dy, k = `${x},${y}`; if (!seen.has(k) && !isl.solid(x, y)) { seen.add(k); todo.push({ x, y }); } } }
+  tiles.forEach(t => assert.ok(seen.has(`${t.x},${t.y}`), `spawn tile ${t.x},${t.y} cannot be reached`));
+  assert.ok([[0, 1], [1, 0], [0, -1], [-1, 0]].some(([dx, dy]) => seen.has(`${isl.cauldron.x + dx},${isl.cauldron.y + dy}`)), 'the cauldron can be reached');
+  const placed = scatter(questTokens(rx.levels[1].quests[2]), tiles, () => 0.37);
+  assert.equal(placed.length, questTokens(rx.levels[1].quests[2]).length);
+  assert.equal(new Set(placed.map(p => `${p.x},${p.y}`)).size, placed.length, 'one molecule per tile');
+  console.log(`Reaction Volcano OK (${quests} quests)`);
+}
 
 
 console.log(`ChemQuest data OK (${orders} orders, ${d.ions.length} ions)`);
