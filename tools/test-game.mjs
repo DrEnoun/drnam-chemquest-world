@@ -14,6 +14,7 @@ import { PROPS, promptFor, orderOf, minGap, relation, judge, wrongText as trendW
 import { parseMolecule, evaluate, explain, lpSlots, solutions, shapeOf, shapeText, regionsOf, valenceTotal, centralIndex, SHAPE_IDS } from '../js/bond-logic.js';
 import { MONSTERS, GEOMETRY, ATOM, MOODS } from '../js/monsters.js';
 import { OPTIONS, DEFAULT_AVATAR, randomAvatar, WIDTH, HEIGHT } from '../js/avatar.js';
+import { buildCourse, judgeChange, judgeGate, hits, passable, createPoseReader, LANES } from '../js/runner-logic.js';
 import { parseFormula, atomsOf, pretty, equation, isBalanced, checkMix, limiting, parseIsland, spawnTiles, questTokens, scatter } from '../js/reaction-logic.js';
 
 const d = JSON.parse(readFileSync('data/diner.json', 'utf8'));
@@ -106,7 +107,7 @@ for (let i = 0; i < 50; i++) {
   assert.ok(a.skin < OPTIONS.skin.length && a.hair < OPTIONS.hair.length && a.coat < OPTIONS.coat.length && OPTIONS.hairStyle.includes(a.hairStyle));
 }
 
-// Overworld: seven worlds in order, pins on the map, unique badges, sensible unlock rules
+// Overworld: eight worlds in order, pins on the map, unique badges, sensible unlock rules
 const wd = JSON.parse(readFileSync('data/worlds.json', 'utf8'));
 const W = wd.worlds;
 const mem = JSON.parse(readFileSync('data/memory.json', 'utf8'));
@@ -116,32 +117,34 @@ const trn = JSON.parse(readFileSync('data/trends.json', 'utf8'));
 const bnd = JSON.parse(readFileSync('data/bonds.json', 'utf8'));
 const EL = JSON.parse(readFileSync('data/elements.json', 'utf8')).elements;
 const rxd = JSON.parse(readFileSync('data/reactions.json', 'utf8'));
-assert.deepEqual(W.map(w => w.id), [1, 2, 3, 4, 5, 6, 7]);
-assert.equal(new Set(W.map(w => w.badge)).size, 7, 'badge names must be unique');
-assert.equal(new Set(W.map(w => w.accent)).size, 7, 'world colours must be unique');
+const end = JSON.parse(readFileSync('data/energy.json', 'utf8'));
+assert.deepEqual(W.map(w => w.id), [1, 2, 3, 4, 5, 6, 7, 8]);
+assert.equal(new Set(W.map(w => w.badge)).size, 8, 'badge names must be unique');
+assert.equal(new Set(W.map(w => w.accent)).size, 8, 'world colours must be unique');
 for (const w of W) {
   assert.ok(EMBLEMS[w.emblem], `world ${w.id}: unknown emblem ${w.emblem}`);
   assert.ok(w.pin[0] > 56 && w.pin[0] < wd.map.width - 56 && w.pin[1] > 60 && w.pin[1] < wd.map.height - 40, `world ${w.id}: pin too close to the map edge`);
   assert.ok(w.tip && w.topic && w.gameplay && w.callout);
-  if (w.playable) { assert.ok(w.blurb); w.levelIds.forEach(id => assert.ok((w.id === 6 ? d.levels : w.id === 2 ? orb.levels : w.id === 3 ? fal.levels : w.id === 4 ? trn.levels : w.id === 5 ? bnd.levels : w.id === 7 ? rxd.levels : mem.levels).some(l => l.id === id), `world ${w.id}: unknown level ${id}`)); }
+  if (w.playable) { assert.ok(w.blurb); w.levelIds.forEach(id => assert.ok((w.id === 6 ? d.levels : w.id === 2 ? orb.levels : w.id === 3 ? fal.levels : w.id === 4 ? trn.levels : w.id === 5 ? bnd.levels : w.id === 7 ? rxd.levels : w.id === 8 ? end.levels : mem.levels).some(l => l.id === id), `world ${w.id}: unknown level ${id}`)); }
   else assert.ok(!w.levelIds, `world ${w.id}: unbuilt worlds have no levels yet`);
 }
 for (let i = 1; i < W.length; i++) assert.ok(W[i].pin[1] < W[i - 1].pin[1], 'worlds climb the map from bottom to top');
 // landscape layout for wide screens: every world has a position, they run left to right, and nothing touches the edges
-assert.deepEqual(wd.mapWide, { width: 720, height: 360 });
+assert.deepEqual(wd.mapWide, { width: 800, height: 360 });
 for (const w of W) assert.ok(w.pinWide[0] >= 60 && w.pinWide[0] <= wd.mapWide.width - 60 && w.pinWide[1] >= 110 && w.pinWide[1] <= wd.mapWide.height - 60, `world ${w.id}: landscape pin too close to the edge`);
 for (let i = 1; i < W.length; i++) { assert.ok(W[i].pinWide[0] - W[i - 1].pinWide[0] >= 95, 'landscape islands need room for a bridge between them'); assert.notEqual(W[i].pinWide[1], W[i - 1].pinWide[1], 'landscape islands zigzag so bridges are diagonal'); }
 // Fresh save: only World 1 is open (Ion Diner opens after World 5)
-assert.deepEqual(worldStates(W, {}).map(s => s.unlocked), [true, false, false, false, false, false, false]);
+assert.deepEqual(worldStates(W, {}).map(s => s.unlocked), [true, false, false, false, false, false, false, false]);
 assert.equal(starKey(6, 2), '6.2');
 assert.equal(worldStates(W, {}).filter(s => s.earned).length, 0);
 assert.ok(worldStates(W, {}, true).every(s => s.unlocked), 'Zen mode opens every world');
 assert.equal(worldStates(W, {}, true).filter(s => s.earned).length, 0, 'Zen mode earns no badges by itself');
-assert.deepEqual(worldStates(W, {}, false).map(s => s.unlocked), [true, false, false, false, false, false, false], 'Arcade is the default');
+assert.deepEqual(worldStates(W, {}, false).map(s => s.unlocked), [true, false, false, false, false, false, false, false], 'Arcade is the default');
 assert.equal(worldStates(W, { '1.1': 3, '1.2': 3, '1.3': 3, '1.4': 3, '2.1': 3, '2.2': 3, '2.3': 3, '2.4': 3, '3.1': 3, '3.2': 3, '3.3': 3, '3.4': 3, '4.1': 3, '4.2': 3, '4.3': 3, '4.4': 3 })[5].unlocked, false, 'Ion Diner stays shut until World 5 is cleared');
 assert.equal(worldStates(W, { '5.1': 1, '5.2': 1, '5.3': 1, '5.4': 1 })[5].unlocked, true, 'clearing World 5 opens World 6');
 assert.equal(worldStates(W, { '5.1': 1, '5.2': 1, '5.3': 1, '5.4': 1 })[6].unlocked, false, 'Reaction Volcano waits for Ion Diner');
 assert.equal(worldStates(W, { '6.1': 1, '6.2': 1, '6.3': 1, '6.4': 1 })[6].unlocked, true, 'clearing World 6 opens World 7');
+assert.equal(worldStates(W, { '7.1': 1, '7.2': 1, '7.3': 1, '7.4': 1 })[7].unlocked, true, 'clearing World 7 opens World 8');
 // Clearing every Ion Diner shift earns the World 6 badge; one shift is not enough
 assert.equal(worldProgress(W[5], { '6.1': 3, '6.2': 2 }).cleared, false);
 assert.equal(worldProgress(W[5], { '6.1': 3, '6.2': 2, '6.3': 1 }).cleared, false, 'the boss shift must be cleared too');
@@ -267,7 +270,7 @@ for (const [id, t] of Object.entries(TRACKS)) {
 }
 assert.ok(Math.abs(midiFreq(69) - 440) < 1e-9 && Math.abs(midiFreq(81) - 880) < 1e-9);
 // every screen has a track, and the three kinds of screen do not all play the same loop
-for (const screen of ['menu', 'shifts', 'avatar', 'game', 'memory', 'orbital', 'falls', 'peaks', 'bonds', 'reactions']) assert.ok(TRACKS[SCREEN_TRACK[screen]], `${screen}: no track`);
+for (const screen of ['menu', 'shifts', 'avatar', 'game', 'memory', 'orbital', 'falls', 'peaks', 'bonds', 'reactions', 'runner']) assert.ok(TRACKS[SCREEN_TRACK[screen]], `${screen}: no track`);
 assert.equal(new Set(Object.values(SCREEN_TRACK)).size, 7);
 
 // ---------- World 2 Orbital Ruins: chemistry answer key, rules, and proof that every level can be solved ----------
@@ -609,6 +612,68 @@ console.log('Bond Glacier OK');
   assert.equal(placed.length, questTokens(rx.levels[1].quests[2]).length);
   assert.equal(new Set(placed.map(p => `${p.x},${p.y}`)).size, placed.length, 'one molecule per tile');
   console.log(`Reaction Volcano OK (${quests} quests)`);
+}
+
+// ---------- World 8 Thermo Track: energy facts, the course, and reading the body ----------
+{
+  const en = JSON.parse(readFileSync('data/energy.json', 'utf8'));
+  // Independent answer key, written by hand: true = exothermic (gives out heat)
+  const EXO = { wood: true, freeze: true, respire: true, warmer: true, condense: true, neutral: true, melt: false, boil: false, photo: false, coldpack: false, sweat: false, bake: false,
+    ch4: true, carbon: true, h2: true, naoh: true, icemelt: false, waterboil: false, caco3: false, nh4no3: false };
+  // Standard enthalpy changes (kJ/mol), rounded: combustion of CH4, C, H2 (to liquid water); dissolving NaOH and NH4NO3; fusion and vaporisation of water; decomposition of CaCO3
+  const DH = { ch4: -890, carbon: -394, h2: -286, naoh: -44, icemelt: 6, waterboil: 41, caco3: 178, nh4no3: 26 };
+  const ANSWER = { breakbond: 'Takes in energy', makebond: 'Gives out energy', exoprod: 'Less energy', exosurr: 'Warmer', endosign: 'Positive (+)', activation: 'Needed to start' };
+  for (const [id, c] of Object.entries(en.changes)) {
+    assert.equal(c.exo, EXO[id], `${id}: exothermic or endothermic?`);
+    if (c.dh != null) { assert.equal(c.dh, DH[id], `${id}: ΔH value`); assert.equal(c.dh < 0, c.exo, `${id}: ΔH sign must match`); assert.ok(c.why.includes(String(Math.abs(c.dh))), `${id}: explanation quotes ΔH`); }
+    assert.ok(c.label.length <= 16, `${id}: label too long for the sign`);
+    assert.match(c.why, c.exo ? /exothermic/ : /endothermic/, `${id}: explanation names the right kind`);
+  }
+  for (const [id, q] of Object.entries(en.questions)) {
+    assert.equal(q.options.length, 3, `${id}: one option per lane`); assert.equal(q.options[q.answer], ANSWER[id], `${id}: answer`);
+    q.options.forEach(o => assert.ok(o.length <= 16, `${id}: option "${o}" too long for a gate panel`));
+  }
+  assert.deepEqual(en.levels.map(l => l.id), [1, 2, 3, 4]);
+  for (const lv of en.levels) {
+    assert.ok(lv.title && lv.subtitle && lv.tip);
+    (lv.changes || []).forEach(id => assert.ok(en.changes[id], `level ${lv.id}: unknown change ${id}`));
+    (lv.questions || []).forEach(id => assert.ok(en.questions[id], `level ${lv.id}: unknown question ${id}`));
+    if (lv.changes) { assert.ok(['exo', 'endo'].includes(lv.collect)); const ex = lv.changes.filter(id => en.changes[id].exo).length; assert.ok(ex >= 3 && lv.changes.length - ex >= 3, `level ${lv.id}: needs both kinds`); }
+    for (let s = 1; s <= 25; s++) {                               // many random courses: every item appears once, nothing impossible
+      let seed = s * 7919; const rng = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+      const course = buildCourse(lv, en, rng);
+      assert.equal(course.filter(o => o.kind === 'change').length, (lv.changes || []).length);
+      assert.equal(course.filter(o => o.kind === 'gate').length, (lv.questions || []).length);
+      assert.equal(course.filter(o => o.kind === 'obstacle' && o.lane !== 'all').length + course.filter(o => o.kind === 'obstacle' && o.lane === 'all').length >= Math.min(1, lv.obstacles), true);
+      assert.ok(passable(course), `level ${lv.id}: impossible barrier row`);
+      assert.equal(course[course.length - 1].kind, 'finish');
+      for (const g of course.filter(o => o.kind === 'gate')) {
+        assert.deepEqual([...g.order].sort(), [0, 1, 2]);
+        assert.ok(!course.some(o => o.kind === 'obstacle' && Math.abs(o.z - g.z) < 8), 'no barrier right at a gate');
+        assert.equal(LANES.filter(l => judgeGate(g, l).ok).length, 1, 'exactly one right lane');
+      }
+      for (const c of course.filter(o => o.kind === 'change')) assert.ok(!course.some(o => o.kind === 'obstacle' && Math.abs(o.z - c.z) < 6), 'no barrier on top of a change');
+    }
+  }
+  // judging
+  assert.equal(judgeChange(en.changes.wood, 'exo').good, true); assert.equal(judgeChange(en.changes.melt, 'exo').good, false);
+  assert.equal(judgeChange(en.changes.caco3, 'endo').good, true); assert.match(judgeChange(en.changes.ch4, 'endo').text, /exothermic.*−890/);
+  assert.equal(hits({ type: 'low', lane: 'all' }, { lane: 0, airborne: true }), false); assert.equal(hits({ type: 'low', lane: 'all' }, { lane: 0 }), true);
+  assert.equal(hits({ type: 'high', lane: 1 }, { lane: 1, sliding: true }), false); assert.equal(hits({ type: 'high', lane: 1 }, { lane: 0 }), false);
+  assert.equal(hits({ type: 'wall', lane: -1 }, { lane: -1, airborne: true }), true);
+  // the pose reader: calibrate standing still, then lean, jump and squat (y grows downwards)
+  const body = (x, y) => { const lm = []; lm[11] = { x: x - 0.1, y, visibility: 0.9 }; lm[12] = { x: x + 0.1, y, visibility: 0.9 }; return lm; };
+  const pr = createPoseReader({ calibrateFrames: 5 });
+  for (let i = 0; i < 5; i++) assert.equal(pr.read(body(0.5, 0.4)), null);
+  assert.ok(pr.calibrated);
+  assert.deepEqual([pr.read(body(0.5, 0.4)).lane, pr.read(body(0.64, 0.4)).lane, pr.read(body(0.6, 0.4)).lane, pr.read(body(0.52, 0.4)).lane], [0, 1, 1, 0], 'lean right with hysteresis');
+  assert.equal(pr.read(body(0.36, 0.4)).lane, -1, 'lean left');
+  pr.read(body(0.5, 0.4));
+  const j1 = pr.read(body(0.5, 0.32)), j2 = pr.read(body(0.5, 0.31));
+  assert.deepEqual([j1.jump, j2.jump], [true, false], 'a jump fires once');
+  pr.read(body(0.5, 0.4)); assert.equal(pr.read(body(0.5, 0.5)).slide, true, 'squat to slide');
+  assert.equal(pr.read([]), null, 'no person, no action');
+  console.log('Thermo Track OK');
 }
 
 

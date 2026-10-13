@@ -154,3 +154,10 @@ export const cauldron = () => make(30, 28, (c, { R, E }) => {
   E(9, 8.4, 1.6, 1.2, '#e8ffb8', false); E(20, 8, 1.2, 1, '#e8ffb8', false);
   return { glow: [15, 8] };
 });
+export const gateArch = () => make(52, 46, (c, { R, P }) => {
+  R(3, 10, 6, 35, 1.4, '#0d7f74'); R(43, 10, 6, 35, 1.4, '#0d7f74');
+  R(0, 4, 52, 9, 2, '#0a2236'); for (let i = 0; i < 6; i++) R(3 + i * 8, 6, 5, 5, 1, i % 2 ? '#ff8a3c' : '#8fd3ff', false);
+  P([[26, 15], [22, 24], [26, 24], [24, 32], [31, 21], [27, 21], [29, 15]], '#d4ff3a');          // a lightning bolt sign
+  R(11, 40, 30, 4, 1, '#6b4a30');
+  return { glow: [26, 23] };
+});

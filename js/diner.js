@@ -14,6 +14,7 @@ import { createFalls } from './falls.js';
 import { createPeaks } from './peaks.js';
 import { createBonds } from './bonds.js';
 import { createReactions } from './reactions.js';
+import { createRunner } from './runner.js';
 import { worldStates, starKey } from './progress.js';
 import { createOverworld } from './overworld.js';
 import { drawBadge, BADGE_W, BADGE_H, BADGE_SS } from './badges.js';
@@ -42,12 +43,13 @@ const bondData = await (await fetch('data/bonds.json')).json();
 const trendData = await (await fetch('data/trends.json')).json();
 const elData = await (await fetch('data/elements.json')).json();
 const rxData = await (await fetch('data/reactions.json')).json();
+const enData = await (await fetch('data/energy.json')).json();
 const worldData = await (await fetch('data/worlds.json')).json();
 const worlds = worldData.worlds;
 const ionById = Object.fromEntries(data.ions.map(i => [i.id, i]));
 
 // ---------- Screens, theme and sound ----------
-const screens = ['menu', 'shifts', 'memory', 'orbital', 'falls', 'peaks', 'bonds', 'reactions', 'avatar', 'game'];
+const screens = ['menu', 'shifts', 'memory', 'orbital', 'falls', 'peaks', 'bonds', 'reactions', 'runner', 'avatar', 'game'];
 function show(name) {
   if (name !== 'menu') overworld.stop();
   if (name !== 'orbital') orbital.stop();
@@ -55,6 +57,7 @@ function show(name) {
   if (name !== 'peaks') peaks.stop();
   if (name !== 'bonds') bonds.stop();
   if (name !== 'reactions') reactions.stop();
+  if (name !== 'runner') runner.stop();
   music.play(SCREEN_TRACK[name]);
   screens.forEach(s => { $('screen-' + s).hidden = s !== name; });
   window.scrollTo(0, 0);
@@ -69,12 +72,12 @@ function applyTheme() {
 }
 function applySound() {
   const label = sound.enabled ? 'Sound FX on' : 'Sound FX off';
-  $('btn-sound').textContent = label; $('btn-sound-menu').textContent = label; $('mem-sound').textContent = label; $('orb-sound').textContent = label; $('fall-sound').textContent = label; $('peak-sound').textContent = label; $('bond-sound').textContent = label; $('rx-sound').textContent = label;
-  [$('btn-sound'), $('btn-sound-menu'), $('mem-sound'), $('orb-sound'), $('fall-sound'), $('peak-sound'), $('bond-sound'), $('rx-sound')].forEach(b => { b.setAttribute('aria-label', sound.enabled ? 'Sound FX are on. Tap to turn them off.' : 'Sound FX are off. Tap to turn them on.'); b.setAttribute('aria-pressed', String(sound.enabled)); });
+  $('btn-sound').textContent = label; $('btn-sound-menu').textContent = label; $('mem-sound').textContent = label; $('orb-sound').textContent = label; $('fall-sound').textContent = label; $('peak-sound').textContent = label; $('bond-sound').textContent = label; $('rx-sound').textContent = label; $('run-sound').textContent = label;
+  [$('btn-sound'), $('btn-sound-menu'), $('mem-sound'), $('orb-sound'), $('fall-sound'), $('peak-sound'), $('bond-sound'), $('rx-sound'), $('run-sound')].forEach(b => { b.setAttribute('aria-label', sound.enabled ? 'Sound FX are on. Tap to turn them off.' : 'Sound FX are off. Tap to turn them on.'); b.setAttribute('aria-pressed', String(sound.enabled)); });
   applyMusic();
 }
 // A music on/off button next to each sound button (music and sound effects are switched separately)
-const musicButtons = [$('btn-sound-menu'), $('btn-sound'), $('mem-sound'), $('orb-sound'), $('fall-sound'), $('peak-sound'), $('bond-sound'), $('rx-sound')].map(sb => {
+const musicButtons = [$('btn-sound-menu'), $('btn-sound'), $('mem-sound'), $('orb-sound'), $('fall-sound'), $('peak-sound'), $('bond-sound'), $('rx-sound'), $('run-sound')].map(sb => {
   const b = document.createElement('button'); b.type = 'button'; b.className = sb.className; b.dataset.role = 'music'; sb.after(b); return b;
 });
 function applyMusic() {
@@ -85,7 +88,7 @@ musicButtons.forEach(b => { b.onclick = toggleMusic; });
 // Browsers keep audio silent until the first tap, so unlock it on the first touch, click or key press.
 ['pointerdown', 'touchend', 'keydown'].forEach(ev => addEventListener(ev, () => sound.unlock(), { passive: true }));
 const toggleSound = () => { sound.enabled = !sound.enabled; save.mute = !sound.enabled; persist(); applySound(); sound.unlock(); sound.select(); };
-$('btn-sound').onclick = $('btn-sound-menu').onclick = $('mem-sound').onclick = $('orb-sound').onclick = $('fall-sound').onclick = $('peak-sound').onclick = $('bond-sound').onclick = $('rx-sound').onclick = toggleSound;
+$('btn-sound').onclick = $('btn-sound-menu').onclick = $('mem-sound').onclick = $('orb-sound').onclick = $('fall-sound').onclick = $('peak-sound').onclick = $('bond-sound').onclick = $('rx-sound').onclick = $('run-sound').onclick = toggleSound;
 $('btn-mode-menu').onclick = () => {
   save.mode = zen() ? 'arcade' : 'zen'; persist(); sound.pop(); renderMenu();
   says($('menu-says'), { text: zen() ? 'Zen mode: every world is open, so play whichever you like, in any order. Your stars still count.' : 'Arcade mode: clear each world to unlock the next. Your stars are kept.', status: zen() ? 'Zen mode on' : 'Arcade mode on' });
@@ -174,7 +177,7 @@ function renderMenu() {
 }
 
 // ---------- Level picker (any playable world) ----------
-const levelsOf = worldId => ({ 1: memData.levels, 2: orbData.levels, 3: fallData.levels, 4: trendData.levels, 5: bondData.levels, 6: data.levels, 7: rxData.levels })[worldId];
+const levelsOf = worldId => ({ 1: memData.levels, 2: orbData.levels, 3: fallData.levels, 4: trendData.levels, 5: bondData.levels, 6: data.levels, 7: rxData.levels, 8: enData.levels })[worldId];
 const unitOf = worldId => (worldId === 6 ? 'shift' : 'level');
 function renderShifts(worldId) {
   const world = worlds.find(w => w.id === worldId), levels = levelsOf(worldId), unit = unitOf(worldId);
@@ -205,6 +208,7 @@ function startWorldLevel(worldId, levelId) {
   else if (worldId === 4) { peaks.start(levelId); show('peaks'); applySound(); }
   else if (worldId === 5) { bonds.start(levelId); show('bonds'); applySound(); }
   else if (worldId === 7) { show('reactions'); reactions.start(levelId); applySound(); }
+  else if (worldId === 8) { show('runner'); runner.start(levelId); applySound(); }
   else { memory.start(levelId); show('memory'); applySound(); }
 }
 
@@ -233,6 +237,11 @@ const bonds = createBonds({
 const reactions = createReactions({
   $, data: rxData, getAvatar: () => save.avatar, says, sound,
   onFinish: r => showResult({ worldId: 7, ...r }),
+  onExit: () => { renderMenu(); show('menu'); },
+});
+const runner = createRunner({
+  $, data: enData, getAvatar: () => save.avatar, says, sound,
+  onFinish: r => showResult({ worldId: 8, ...r }),
   onExit: () => { renderMenu(); show('menu'); },
 });
 const memory = createMemory({
@@ -437,7 +446,7 @@ function showResult(r) {
 }
 $('result-retry').onclick = () => startWorldLevel(lastRun.worldId, lastRun.levelId);
 $('result-next').onclick = () => startWorldLevel(lastRun.worldId, lastRun.levelId + 1);
-$('result-menu').onclick = () => { const won = !!(lastRun && lastRun.won); $('result').hidden = true; memory.stop(); orbital.stop(); falls.stop(); peaks.stop(); bonds.stop(); reactions.stop(); renderMenu(); show('menu'); if (won) overworld.celebrate(); };
+$('result-menu').onclick = () => { const won = !!(lastRun && lastRun.won); $('result').hidden = true; memory.stop(); orbital.stop(); falls.stop(); peaks.stop(); bonds.stop(); reactions.stop(); runner.stop(); renderMenu(); show('menu'); if (won) overworld.celebrate(); };
 $('btn-quit').onclick = () => { if (g) g.over = true; $('result').hidden = true; renderMenu(); show('menu'); };
 
 // ---------- Scene (canvas, 320 × 192 logical pixels) ----------
@@ -571,6 +580,6 @@ function frame(now) {
 }
 requestAnimationFrame(frame);
 
-if (new URLSearchParams(location.search).has('test')) window.__quest = { bonds, peaks, falls, orbital, memory, reactions };
+if (new URLSearchParams(location.search).has('test')) window.__quest = { bonds, peaks, falls, orbital, memory, reactions, runner };
 renderMenu();
 show('menu');

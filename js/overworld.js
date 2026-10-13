@@ -1,4 +1,4 @@
-// Overworld map: seven organic islands (meadow, ruins, falls, peaks, glacier, diner, volcano) joined by rope bridges, with glossy
+// Overworld map: eight organic islands (meadow, ruins, falls, peaks, glacier, diner, volcano, track) joined by rope bridges, with glossy
 // numbered pins and the player's avatar. Drawn at 2x then crisped into hard pixels, with animated water, waterfalls,
 // smoke, lit windows, an orbiting atom, snow, neon and boats.
 import { drawAvatar } from './avatar.js';
@@ -18,6 +18,7 @@ const PAL = {
   peaks:   { top: '#8b9caf', hi: '#b8c7d7', sh: '#697a8d', edge: '#dce7f1', cliff: '#566378', cliff2: '#363f50' },
   glacier: { top: '#d6f3ff', hi: '#ffffff', sh: '#a5d3ec', edge: '#ffffff', cliff: '#86bde6', cliff2: '#4f86b0' },
   diner:   { top: '#33b9ad', hi: '#6ee9db', sh: '#1f8e88', edge: '#aaffef', cliff: '#10666c', cliff2: '#0a4048' },
+  track:   { top: '#9cc9e8', hi: '#d6efff', sh: '#6fa6cc', edge: '#ffffff', cliff: '#8a6a55', cliff2: '#5c3a24' },
   volcano: { top: '#5fb862', hi: '#8fdc7c', sh: '#3f9a52', edge: '#c4f5a4', cliff: '#9a6b45', cliff2: '#5c3a24' },
 };
 
@@ -32,6 +33,7 @@ const SCENERY = {
   falls:  [['tealTree', -50, 4], ['pine', -40, 12], ['wall', 32, 5], ['tealTree', 54, 13], ['bushB', -28, 17], ['rocks', 8, 21], ['blossom', -58, 16]],
   peaks:  [['mtn', -34, 6], ['mtnS', -14, 16], ['castle', 36, 4], ['pine', -54, 14], ['rocks', 54, 16]],
   glacier:[['crystal', -36, 6], ['snowPine', -52, 12], ['crystalS', -14, 18], ['iceHall', 33, 4], ['snowPine', 55, 13], ['snowPine', -46, 17]],
+  track:  [['snowPine', -56, 10], ['crystalS', -44, 18], ['gateArch', 4, 10], ['palm', 50, 8], ['rocks', 56, 18], ['lamp', -24, 20]],
   volcano:[['volcano', -22, 6], ['palm', -54, 12], ['palm', 48, 8], ['cauldron', 30, 16], ['rocks', 54, 18], ['bushB', -36, 19], ['palm', -60, 18]],
   diner:  [['pylonP', -46, 8], ['pylonM', -34, 15], ['diner', 33, 3], ['lamp', -12, 20], ['lamp', 58, 14], ['crystalS', 8, 22]],
 };
@@ -39,7 +41,7 @@ const MAKE = {
   roundTree: () => SC.roundTree(), blossom: () => SC.roundTree(SC.TREES.blossom), tealTree: () => SC.roundTree(SC.TREES.teal), limeTree: () => SC.roundTree(SC.TREES.lime), autumn: () => SC.roundTree(SC.TREES.autumn), bushB: () => SC.bush(['#2f9a8a', '#52d1b8']), pine: () => SC.pine(false), snowPine: () => SC.pine(true), palm: SC.palm, bush: () => SC.bush(), rocks: () => SC.rocks(),
   fence: SC.fence, cottage: SC.cottage, ziggurat: SC.ziggurat, pillar: SC.pillar, wall: SC.tableWall, castle: SC.castle,
   mtn: () => SC.mountain(64, 54), mtnS: () => SC.mountain(40, 34), crystal: SC.crystal, crystalS: () => SC.crystalS(), iceHall: SC.iceHall,
-  diner: SC.diner, lamp: SC.lamp, pylonP: () => SC.pylon(), pylonM: () => SC.pylon(['#d98bff', '#9a45d1', '#f3d2ff']), volcano: SC.volcano, cauldron: SC.cauldron,
+  diner: SC.diner, lamp: SC.lamp, pylonP: () => SC.pylon(), pylonM: () => SC.pylon(['#d98bff', '#9a45d1', '#f3d2ff']), volcano: SC.volcano, cauldron: SC.cauldron, gateArch: SC.gateArch,
 };
 const cache = {};
 const sprite = k => (cache[k] ??= MAKE[k]());
@@ -80,6 +82,7 @@ function texture(c, w, p) {
   if (w.biome === 'falls') { spot(14, (x, y) => { c.fillStyle = 'rgba(20,100,60,.35)'; c.beginPath(); c.ellipse(x, y, 6, 2.4, 0, 0, 7); c.fill(); }); }
   if (w.biome === 'peaks') { c.strokeStyle = 'rgba(40,52,70,.35)'; c.lineWidth = 0.9; spot(14, (x, y) => { c.beginPath(); c.moveTo(x, y); c.lineTo(x + 5, y + 2); c.lineTo(x + 7, y + 6); c.stroke(); }); spot(8, (x, y) => { c.fillStyle = 'rgba(255,255,255,.7)'; c.beginPath(); c.ellipse(x, y, 5, 2, 0, 0, 7); c.fill(); }); }
   if (w.biome === 'glacier') { c.strokeStyle = 'rgba(79,134,176,.45)'; c.lineWidth = 0.9; spot(12, (x, y) => { c.beginPath(); c.moveTo(x, y); c.lineTo(x + 7, y - 2); c.lineTo(x + 9, y + 3); c.stroke(); }); c.fillStyle = '#9fe0ff'; c.beginPath(); c.ellipse(CX - 16, CY + 14, 11, 4, 0, 0, 7); c.fill(); }
+  if (w.biome === 'track') { c.fillStyle = '#6fc06a'; c.beginPath(); c.ellipse(CX + 24, CY + 4, 34, 15, 0, 0, 7); c.fill(); c.fillStyle = '#7f8a9a'; c.beginPath(); c.moveTo(CX - 8, CY + RY); c.lineTo(CX + 16, CY + RY); c.lineTo(CX + 9, CY - 8); c.lineTo(CX + 1, CY - 8); c.fill(); c.fillStyle = '#6b4a30'; for (let y = CY - 6; y < CY + RY; y += 4) c.fillRect(CX - 4 + (y - CY) * 0.2, y, 16 - (CY + RY - y) * 0.05, 1.4); }
   if (w.biome === 'volcano') { c.fillStyle = '#f0d49a'; c.beginPath(); c.ellipse(CX + 26, CY + 12, 24, 7, 0, 0, 7); c.fill(); spot(10, (x, y) => { c.fillStyle = 'rgba(30,110,50,.35)'; c.beginPath(); c.ellipse(x, y, 5, 2, 0, 0, 7); c.fill(); }); c.fillStyle = '#ff7a2e'; c.beginPath(); c.ellipse(CX - 40, CY + 14, 7, 3, 0, 0, 7); c.fill(); c.fillStyle = '#ffe066'; c.fillRect(CX - 42, CY + 13, 3, 1.2); }
   if (w.biome === 'diner') { c.strokeStyle = 'rgba(255,255,255,.2)'; c.lineWidth = 0.8; for (let x = CX - RX; x < CX + RX; x += 9) { c.beginPath(); c.moveTo(x, CY - RY); c.lineTo(x + 4, CY + RY); c.stroke(); } for (let y = CY - RY; y < CY + RY; y += 7) { c.beginPath(); c.moveTo(CX - RX, y); c.lineTo(CX + RX, y + 2); c.stroke(); } }
 }
@@ -143,7 +146,7 @@ function pinSprite(w, st) {
 
 export function createOverworld({ canvas, pinsEl, worlds, map: mapPortrait, mapWide, getState, getAvatar, onSelect, onMonster = () => {} }) {
   const ctx = canvas.getContext('2d');
-  // Two layouts of the same seven islands: a tall one for phones and a landscape one for laptops and projectors.
+  // Two layouts of the same eight islands: a tall one for phones and a landscape one for laptops and projectors.
   worlds.forEach(w => { w.pinPortrait = w.pin; w.pinWide = w.pinWide || w.pin; });
   let mode = 'portrait', map = mapPortrait, S = A, W = 0, H = 0, layer = null, lctx = null, water = null;
   const byId = Object.fromEntries(worlds.map(w => [w.id, w]));

@@ -2,7 +2,7 @@
 
 **Chemistry with Dr. NAM** · a pixel-art chemistry game for phones.
 
-Travel across a map of seven islands. Each world teaches one chemistry topic with a different style of game. Clear a world to earn its badge and open the next. Played in a phone browser, with no login and no app to install.
+Travel across a map of eight islands. Each world teaches one chemistry topic with a different style of game. Clear a world to earn its badge and open the next. Played in a phone browser, with no login and no app to install.
 
 | # | World | Game | Topic | Status |
 |---|---|---|---|---|
@@ -13,6 +13,7 @@ Travel across a map of seven islands. Each world teaches one chemistry topic wit
 | 5 | Bond Glacier | Drag and drop | Lewis structures and VSEPR | **Playable** (4 levels) |
 | 6 | Ion Diner | Diner dash | Ionic compounds and formulae | **Playable** (4 shifts) |
 | 7 | Reaction Volcano | Walk and collect | Chemical reactions: balancing equations, reaction types, limiting reactant | **Playable** (4 levels) |
+| 8 | Thermo Track | Body runner | Energy changes: exothermic and endothermic, ΔH, bonds and energy | **Playable** (4 levels) |
 
 Friendly molecule monsters (H₂O, CO₂, NH₃, CH₄, O₂ and NaCl) roam the map. Tap one to learn its real shape and bonding.
 
@@ -65,6 +66,7 @@ All questions, levels and worlds are in `data/`:
 | `data/trends.json` | Trend Peaks: element values and every climb (the property, the direction, the elements) |
 | `data/elements.json` | The 45 elements used (group, period, block, category, family) |
 | `data/orbitals.json` | Orbital Ruins: each level's element, board layout and tip |
+| `data/energy.json` | Thermo Track: the energy changes (exothermic or endothermic, ΔH), the gate questions and each run |
 | `data/reactions.json` | Reaction Volcano: the island map, every quest (equation, balanced coefficients, decoys, hint, fact) and the reaction types |
 | `data/worlds.json` | The map: world names, topics, colours, pin positions, badges, tips |
 
@@ -92,6 +94,7 @@ More detail on adding Ion Diner shifts and memory levels is in [`docs/EDITING.md
 - `js/peaks.js` and `js/trend-logic.js`: Trend Peaks (the ledges, hopping, and the trend rules and explanations).
 - `js/orbital.js` and `js/orbital-logic.js`: Orbital Ruins (the board and the Aufbau, Hund and Pauli rules).
 - `js/reactions.js` and `js/reaction-logic.js`: Reaction Volcano (the walkable island, and the equation, cauldron and limiting-reactant rules).
+- `js/runner.js` and `js/runner-logic.js`: Thermo Track (the 3-lane track, judging, and turning body poses into lane, jump and slide). `js/body.js`: the webcam and MediaPipe Pose.
 - `js/progress.js`: unlocking worlds and earning badges. `js/avatar.js`: the avatar creator.
 - Game rules live in the `*-logic.js` and `progress.js` files, with no screen code, so they can be tested in Node.
 - Style: the Dr. NAM design system in `brand-kit/` (night and day themes, League Spartan and Questrial, electric-lime accent).
@@ -101,6 +104,15 @@ More detail on adding Ion Diner shifts and memory levels is in [`docs/EDITING.md
 Created by Chemistry with Dr. NAM (Dr. Nur ’Ainun Mokhtar, UiTM Cawangan Pulau Pinang). The avatar is a generic student-scientist; Dr. NAM appears only as her official badge.
 
 This game grew out of the [Dr. NAM Virtual Secret Lab](https://github.com/DrEnoun/dr-nam-virtual-secret-lab) project.
+
+## Playing Thermo Track with your body
+
+Thermo Track (World 8) can be played Wii-style in front of a laptop webcam: press **Use my body (camera)**, stand back until your shoulders and hips are in the preview, and stand still for a moment while it learns where you are. Then **lean or step left and right** to change lanes, **jump** over low barriers and **squat** to slide under high bars. Press **Recalibrate** if you move to a new spot. Keys (← → ↑ ↓) and swipes always work too.
+
+- The video never leaves the device: frames go from the camera straight to the body tracker inside the browser, and nothing is recorded or sent.
+- The body tracker (MediaPipe Pose, in `vendor/mediapipe-pose/`, about 12 MB) is bundled with the game, so no internet is needed. It is downloaded the first time someone turns the camera on, then kept on the device for offline play.
+- Cameras need the game to be opened over https (GitHub Pages) or from `localhost`.
+- Works best with one player, good lighting and about 2 metres from the camera.
 
 ## Arcade and Zen modes
 

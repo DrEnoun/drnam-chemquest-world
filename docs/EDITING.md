@@ -77,3 +77,11 @@ Players walk round the island, collect reactant molecules and mix them in the ca
 - **The island** is the grid of characters in `island`: `~` water, `s` sand, `g` grass, `@` start, `C` cauldron, `N` quest giver, `V` volcano (a 2 × 2 block), `L` lava, `T` palm or tree, `B` bush, `R` rock. Every row must be the same length and the edge must be water.
 
 The cauldron checks the atoms itself, so a wrong `coeffs` entry is caught by `npm test`, which also compares every equation with a hand-written answer key (add your new equation to `KEY` in `tools/test-game.mjs`) and checks that every molecule can be reached on foot.
+
+## Thermo Track runs (`data/energy.json`)
+
+- `changes` are the energy changes that float above the track. Each has a short `label` (16 characters at most, so it fits the sign), `exo` (`true` = exothermic, gives out heat; `false` = endothermic, takes in heat), an optional `dh` in kJ/mol (negative for exothermic), and `why`, the explanation shown when a player grabs the wrong one.
+- `questions` are gates across the track: `q`, three short `options` (one per lane, 16 characters at most) and `answer` (0, 1 or 2). The lanes are shuffled every run.
+- Each level lists the `changes` and `questions` it uses, `collect` (`"exo"` or `"endo"`: which kind to grab), `speed` (1 is normal) and how many `obstacles` to jump, slide under or dodge.
+
+`npm test` checks every change against a hand-written key (exothermic or endothermic, and the ΔH values), checks every gate answer, and builds 25 random courses per level to make sure none is impossible. Add new changes to `EXO` (and `DH`) in `tools/test-game.mjs`.
