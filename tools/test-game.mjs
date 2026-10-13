@@ -14,6 +14,7 @@ import { PROPS, promptFor, orderOf, minGap, relation, judge, wrongText as trendW
 import { parseMolecule, evaluate, explain, lpSlots, solutions, shapeOf, shapeText, regionsOf, valenceTotal, centralIndex, SHAPE_IDS } from '../js/bond-logic.js';
 import { MONSTERS, GEOMETRY, ATOM, MOODS } from '../js/monsters.js';
 import { OPTIONS, DEFAULT_AVATAR, randomAvatar, WIDTH, HEIGHT } from '../js/avatar.js';
+import { buildPuzzle, checkJoints, solved, countSolutions, hintFor, joints } from '../js/jigsaw-logic.js';
 import { buildCourse, judgeChange, judgeGate, hits, passable, createPoseReader, LANES } from '../js/runner-logic.js';
 import { parseFormula, atomsOf, pretty, equation, isBalanced, checkMix, limiting, parseIsland, spawnTiles, questTokens, scatter } from '../js/reaction-logic.js';
 
@@ -32,6 +33,7 @@ const KEY = {
   'aluminium sulfate': 'Al2(SO4)3', 'sodium phosphate': 'Na3PO4', 'potassium carbonate': 'K2CO3',
   'magnesium hydroxide': 'Mg(OH)2',
 };
+const KEY_IONIC = KEY;
 // British spellings required by the brief
 const NAMES = new Set(d.ions.map(i => i.name));
 ['aluminium', 'sulfate', 'sulfide'].forEach(n => assert.ok(NAMES.has(n), `${n} missing`));
@@ -107,7 +109,7 @@ for (let i = 0; i < 50; i++) {
   assert.ok(a.skin < OPTIONS.skin.length && a.hair < OPTIONS.hair.length && a.coat < OPTIONS.coat.length && OPTIONS.hairStyle.includes(a.hairStyle));
 }
 
-// Overworld: eight worlds in order, pins on the map, unique badges, sensible unlock rules
+// Overworld: nine worlds in order, pins on the map, unique badges, sensible unlock rules
 const wd = JSON.parse(readFileSync('data/worlds.json', 'utf8'));
 const W = wd.worlds;
 const mem = JSON.parse(readFileSync('data/memory.json', 'utf8'));
@@ -118,33 +120,35 @@ const bnd = JSON.parse(readFileSync('data/bonds.json', 'utf8'));
 const EL = JSON.parse(readFileSync('data/elements.json', 'utf8')).elements;
 const rxd = JSON.parse(readFileSync('data/reactions.json', 'utf8'));
 const end = JSON.parse(readFileSync('data/energy.json', 'utf8'));
-assert.deepEqual(W.map(w => w.id), [1, 2, 3, 4, 5, 6, 7, 8]);
-assert.equal(new Set(W.map(w => w.badge)).size, 8, 'badge names must be unique');
-assert.equal(new Set(W.map(w => w.accent)).size, 8, 'world colours must be unique');
+const jgd = JSON.parse(readFileSync('data/jigsaw.json', 'utf8'));
+assert.deepEqual(W.map(w => w.id), [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+assert.equal(new Set(W.map(w => w.badge)).size, 9, 'badge names must be unique');
+assert.equal(new Set(W.map(w => w.accent)).size, 9, 'world colours must be unique');
 for (const w of W) {
   assert.ok(EMBLEMS[w.emblem], `world ${w.id}: unknown emblem ${w.emblem}`);
   assert.ok(w.pin[0] > 56 && w.pin[0] < wd.map.width - 56 && w.pin[1] > 60 && w.pin[1] < wd.map.height - 40, `world ${w.id}: pin too close to the map edge`);
   assert.ok(w.tip && w.topic && w.gameplay && w.callout);
-  if (w.playable) { assert.ok(w.blurb); w.levelIds.forEach(id => assert.ok((w.id === 6 ? d.levels : w.id === 2 ? orb.levels : w.id === 3 ? fal.levels : w.id === 4 ? trn.levels : w.id === 5 ? bnd.levels : w.id === 7 ? rxd.levels : w.id === 8 ? end.levels : mem.levels).some(l => l.id === id), `world ${w.id}: unknown level ${id}`)); }
+  if (w.playable) { assert.ok(w.blurb); w.levelIds.forEach(id => assert.ok((w.id === 6 ? d.levels : w.id === 2 ? orb.levels : w.id === 3 ? fal.levels : w.id === 4 ? trn.levels : w.id === 5 ? bnd.levels : w.id === 7 ? rxd.levels : w.id === 8 ? end.levels : w.id === 9 ? jgd.levels : mem.levels).some(l => l.id === id), `world ${w.id}: unknown level ${id}`)); }
   else assert.ok(!w.levelIds, `world ${w.id}: unbuilt worlds have no levels yet`);
 }
 for (let i = 1; i < W.length; i++) assert.ok(W[i].pin[1] < W[i - 1].pin[1], 'worlds climb the map from bottom to top');
 // landscape layout for wide screens: every world has a position, they run left to right, and nothing touches the edges
-assert.deepEqual(wd.mapWide, { width: 800, height: 360 });
+assert.deepEqual(wd.mapWide, { width: 900, height: 360 });
 for (const w of W) assert.ok(w.pinWide[0] >= 60 && w.pinWide[0] <= wd.mapWide.width - 60 && w.pinWide[1] >= 110 && w.pinWide[1] <= wd.mapWide.height - 60, `world ${w.id}: landscape pin too close to the edge`);
 for (let i = 1; i < W.length; i++) { assert.ok(W[i].pinWide[0] - W[i - 1].pinWide[0] >= 95, 'landscape islands need room for a bridge between them'); assert.notEqual(W[i].pinWide[1], W[i - 1].pinWide[1], 'landscape islands zigzag so bridges are diagonal'); }
 // Fresh save: only World 1 is open (Ion Diner opens after World 5)
-assert.deepEqual(worldStates(W, {}).map(s => s.unlocked), [true, false, false, false, false, false, false, false]);
+assert.deepEqual(worldStates(W, {}).map(s => s.unlocked), [true, false, false, false, false, false, false, false, false]);
 assert.equal(starKey(6, 2), '6.2');
 assert.equal(worldStates(W, {}).filter(s => s.earned).length, 0);
 assert.ok(worldStates(W, {}, true).every(s => s.unlocked), 'Zen mode opens every world');
 assert.equal(worldStates(W, {}, true).filter(s => s.earned).length, 0, 'Zen mode earns no badges by itself');
-assert.deepEqual(worldStates(W, {}, false).map(s => s.unlocked), [true, false, false, false, false, false, false, false], 'Arcade is the default');
+assert.deepEqual(worldStates(W, {}, false).map(s => s.unlocked), [true, false, false, false, false, false, false, false, false], 'Arcade is the default');
 assert.equal(worldStates(W, { '1.1': 3, '1.2': 3, '1.3': 3, '1.4': 3, '2.1': 3, '2.2': 3, '2.3': 3, '2.4': 3, '3.1': 3, '3.2': 3, '3.3': 3, '3.4': 3, '4.1': 3, '4.2': 3, '4.3': 3, '4.4': 3 })[5].unlocked, false, 'Ion Diner stays shut until World 5 is cleared');
 assert.equal(worldStates(W, { '5.1': 1, '5.2': 1, '5.3': 1, '5.4': 1 })[5].unlocked, true, 'clearing World 5 opens World 6');
 assert.equal(worldStates(W, { '5.1': 1, '5.2': 1, '5.3': 1, '5.4': 1 })[6].unlocked, false, 'Reaction Volcano waits for Ion Diner');
 assert.equal(worldStates(W, { '6.1': 1, '6.2': 1, '6.3': 1, '6.4': 1 })[6].unlocked, true, 'clearing World 6 opens World 7');
 assert.equal(worldStates(W, { '7.1': 1, '7.2': 1, '7.3': 1, '7.4': 1 })[7].unlocked, true, 'clearing World 7 opens World 8');
+assert.equal(worldStates(W, { '8.1': 1, '8.2': 1, '8.3': 1, '8.4': 1 })[8].unlocked, true, 'clearing World 8 opens World 9');
 // Clearing every Ion Diner shift earns the World 6 badge; one shift is not enough
 assert.equal(worldProgress(W[5], { '6.1': 3, '6.2': 2 }).cleared, false);
 assert.equal(worldProgress(W[5], { '6.1': 3, '6.2': 2, '6.3': 1 }).cleared, false, 'the boss shift must be cleared too');
@@ -270,7 +274,7 @@ for (const [id, t] of Object.entries(TRACKS)) {
 }
 assert.ok(Math.abs(midiFreq(69) - 440) < 1e-9 && Math.abs(midiFreq(81) - 880) < 1e-9);
 // every screen has a track, and the three kinds of screen do not all play the same loop
-for (const screen of ['menu', 'shifts', 'avatar', 'game', 'memory', 'orbital', 'falls', 'peaks', 'bonds', 'reactions', 'runner']) assert.ok(TRACKS[SCREEN_TRACK[screen]], `${screen}: no track`);
+for (const screen of ['menu', 'shifts', 'avatar', 'game', 'memory', 'orbital', 'falls', 'peaks', 'bonds', 'reactions', 'runner', 'jigsaw']) assert.ok(TRACKS[SCREEN_TRACK[screen]], `${screen}: no track`);
 assert.equal(new Set(Object.values(SCREEN_TRACK)).size, 7);
 
 // ---------- World 2 Orbital Ruins: chemistry answer key, rules, and proof that every level can be solved ----------
@@ -674,6 +678,43 @@ console.log('Bond Glacier OK');
   pr.read(body(0.5, 0.4)); assert.equal(pr.read(body(0.5, 0.5)).slide, true, 'squat to slide');
   assert.equal(pr.read([]), null, 'no person, no action');
   console.log('Thermo Track OK');
+}
+
+// ---------- World 9 Puzzle Pier: fair jigsaws with correct chemistry ----------
+{
+  const jg = JSON.parse(readFileSync('data/jigsaw.json', 'utf8'));
+  const plain = t => t.replace(/[₀-₉]/g, ch => '₀₁₂₃₄₅₆₇₈₉'.indexOf(ch)).replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, ch => '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(ch));
+  assert.deepEqual(jg.levels.map(l => l.id), [1, 2, 3, 4, 5, 6, 7, 8]);
+  assert.equal(joints().length, 7);
+  // Independent keys
+  const CONFIG = { Li: '1s2 2s1', C: '1s2 2s2 2p2', N: '1s2 2s2 2p3', O: '1s2 2s2 2p4', F: '1s2 2s2 2p5', Na: '[Ne] 3s1', Mg: '[Ne] 3s2' };
+  const SHAPE = { 'CH₄ shape': 'Tetrahedral', 'NH₃ shape': 'Trigonal pyramidal', 'H₂O shape': 'Bent', 'CO₂ shape': 'Linear', 'BF₃ shape': 'Trigonal planar', 'Bond angle in H₂O': '104.5°', 'Bond angle in CH₄': '109.5°' };
+  const ION = { sulfate: 'SO4', nitrate: 'NO3', ammonium: 'NH4', carbonate: 'CO3', hydroxide: 'OH', phosphate: 'PO4', chloride: 'Cl' };
+  for (const lv of jg.levels) {
+    assert.ok(lv.title && lv.subtitle && lv.tip && lv.picture >= 1 && lv.picture <= 8);
+    assert.equal(lv.pairs.length, 7, `jigsaw ${lv.id}: 7 pairs`);
+    const texts = [...lv.pairs.flat(), ...(lv.decoys || [])];
+    texts.forEach(t => assert.ok(t.length <= 26, `jigsaw ${lv.id}: "${t}" is too long for an edge`));
+    assert.equal(new Set(texts.map(t => t.toLowerCase())).size, texts.length, `jigsaw ${lv.id}: every text must be different`);
+    assert.ok((lv.decoys || []).length <= 10);
+    for (let s = 1; s <= 20; s++) {
+      let seed = s * 104729; const rng = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+      const pz = buildPuzzle(lv, rng);
+      const home = [0, 1, 2, 3, 4, 5].map(sl => pz.pieces.find(p => p.home === sl).id);
+      assert.ok(solved(pz, home), `jigsaw ${lv.id}: the home arrangement must solve it`);
+      assert.equal(countSolutions(pz), 1, `jigsaw ${lv.id}: exactly one way to finish`);
+      const swapped = [...home]; [swapped[1], swapped[2]] = [swapped[2], swapped[1]];
+      assert.ok(checkJoints(pz, swapped).some(j => j.state === 'clash') && !solved(pz, swapped));
+      assert.deepEqual(hintFor(pz, [pz.anchor, null, null, null, null, null]), { slot: 1, piece: pz.pieces.find(p => p.home === 1).id });
+      assert.equal(pz.pieces.reduce((n, p) => n + Object.values(p.edges).filter(e => e && !e.decoy).length, 0), 14, 'each pair appears on two touching edges');
+    }
+  }
+  const lv = id => jg.levels.find(l => l.id === id);
+  lv(2).pairs.forEach(([el, cfg]) => assert.equal(plain(cfg), CONFIG[el], `${el} configuration`));
+  lv(5).pairs.forEach(([q, a]) => assert.equal(a, SHAPE[q], `${q}`));
+  lv(1).pairs.forEach(([f, name]) => assert.ok(plain(f).startsWith(ION[name]), `${name} formula`));
+  lv(6).pairs.forEach(([name, f]) => assert.equal(plain(f), KEY_IONIC[name.toLowerCase()], `${name} formula`));
+  console.log('Puzzle Pier OK');
 }
 
 

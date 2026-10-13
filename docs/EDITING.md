@@ -85,3 +85,9 @@ The cauldron checks the atoms itself, so a wrong `coeffs` entry is caught by `np
 - Each level lists the `changes` and `questions` it uses, `collect` (`"exo"` or `"endo"`: which kind to grab), `speed` (1 is normal) and how many `obstacles` to jump, slide under or dodge.
 
 `npm test` checks every change against a hand-written key (exothermic or endothermic, and the ΔH values), checks every gate answer, and builds 25 random courses per level to make sure none is impossible. Add new changes to `EXO` (and `DH`) in `tools/test-game.mjs`.
+
+## Puzzle Pier jigsaws (`data/jigsaw.json`)
+
+Each puzzle is 6 square pieces on a 3 × 2 board. Write exactly 7 `pairs` (`["question or term", "its match"]`); the game puts one half of each pair on each side of a place where two pieces meet, at random each time. `decoys` are wrong answers placed on outside edges (up to 10). `picture` is the world (1–8) whose scene appears when the puzzle is finished.
+
+Keep every text to 26 characters or fewer, and make sure no text could sensibly match two others (for example, do not use both "Releases heat" and "Gives out energy"). `npm test` checks that every text is different, that each puzzle has exactly one solution, and checks the configurations, shapes, ion names and ionic formulae against answer keys.

@@ -15,6 +15,7 @@ import { createPeaks } from './peaks.js';
 import { createBonds } from './bonds.js';
 import { createReactions } from './reactions.js';
 import { createRunner } from './runner.js';
+import { createJigsaw } from './jigsaw.js';
 import { worldStates, starKey } from './progress.js';
 import { createOverworld } from './overworld.js';
 import { drawBadge, BADGE_W, BADGE_H, BADGE_SS } from './badges.js';
@@ -44,12 +45,13 @@ const trendData = await (await fetch('data/trends.json')).json();
 const elData = await (await fetch('data/elements.json')).json();
 const rxData = await (await fetch('data/reactions.json')).json();
 const enData = await (await fetch('data/energy.json')).json();
+const jgData = await (await fetch('data/jigsaw.json')).json();
 const worldData = await (await fetch('data/worlds.json')).json();
 const worlds = worldData.worlds;
 const ionById = Object.fromEntries(data.ions.map(i => [i.id, i]));
 
 // ---------- Screens, theme and sound ----------
-const screens = ['menu', 'shifts', 'memory', 'orbital', 'falls', 'peaks', 'bonds', 'reactions', 'runner', 'avatar', 'game'];
+const screens = ['menu', 'shifts', 'memory', 'orbital', 'falls', 'peaks', 'bonds', 'reactions', 'runner', 'jigsaw', 'avatar', 'game'];
 function show(name) {
   if (name !== 'menu') overworld.stop();
   if (name !== 'orbital') orbital.stop();
@@ -72,12 +74,12 @@ function applyTheme() {
 }
 function applySound() {
   const label = sound.enabled ? 'Sound FX on' : 'Sound FX off';
-  $('btn-sound').textContent = label; $('btn-sound-menu').textContent = label; $('mem-sound').textContent = label; $('orb-sound').textContent = label; $('fall-sound').textContent = label; $('peak-sound').textContent = label; $('bond-sound').textContent = label; $('rx-sound').textContent = label; $('run-sound').textContent = label;
-  [$('btn-sound'), $('btn-sound-menu'), $('mem-sound'), $('orb-sound'), $('fall-sound'), $('peak-sound'), $('bond-sound'), $('rx-sound'), $('run-sound')].forEach(b => { b.setAttribute('aria-label', sound.enabled ? 'Sound FX are on. Tap to turn them off.' : 'Sound FX are off. Tap to turn them on.'); b.setAttribute('aria-pressed', String(sound.enabled)); });
+  $('btn-sound').textContent = label; $('btn-sound-menu').textContent = label; $('mem-sound').textContent = label; $('orb-sound').textContent = label; $('fall-sound').textContent = label; $('peak-sound').textContent = label; $('bond-sound').textContent = label; $('rx-sound').textContent = label; $('run-sound').textContent = label; $('jig-sound').textContent = label;
+  [$('btn-sound'), $('btn-sound-menu'), $('mem-sound'), $('orb-sound'), $('fall-sound'), $('peak-sound'), $('bond-sound'), $('rx-sound'), $('run-sound'), $('jig-sound')].forEach(b => { b.setAttribute('aria-label', sound.enabled ? 'Sound FX are on. Tap to turn them off.' : 'Sound FX are off. Tap to turn them on.'); b.setAttribute('aria-pressed', String(sound.enabled)); });
   applyMusic();
 }
 // A music on/off button next to each sound button (music and sound effects are switched separately)
-const musicButtons = [$('btn-sound-menu'), $('btn-sound'), $('mem-sound'), $('orb-sound'), $('fall-sound'), $('peak-sound'), $('bond-sound'), $('rx-sound'), $('run-sound')].map(sb => {
+const musicButtons = [$('btn-sound-menu'), $('btn-sound'), $('mem-sound'), $('orb-sound'), $('fall-sound'), $('peak-sound'), $('bond-sound'), $('rx-sound'), $('run-sound'), $('jig-sound')].map(sb => {
   const b = document.createElement('button'); b.type = 'button'; b.className = sb.className; b.dataset.role = 'music'; sb.after(b); return b;
 });
 function applyMusic() {
@@ -88,7 +90,7 @@ musicButtons.forEach(b => { b.onclick = toggleMusic; });
 // Browsers keep audio silent until the first tap, so unlock it on the first touch, click or key press.
 ['pointerdown', 'touchend', 'keydown'].forEach(ev => addEventListener(ev, () => sound.unlock(), { passive: true }));
 const toggleSound = () => { sound.enabled = !sound.enabled; save.mute = !sound.enabled; persist(); applySound(); sound.unlock(); sound.select(); };
-$('btn-sound').onclick = $('btn-sound-menu').onclick = $('mem-sound').onclick = $('orb-sound').onclick = $('fall-sound').onclick = $('peak-sound').onclick = $('bond-sound').onclick = $('rx-sound').onclick = $('run-sound').onclick = toggleSound;
+$('btn-sound').onclick = $('btn-sound-menu').onclick = $('mem-sound').onclick = $('orb-sound').onclick = $('fall-sound').onclick = $('peak-sound').onclick = $('bond-sound').onclick = $('rx-sound').onclick = $('run-sound').onclick = $('jig-sound').onclick = toggleSound;
 $('btn-mode-menu').onclick = () => {
   save.mode = zen() ? 'arcade' : 'zen'; persist(); sound.pop(); renderMenu();
   says($('menu-says'), { text: zen() ? 'Zen mode: every world is open, so play whichever you like, in any order. Your stars still count.' : 'Arcade mode: clear each world to unlock the next. Your stars are kept.', status: zen() ? 'Zen mode on' : 'Arcade mode on' });
@@ -141,7 +143,7 @@ function renderWorldCard() {
   card.innerHTML = `<p class="world-card__eyebrow">World ${w.id} · ${w.gameplay}</p>
     <h2>${w.name}</h2><p class="world-card__meta">${w.topic}</p>
     <p class="world-card__meta">${status}</p>
-    ${w.playable ? `<p class="world-card__stars" aria-label="${st.starSum} of ${st.total * 3} stars">${'★'.repeat(st.starSum)}${'☆'.repeat(st.total * 3 - st.starSum)}</p>` : ''}
+    ${w.playable ? `<p class="world-card__stars" aria-label="${st.starSum} of ${st.total * 3} stars">${st.total * 3 > 12 ? `★ ${st.starSum} of ${st.total * 3}` : '★'.repeat(st.starSum) + '☆'.repeat(st.total * 3 - st.starSum)}</p>` : ''}
     <button class="btn-start" id="btn-play" type="button" ${play ? '' : 'disabled'}>${play ? 'Play' : st.unlocked ? 'Coming soon' : 'Locked'}</button>`;
   if (play) $('btn-play').onclick = () => { sound.unlock(); sound.select(); renderShifts(w.id); show('shifts'); };
   says($('menu-says'), { text: w.tip });
@@ -177,7 +179,7 @@ function renderMenu() {
 }
 
 // ---------- Level picker (any playable world) ----------
-const levelsOf = worldId => ({ 1: memData.levels, 2: orbData.levels, 3: fallData.levels, 4: trendData.levels, 5: bondData.levels, 6: data.levels, 7: rxData.levels, 8: enData.levels })[worldId];
+const levelsOf = worldId => ({ 1: memData.levels, 2: orbData.levels, 3: fallData.levels, 4: trendData.levels, 5: bondData.levels, 6: data.levels, 7: rxData.levels, 8: enData.levels, 9: jgData.levels })[worldId];
 const unitOf = worldId => (worldId === 6 ? 'shift' : 'level');
 function renderShifts(worldId) {
   const world = worlds.find(w => w.id === worldId), levels = levelsOf(worldId), unit = unitOf(worldId);
@@ -209,6 +211,7 @@ function startWorldLevel(worldId, levelId) {
   else if (worldId === 5) { bonds.start(levelId); show('bonds'); applySound(); }
   else if (worldId === 7) { show('reactions'); reactions.start(levelId); applySound(); }
   else if (worldId === 8) { show('runner'); runner.start(levelId); applySound(); }
+  else if (worldId === 9) { show('jigsaw'); jigsaw.start(levelId); applySound(); }
   else { memory.start(levelId); show('memory'); applySound(); }
 }
 
@@ -242,6 +245,11 @@ const reactions = createReactions({
 const runner = createRunner({
   $, data: enData, getAvatar: () => save.avatar, says, sound,
   onFinish: r => showResult({ worldId: 8, ...r }),
+  onExit: () => { renderMenu(); show('menu'); },
+});
+const jigsaw = createJigsaw({
+  $, data: jgData, says, sound,
+  onFinish: r => showResult({ worldId: 9, ...r }),
   onExit: () => { renderMenu(); show('menu'); },
 });
 const memory = createMemory({
@@ -580,6 +588,6 @@ function frame(now) {
 }
 requestAnimationFrame(frame);
 
-if (new URLSearchParams(location.search).has('test')) window.__quest = { bonds, peaks, falls, orbital, memory, reactions, runner };
+if (new URLSearchParams(location.search).has('test')) window.__quest = { bonds, peaks, falls, orbital, memory, reactions, runner, jigsaw };
 renderMenu();
 show('menu');

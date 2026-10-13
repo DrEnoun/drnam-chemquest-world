@@ -1,7 +1,7 @@
 {
  "map": {
   "width": 288,
-  "height": 868
+  "height": 958
  },
  "worlds": [
   {
@@ -14,7 +14,7 @@
    "icon": "molecule",
    "pin": [
     84,
-    772
+    862
    ],
    "badge": "Memory Master",
    "emblem": "cards",
@@ -43,7 +43,7 @@
    "icon": "atom",
    "pin": [
     204,
-    682
+    772
    ],
    "badge": "Orbital Ace",
    "emblem": "orbit",
@@ -72,7 +72,7 @@
    "icon": "target",
    "pin": [
     84,
-    592
+    682
    ],
    "badge": "Table Topper",
    "emblem": "grid",
@@ -101,7 +101,7 @@
    "icon": "sparkle",
    "pin": [
     204,
-    502
+    592
    ],
    "badge": "Trend Jumper",
    "emblem": "arrow",
@@ -130,7 +130,7 @@
    "icon": "electron",
    "pin": [
     84,
-    412
+    502
    ],
    "badge": "Bond Builder",
    "emblem": "bond",
@@ -159,7 +159,7 @@
    "icon": "flask",
    "pin": [
     204,
-    322
+    412
    ],
    "badge": "Ion Chef",
    "emblem": "flask",
@@ -189,7 +189,7 @@
    "icon": "testtube",
    "pin": [
     84,
-    232
+    322
    ],
    "badge": "Equation Explorer",
    "emblem": "flame",
@@ -218,7 +218,7 @@
    "icon": "forces",
    "pin": [
     204,
-    142
+    232
    ],
    "badge": "Energy Sprinter",
    "emblem": "bolt",
@@ -236,10 +236,43 @@
     740,
     140
    ]
+  },
+  {
+   "id": 9,
+   "name": "Puzzle Pier",
+   "gameplay": "Jigsaw",
+   "topic": "Revision: every topic",
+   "biome": "pier",
+   "accent": "#ffd23a",
+   "icon": "lattice",
+   "pin": [
+    84,
+    142
+   ],
+   "badge": "Puzzle Master",
+   "emblem": "jigsaw",
+   "playable": true,
+   "callout": "8 puzzles",
+   "tip": "Did you know? Puzzles like these are called Tarsia puzzles. Each piece only fits next to the pieces whose edges make a matching pair.",
+   "levelIds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "blurb": "Match-the-edges jigsaws, one for every ChemQuest topic. Pieces fit where the touching edges make a pair, and the finished puzzle shows a picture.",
+   "pinWide": [
+    836,
+    280
+   ]
   }
  ],
  "mapWide": {
-  "width": 800,
+  "width": 900,
   "height": 360
  }
 }

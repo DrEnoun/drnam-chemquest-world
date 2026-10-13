@@ -161,3 +161,12 @@ export const gateArch = () => make(52, 46, (c, { R, P }) => {
   R(11, 40, 30, 4, 1, '#6b4a30');
   return { glow: [26, 23] };
 });
+export const puzzleTower = () => make(40, 52, (c, { R, E }) => {
+  const piece = (x, y, col) => { R(x, y, 14, 14, 2, col); E(x + 14, y + 7, 3, 3, col, false); E(x + 7, y, 3, 3, col, false); };
+  piece(4, 36, '#ff8a3c'); piece(20, 36, '#2dd4bf'); piece(12, 21, '#a78bfa'); piece(12, 6, '#d4ff3a');
+});
+export const lighthouse = () => make(26, 58, (c, { R, P, E }) => {
+  P([[6, 56], [9, 14], [17, 14], [20, 56]], '#f4f9ff'); for (let y = 20; y < 56; y += 12) P([[8.6 - (y - 14) * 0.07, y], [17.4 + (y - 14) * 0.07, y], [17.8 + (y - 14) * 0.07, y + 5], [8.2 - (y - 14) * 0.07, y + 5]], '#fc7a7a', false);
+  R(7, 8, 12, 7, 1.5, '#0a2236'); R(9, 9.4, 8, 4.4, 1, '#ffe066', false); P([[6, 8.4], [13, 1], [20, 8.4]], '#fc7a7a'); R(4, 54, 18, 4, 1, '#8a6a45');
+  return { glow: [13, 11] };
+});
