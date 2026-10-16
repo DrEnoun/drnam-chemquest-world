@@ -11,7 +11,7 @@ import { lockPlay } from './playlock.js';
 const VW = 320, VH0 = 240, SA = 3;                    // view size in art units; backing pixels per unit (the same 3x art as the map)
 let VH = VH0, HORIZON = 84, FEET = 224, RS = 3;      // RS: canvas pixels per art unit (2 on phones to keep the frame rate up)               // the view can grow taller on a phone held upright (setView)
 const F = 14, LW = 64;     // horizon line, player's feet, perspective strength, lane width at the player
-const ZMAX = 120, BASE_SPEED = 17;
+const ZMAX = 120, BASE_SPEED = 11;                    // a calmer pace, so there is time to read
 const proj = z => F / (F + Math.max(-F * 0.6, z));
 const gy = z => HORIZON + (FEET - HORIZON) * proj(z);
 const gx = (lane, z) => VW / 2 + lane * LW * proj(z);
@@ -66,7 +66,7 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
 
   // ---------- state ----------
   let level = null, course = [], hearts = 3, coins = 0, xp = 0, right = 0, asked = 0, over = false, running = false, raf = 0, last = 0, t = 0;
-  let state = 'ready', count = 0, dist = 0, speed = BASE_SPEED, slowUntil = 0, hurtUntil = 0, flash = 0, toast = null;
+  let gateEase = 1, state = 'ready', count = 0, dist = 0, speed = BASE_SPEED, slowUntil = 0, hurtUntil = 0, flash = 0, toast = null;
   let lane = 0, laneX = 0, jumpT = -1, slideT = -1, finishZ = 1;
   let props = [], parts = [];
   const reader = createPoseReader();
@@ -99,7 +99,7 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
     course = buildCourse(level, data).map(o => ({ ...o }));
     finishZ = course[course.length - 1].z;
     hearts = 3; coins = 0; xp = 0; right = 0; asked = 0; over = false; state = 'ready'; count = 0; dist = 0;
-    speed = BASE_SPEED * (level.speed || 1); lane = 0; laneX = 0; jumpT = slideT = -1; toast = null; parts = []; flash = 0; hurtUntil = 0;
+    speed = BASE_SPEED * (level.speed || 1); lane = 0; laneX = 0; jumpT = slideT = -1; toast = null; parts = []; flash = 0; hurtUntil = 0; gateEase = 1;
     props = []; for (let z = 4; z < ZMAX; z += 9) addProps(z);
     renderHUD(); progress(); shown = null;
     $('run-meta').textContent = `${level.boss ? 'Boss' : 'Level ' + level.id}: ${level.title} · ${level.subtitle}`;
@@ -170,7 +170,7 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
   // ---------- the side card: what is coming up ----------
   let shown = null;
   function upcoming() {
-    const next = course.find(o => !o.done && (o.kind === 'change' || o.kind === 'gate') && o.z < 70);
+    const next = course.find(o => !o.done && (o.kind === 'change' || o.kind === 'gate') && o.z < 110);
     if (next === shown) return; shown = next;
     if (!next) { $('run-now').innerHTML = ''; return; }
     if (next.kind === 'gate') $('run-now').innerHTML = `<p class="run-q">${next.q}</p><div class="run-opts">${[-1, 0, 1].map(l => `<span><small>${['Left', 'Middle', 'Right'][l + 1]}</small>${next.options[next.order[l + 1]]}</span>`).join('')}</div>`;
@@ -285,7 +285,7 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
     // messages on the track
     if (state === 'ready') banner(usingBody && !reader.calibrated ? 'Stand still in the middle…' : usingBody ? 'Jump to start!' : 'Press Start, Space or ↑', '');
     if (state === 'count') banner(String(Math.ceil(count)), '');
-    const gate = state === 'run' && course.find(o => o.kind === 'gate' && !o.done && o.z < 80);
+    const gate = state === 'run' && course.find(o => o.kind === 'gate' && !o.done && o.z < 115);
     if (gate) { ctx.fillStyle = 'rgba(6,13,27,.72)'; ctx.fillRect(0, 0, VW, 20); text(ctx, gate.q, VW / 2, 10.5, 11, '#ffffff'); }
     if (toast && t - toast.t < 1.6) { const a = Math.min(1, (1.6 - (t - toast.t)) * 3); ctx.globalAlpha = a; pill(toast.str, VW / 2, gate ? 34 : 22, toast.good ? '#d4ff3a' : '#fc7a7a'); ctx.globalAlpha = 1; }
     if (flash > 0) { ctx.globalAlpha = Math.min(0.35, flash); ctx.fillStyle = '#fc7a7a'; ctx.fillRect(0, 0, VW, VH); ctx.globalAlpha = 1; }
@@ -302,7 +302,10 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
     laneX += (lane - laneX) * Math.min(1, dt * 18); flushPending();
     if (state === 'count') { count -= dt; if (count <= 0) { state = 'run'; sound.correct(); } }
     if (state === 'run') {
-      const v = speed * (t < slowUntil ? 0.55 : 1) * (1 + Math.min(0.35, dist / 2400));
+      // slow down as an answer gate comes close, so the question can be read and thought about
+      const gateAhead = course.find(o => o.kind === 'gate' && !o.done && o.z < 60 && o.z > 0);
+      gateEase += ((gateAhead ? 0.6 : 1) - gateEase) * Math.min(1, dt * 2.5);
+      const v = speed * (t < slowUntil ? 0.55 : 1) * gateEase * (1 + Math.min(0.15, dist / 3600));
       const dz = v * dt; dist += dz; progress();
       for (const o of course) { if (o.done) continue; const before = o.z; o.z -= dz; if (before > 0 && o.z <= 0) { o.done = true; judge(o); } }
       for (const p of props) p.z -= dz;
