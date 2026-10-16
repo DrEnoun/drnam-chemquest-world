@@ -9,7 +9,7 @@ import { createBodyCam } from './body.js';
 import { lockPlay } from './playlock.js';
 
 const VW = 320, VH0 = 240, SA = 3;                    // view size in art units; backing pixels per unit (the same 3x art as the map)
-let VH = VH0, HORIZON = 84, FEET = 224;               // the view can grow taller on a phone held upright (setView)
+let VH = VH0, HORIZON = 84, FEET = 224, RS = 3;      // RS: canvas pixels per art unit (2 on phones to keep the frame rate up)               // the view can grow taller on a phone held upright (setView)
 const F = 14, LW = 64;     // horizon line, player's feet, perspective strength, lane width at the player
 const ZMAX = 120, BASE_SPEED = 17;
 const proj = z => F / (F + Math.max(-F * 0.6, z));
@@ -29,7 +29,9 @@ function wrap(c, str, maxW, size) {
 
 export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit }) {
   const cv = $('run-canvas'), ctx = cv.getContext('2d');
-  cv.width = VW * SA; cv.height = VH * SA; cv.style.setProperty('--run-r', (VW / VH).toFixed(4));
+  const wantRS = () => (matchMedia('(pointer: coarse)').matches && !document.documentElement.classList.contains('wide') ? 2 : 3);
+  function sizeCanvas() { RS = wantRS(); cv.width = VW * RS; cv.height = VH * RS; cv.style.setProperty('--run-r', (VW / VH).toFixed(4)); }
+  sizeCanvas();
 
   // ---------- static backdrop: dusk sky, a volcano on the hot side, snowy peaks on the cold side ----------
   const buildSky = () => {
@@ -51,12 +53,12 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
   // On a phone held upright the playing view is taller than 4:3: grow the view, keeping the horizon and the runner's feet in proportion.
   function setView(vh) {
     vh = Math.round(vh); if (vh === VH) return;
-    VH = vh; HORIZON = Math.round(VH * 0.35); FEET = VH - 16; cv.height = VH * SA; sky = buildSky();
-    cv.style.setProperty('--run-r', (VW / VH).toFixed(4));
+    VH = vh; HORIZON = Math.round(VH * 0.35); FEET = VH - 16; sizeCanvas(); sky = buildSky();
   }
   function refit() {
     const playing = $('screen-runner').dataset.play === 'true' && !document.documentElement.classList.contains('wide');
     const r = $('run-canvas').parentElement.getBoundingClientRect();
+    if (wantRS() !== RS) sizeCanvas();
     setView(playing && r.width > 40 ? Math.max(VH0, Math.min(460, VW * r.height / r.width)) : VH0);
   }
   new ResizeObserver(refit).observe($('run-canvas').parentElement);
@@ -79,8 +81,8 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
       if (!r) { $('run-camstat').textContent = 'I can’t see you: step back into the picture.'; return; }
       $('run-camstat').textContent = 'Lean or step left and right · jump · squat';
       if (r.lane !== lane) setLane(r.lane);
-      if (r.jump) { if (state === 'ready') begin(); else jump(); }
-      if (r.slide) slide();
+      if (r.jump) { if (state === 'ready') begin(); else act('J'); }
+      if (r.slide) act('S');
     },
     onStatus: (s, msg) => {
       $('run-camstat').textContent = msg;
@@ -104,19 +106,23 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
     $('run-rule').innerHTML = level.collect ? (level.collect === 'exo' ? 'Grab <b class="hot">EXOTHERMIC</b> changes (give out heat).<br>Dodge <b class="cold">ENDOTHERMIC</b> ones (take in heat).' : 'Grab <b class="cold">ENDOTHERMIC</b> changes (ΔH positive).<br>Dodge <b class="hot">EXOTHERMIC</b> ones (ΔH negative).') : 'Run through the gate with the right answer.';
     $('run-now').innerHTML = '';
     says($('run-says'), { text: level.tip });
-    $('run-start').hidden = false; setPlay(false);
+    $('run-start').hidden = false; setPlay(true);
     if (!running) { running = true; last = performance.now(); raf = requestAnimationFrame(frame); }
   }
   function addProps(z) { for (const side of [-1, 1]) props.push({ z: z + Math.random() * 4, side, s: (side < 0 ? sideSprites.hot : sideSprites.cold)[Math.floor(Math.random() * 3)], off: 2.3 + Math.random() * 1.4 }); }
   // While the player is running, the page is locked and (on a phone) the track fills the screen.
   function setPlay(on) { $('screen-runner').dataset.play = String(on); lockPlay(on); requestAnimationFrame(() => { refit(); requestAnimationFrame(refit); }); }
-  function begin() { if (state !== 'ready' || over) return; setPlay(true); state = 'count'; count = 3; $('run-start').hidden = true; sound.unlock(); sound.select(); }
+  function begin() { if (state !== 'ready' || over) return; state = 'count'; count = 3; $('run-start').hidden = true; sound.unlock(); sound.select(); }
   const renderHUD = () => { $('run-hearts').innerHTML = [0, 1, 2].map(i => `<span class="${i < hearts ? '' : 'gone'}">${i < hearts ? '♥' : '♡'}</span>`).join(''); $('run-hearts').setAttribute('aria-label', `${hearts} of 3 hearts`); $('run-coins').textContent = coins; };
   const progress = () => { const f = Math.min(1, dist / finishZ); $('run-progress').firstElementChild.style.transform = `scaleX(${f})`; $('run-progress').setAttribute('aria-valuenow', Math.round(f * 100)); };
 
   // ---------- moves ----------
   function setLane(l) { if (over || state === 'done') return; const n = Math.max(-1, Math.min(1, l)); if (n !== lane) { lane = n; sound.tick(); } }
   const step = d => setLane(lane + d);
+  // A jump or slide asked for a moment too early is remembered for a quarter of a second, so quick swipes never get lost.
+  let pend = null;
+  function act(k) { if (k === 'J') { if (jumpT >= 0) pend = { k, until: t + 0.25 }; else jump(); } else if (slideT >= 0) pend = { k, until: t + 0.25 }; else slide(); }
+  function flushPending() { if (!pend) return; if (t > pend.until) { pend = null; return; } if (pend.k === 'J' ? jumpT < 0 : slideT < 0) { const k = pend.k; pend = null; if (k === 'J') jump(); else slide(); } }
   function jump() { if (state !== 'run' || jumpT >= 0) return; jumpT = 0; slideT = -1; sound.pop(); }
   function slide() { if (state !== 'run' || slideT >= 0) return; slideT = 0; jumpT = -1; sound.select(); }
   const airborne = () => jumpT >= 0 && jumpT < JUMP_TIME * 0.92;
@@ -151,7 +157,7 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
   const burst = (x, y, col, n) => { for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, sp = 30 + Math.random() * 60; parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 40, life: 0, max: 0.7, col }); } };
 
   function finish(win) {
-    if (over) return; over = true; setPlay(false);
+    if (over) return; over = true;
     const total = course.filter(o => o.kind === 'gate').length + course.filter(o => o.kind === 'change' && judgeChange(o, level.collect).good).length;
     onFinish({
       win, hearts, coins, xp: xp + (win ? 20 : 0), levelId: level.id,
@@ -263,7 +269,7 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
     ctx.drawImage(avatarBackCanvas(getAvatar(), stepF, pose), x - w / 2, FEET - h + 4 - jh + bob, w, h);
   }
   function draw() {
-    ctx.setTransform(SA, 0, 0, SA, 0, 0); ctx.imageSmoothingEnabled = false;
+    ctx.setTransform(RS, 0, 0, RS, 0, 0); ctx.imageSmoothingEnabled = RS < SA;
     ctx.drawImage(sky, 0, 0, VW, HORIZON + 2);
     drawGround();
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
@@ -293,7 +299,7 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
   function frame(now) {
     if (!running) return;
     const dt = Math.min(0.05, (now - last) / 1000); last = now; t += dt;
-    laneX += (lane - laneX) * Math.min(1, dt * 14);
+    laneX += (lane - laneX) * Math.min(1, dt * 18); flushPending();
     if (state === 'count') { count -= dt; if (count <= 0) { state = 'run'; sound.correct(); } }
     if (state === 'run') {
       const v = speed * (t < slowUntil ? 0.55 : 1) * (1 + Math.min(0.35, dist / 2400));
@@ -317,17 +323,33 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
     if (e.target.closest && e.target.closest('button') && (e.key === ' ' || e.key === 'Enter')) return;
     const k = KEY[e.key]; if (!k) return; e.preventDefault();
     if (state === 'ready' && (k === 'J')) { begin(); return; }
-    if (k === 'L') step(-1); else if (k === 'R') step(1); else if (k === 'J') jump(); else slide();
+    if (k === 'L') step(-1); else if (k === 'R') step(1); else if (k === 'J') act('J'); else act('S');
   });
+  // Swipe anywhere on the screen. A swipe counts after only 12px of movement, and keeps counting: every further 12px
+  // of the same touch is another move, so quick zig-zags and chains of swipes all register.
+  const SWIPE_PX = 12, screenEl = $('screen-runner');
   let sw = null;
-  cv.addEventListener('pointerdown', e => { sw = { x: e.clientX, y: e.clientY, done: false }; cv.setPointerCapture(e.pointerId); e.preventDefault(); sound.unlock(); });
-  cv.addEventListener('pointermove', e => {
-    if (!sw || sw.done) return; const dx = e.clientX - sw.x, dy = e.clientY - sw.y;
-    if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return; sw.done = true;
-    if (state === 'ready') { begin(); return; }
-    if (Math.abs(dx) > Math.abs(dy)) step(dx > 0 ? 1 : -1); else if (dy < 0) jump(); else slide();
+  const swipeStep = (dx, dy) => { if (Math.abs(dx) > Math.abs(dy)) step(dx > 0 ? 1 : -1); else act(dy < 0 ? 'J' : 'S'); };
+  screenEl.addEventListener('pointerdown', e => {
+    if (!running || (e.target.closest('button, a, .chip, input, .overlay') && !e.target.closest('#run-start'))) { sw = null; return; }
+    sw = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: false }; sound.unlock();
+    try { screenEl.setPointerCapture(e.pointerId); } catch (err) { /* fine */ }
+    if (e.cancelable) e.preventDefault();
   });
-  cv.addEventListener('pointerup', () => { if (sw && !sw.done && state === 'ready') begin(); sw = null; });
+  screenEl.addEventListener('pointermove', e => {
+    if (!sw || e.pointerId !== sw.id) return;
+    let dx = e.clientX - sw.x, dy = e.clientY - sw.y;
+    while (Math.max(Math.abs(dx), Math.abs(dy)) >= SWIPE_PX) {
+      sw.moved = true;
+      if (state === 'ready') { begin(); sw.x = e.clientX; sw.y = e.clientY; return; }
+      swipeStep(dx, dy);
+      if (Math.abs(dx) > Math.abs(dy)) sw.x += dx > 0 ? SWIPE_PX : -SWIPE_PX; else sw.y += dy > 0 ? SWIPE_PX : -SWIPE_PX;
+      dx = e.clientX - sw.x; dy = e.clientY - sw.y;
+    }
+    if (e.cancelable) e.preventDefault();
+  });
+  const endSwipe = e => { if (sw && e.pointerId === sw.id) { if (!sw.moved && state === 'ready') begin(); sw = null; } };
+  screenEl.addEventListener('pointerup', endSwipe); screenEl.addEventListener('pointercancel', endSwipe);
   $('run-start').onclick = begin;
   $('run-cam').onclick = async () => { sound.unlock(); if (cam.on) cam.stop(); else await cam.start(); };
   $('run-recal').onclick = () => { reader.reset(); sound.pop(); $('run-camstat').textContent = 'Stand still in the middle…'; };

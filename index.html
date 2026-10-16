@@ -445,6 +445,13 @@
     // Keep the game on the device so it still works without internet (for example at a STEM tour event)
     if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
       addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+      // When a newer version of the game arrives, switch to it as soon as the player is back on the map (never in the middle of a level)
+      var hadWorker = !!navigator.serviceWorker.controller, waiting = false;
+      function onMap() { var m = document.getElementById('screen-menu'); return m && !m.hidden && document.getElementById('result').hidden && document.getElementById('world-pop').hidden; }
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (!hadWorker || waiting) return; waiting = true;
+        var t = setInterval(function () { if (onMap()) { clearInterval(t); location.reload(); } }, 1500);
+      });
     }
   </script>
 </body>
