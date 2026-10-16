@@ -13,6 +13,7 @@ import { createOrbital } from './orbital.js';
 import { createFalls } from './falls.js';
 import { createPeaks } from './peaks.js';
 import { createBonds } from './bonds.js';
+import { lockPlay } from './playlock.js';
 import { createReactions } from './reactions.js';
 import { createRunner } from './runner.js';
 import { createJigsaw } from './jigsaw.js';
@@ -60,6 +61,7 @@ function show(name) {
   if (name !== 'bonds') bonds.stop();
   if (name !== 'reactions') reactions.stop();
   if (name !== 'runner') runner.stop();
+  lockPlay(['orbital', 'falls', 'peaks', 'bonds', 'reactions'].includes(name));
   music.play(SCREEN_TRACK[name]);
   screens.forEach(s => { $('screen-' + s).hidden = s !== name; });
   window.scrollTo(0, 0);
@@ -126,6 +128,7 @@ let selected = save.world;
 const overworld = createOverworld({
   canvas: $('map-canvas'), pinsEl: $('map-pins'), worlds, map: worldData.map, mapWide: worldData.mapWide,
   getState: states, getAvatar: () => save.avatar,
+  onPin: id => openWorldPop(id),
   onMonster: m => { sound.unlock(); sound.select(); says($('menu-says'), { text: m.fact, status: `Meet ${m.name}!` }); },
   onSelect: (id, arrived) => {
     selected = id;
@@ -148,6 +151,49 @@ function renderWorldCard() {
   if (play) $('btn-play').onclick = () => { sound.unlock(); sound.select(); renderShifts(w.id); show('shifts'); };
   says($('menu-says'), { text: w.tip });
 }
+
+
+// ---------- World pop-up: tap a world on the map for a big card with Play now; tap it twice to jump straight in ----------
+let popId = null, popAt = 0;
+const nextLevelOf = worldId => {
+  const levels = levelsOf(worldId), star = id => save.stars[starKey(worldId, id)] || 0;
+  const i = levels.findIndex((lv, k) => star(lv.id) === 0 && (zen() || k === 0 || star(levels[k - 1].id) > 0));
+  return levels[i < 0 ? 0 : i];
+};
+function openWorldPop(id) {
+  const w = worlds.find(x => x.id === id), st = states()[id - 1];
+  popId = id; popAt = performance.now(); selected = id;
+  const play = w.playable && st.unlocked, unit = unitOf(id);
+  $('wp-card').style.setProperty('--accent', w.accent);
+  $('wp-eyebrow').textContent = `World ${w.id} · ${w.gameplay}`;
+  $('wp-title').textContent = w.name; $('wp-topic').textContent = w.topic;
+  $('wp-blurb').textContent = w.playable ? (w.blurb || w.tip) : w.tip;
+  const nxt = play ? nextLevelOf(id) : null;
+  $('wp-status').textContent = !st.unlocked ? `Locked. Clear World ${w.id - 1} to open it, or switch to Zen mode.` : w.playable ? `${st.got} of ${st.total} ${unit}s cleared${nxt ? ` · Next: ${nxt.title}` : ''}` : 'Coming soon!';
+  $('wp-stars').textContent = w.playable ? `★ ${st.starSum} of ${st.total * 3}` : '';
+  $('wp-play').hidden = !st.unlocked || !w.playable; $('wp-play').textContent = st.got === st.total && st.total ? 'Play again' : st.got ? 'Continue' : 'Play now';
+  $('wp-levels').hidden = !play; $('wp-tip').hidden = !play;
+  $('world-pop').hidden = false; sound.unlock(); sound.pop();
+  if (!$('wp-play').hidden) $('wp-play').focus({ preventScroll: true }); else $('wp-close').focus({ preventScroll: true });
+}
+const closeWorldPop = () => { $('world-pop').hidden = true; popId = null; };
+function playFromPop() {
+  const id = popId, w = worlds.find(x => x.id === id), st = states()[id - 1];
+  if (!w || !w.playable || !st.unlocked) return;
+  closeWorldPop(); sound.unlock(); sound.select();
+  save.world = id; persist(); startWorldLevel(id, nextLevelOf(id).id); applySound();
+}
+$('wp-play').onclick = playFromPop;
+$('wp-levels').onclick = () => { const id = popId; closeWorldPop(); sound.select(); selected = id; renderShifts(id); show('shifts'); };
+$('wp-close').onclick = () => { sound.pop(); closeWorldPop(); };
+// a second tap right after the first lands on the pop-up (it opened under the finger): that is the "double tap to play"
+$('world-pop').addEventListener('click', e => {
+  if (e.target.closest('#wp-close, #wp-levels')) return;
+  const quick = performance.now() - popAt < 650;
+  if (e.target.closest('#wp-play') || quick) { playFromPop(); if (!$('world-pop').hidden) closeWorldPop(); return; }
+  if (e.target === $('world-pop')) { closeWorldPop(); }
+});
+addEventListener('keydown', e => { if (e.key === 'Escape' && !$('world-pop').hidden) closeWorldPop(); });
 
 function renderTopics() {
   const st = states();

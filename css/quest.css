@@ -767,3 +767,38 @@ html:not(.wide) .bond-chip svg { max-width: 100%; }
   html:not(.wide) .screen--jigsaw .says__name { display: none; }
   html:not(.wide) .screen--jigsaw .says__text { font-size: 13.5px; line-height: 1.25; }
 }
+
+/* ===== Tap a world on the map: a big pop-up with Play now ===== */
+.world-pop { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: calc(16px * var(--k)); background: rgba(2, 8, 20, .66); animation: wpfade .18s ease-out; }
+.world-pop[hidden] { display: none; }
+.world-pop__card { position: relative; width: min(100%, calc(420px * var(--k))); padding: calc(22px * var(--k)) calc(20px * var(--k)) calc(18px * var(--k)); border-radius: var(--radius-md); display: grid; gap: calc(8px * var(--k)); text-align: center; border-top: calc(10px * var(--k)) solid var(--accent, #d4ff3a); animation: wppop .26s cubic-bezier(.2, 1.4, .4, 1); }
+.world-pop__card h2 { font-size: calc(36px * var(--k)); font-weight: 800; line-height: 1.05; }
+.wp-topic { font: 800 calc(18px * var(--k)) var(--font-display); }
+.wp-blurb, .wp-status { font-size: calc(16px * var(--k)); line-height: 1.35; }
+.wp-status { font-weight: 700; }
+.wp-close { position: absolute; top: calc(10px * var(--k)); right: calc(10px * var(--k)); min-width: calc(40px * var(--k)); min-height: calc(40px * var(--k)); padding: 0; }
+.wp-play { width: 100%; min-height: calc(64px * var(--k)); font-size: calc(26px * var(--k)); margin-top: calc(4px * var(--k)); }
+.wp-play[disabled] { background: #c8d2dc; color: #3a4654; box-shadow: 0 calc(6px * var(--k)) 0 var(--sticker-ink); cursor: not-allowed; }
+.wp-levels { justify-self: center; }
+.wp-levels[hidden], .wp-play[hidden] { display: none; }
+.wp-tip { font-size: calc(13px * var(--k)); opacity: .7; }
+@keyframes wppop { from { transform: scale(.7) translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes wpfade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .world-pop, .world-pop__card { animation: none; } }
+
+/* ===== Playing: the page stays still (no scroll, bounce or zoom) ===== */
+html.playing, html.playing body { overflow: hidden; overscroll-behavior: none; touch-action: none; }
+html.playing body { position: fixed; inset: 0; width: 100%; }
+/* Thermo Track on a phone: while running, the track fills the screen */
+@media all {
+  html:not(.wide) .screen--runner[data-play="true"] { position: fixed; inset: 0; z-index: 20; max-width: none; height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; gap: 6px; padding: 8px 10px calc(8px + env(safe-area-inset-bottom)); background: var(--surface-050); touch-action: none; overscroll-behavior: none; }
+  html:not(.wide) .screen--runner[data-play="true"] .run-main { flex: 1 1 0; min-height: 0; }
+  html:not(.wide) .screen--runner[data-play="true"] .run-board { flex: 1 1 0; min-height: 0; display: grid; place-items: center; container-type: size; }
+  html:not(.wide) .screen--runner[data-play="true"] #run-canvas { aspect-ratio: var(--run-r, 1.3333); width: min(100cqw, calc(100cqh * var(--run-r, 1.3333))); }
+  html:not(.wide) .screen--runner[data-play="true"] .run-camwrap, html:not(.wide) .screen--runner[data-play="true"] .run-keys { display: none; }
+  html:not(.wide) .screen--runner[data-play="true"] .run-side { flex: 0 0 auto; }
+}
+@media (max-height: 500px) {
+  html:not(.wide) .screen--runner[data-play="true"] .run-side, html:not(.wide) .screen--runner[data-play="true"] .ticket { display: none; }
+}
+.wp-close, .wp-levels { background: #fff; color: var(--sticker-ink); border: calc(2.5px * var(--k)) solid var(--sticker-ink); font-weight: 800; box-shadow: 0 calc(3px * var(--k)) 0 var(--sticker-ink); }
