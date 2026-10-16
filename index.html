@@ -22,6 +22,22 @@
 <body>
   <div class="bg" aria-hidden="true"></div>
 
+  <!-- ================= World pop-up (tap a world on the map) ================= -->
+  <div class="world-pop" id="world-pop" hidden role="dialog" aria-modal="true" aria-labelledby="wp-title">
+    <div class="world-pop__card sticker-static" id="wp-card">
+      <button class="chip wp-close" id="wp-close" type="button" aria-label="Close">✕</button>
+      <p class="world-card__eyebrow" id="wp-eyebrow"></p>
+      <h2 id="wp-title"></h2>
+      <p class="wp-topic" id="wp-topic"></p>
+      <p class="wp-blurb" id="wp-blurb"></p>
+      <p class="wp-status" id="wp-status"></p>
+      <p class="world-card__stars" id="wp-stars"></p>
+      <button class="btn-start wp-play" id="wp-play" type="button">Play now</button>
+      <button class="chip wp-levels" id="wp-levels" type="button">Choose a level</button>
+      <p class="wp-tip" id="wp-tip">Tip: double-tap a world to jump straight in.</p>
+    </div>
+  </div>
+
   <!-- ================= Overworld (home) ================= -->
   <main class="screen screen--menu" id="screen-menu">
     <header class="head">

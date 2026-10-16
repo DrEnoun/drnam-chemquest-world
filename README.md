@@ -123,3 +123,8 @@ The button at the top of the map switches between two ways to play (saved on the
 
 - **Arcade** (default): worlds and levels unlock one by one. World 2 opens when World 1 is cleared, and so on.
 - **Zen**: every world and every level is open, so players can play whichever they like (useful for STEM tours, demos and revision). Stars still save in both modes, and badges are only earned by clearing a world's levels.
+
+## Playing on a phone
+
+- **Tap a world on the map** and a big card pops up with **Play now** (it continues from the next level), **Choose a level**, and the world's progress. **Double-tap** (or double-click) a world to jump straight in.
+- While a game is being played the page is locked: no scrolling, bounce or pinch zoom (`js/playlock.js`). Thermo Track fills the screen while you run, and the track gets taller on an upright phone.

@@ -6,9 +6,11 @@ import { avatarBackCanvas, WIDTH, HEIGHT } from './avatar.js';
 import { pxCanvas, crisp, shapes, shade, tint } from './pxart.js';
 import * as SC from './scenery.js';
 import { createBodyCam } from './body.js';
+import { lockPlay } from './playlock.js';
 
-const VW = 320, VH = 240, SA = 3;                    // view size in art units; backing pixels per unit (the same 3x art as the map)
-const HORIZON = 84, FEET = 224, F = 14, LW = 64;     // horizon line, player's feet, perspective strength, lane width at the player
+const VW = 320, VH0 = 240, SA = 3;                    // view size in art units; backing pixels per unit (the same 3x art as the map)
+let VH = VH0, HORIZON = 84, FEET = 224;               // the view can grow taller on a phone held upright (setView)
+const F = 14, LW = 64;     // horizon line, player's feet, perspective strength, lane width at the player
 const ZMAX = 120, BASE_SPEED = 17;
 const proj = z => F / (F + Math.max(-F * 0.6, z));
 const gy = z => HORIZON + (FEET - HORIZON) * proj(z);
@@ -27,10 +29,10 @@ function wrap(c, str, maxW, size) {
 
 export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit }) {
   const cv = $('run-canvas'), ctx = cv.getContext('2d');
-  cv.width = VW * SA; cv.height = VH * SA;
+  cv.width = VW * SA; cv.height = VH * SA; cv.style.setProperty('--run-r', (VW / VH).toFixed(4));
 
   // ---------- static backdrop: dusk sky, a volcano on the hot side, snowy peaks on the cold side ----------
-  const sky = (() => {
+  const buildSky = () => {
     const b = pxCanvas(VW * SA, HORIZON * SA + 6), c = b.getContext('2d'); c.scale(SA, SA);
     const { P, E } = shapes(c);
     const g = c.createLinearGradient(0, 0, 0, HORIZON); g.addColorStop(0, '#1b4f8f'); g.addColorStop(0.55, '#3f8fc8'); g.addColorStop(1, '#ffc58a'); c.fillStyle = g; c.fillRect(0, 0, VW, HORIZON + 2);
@@ -44,7 +46,20 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
     P([[-10, HORIZON + 2], [60, HORIZON - 10], [130, HORIZON + 2]], '#3d7a5a', false); P([[180, HORIZON + 2], [260, HORIZON - 8], [330, HORIZON + 2]], '#4f86a8', false);
     crisp(b, null);
     return b;
-  })();
+  };
+  let sky = buildSky();
+  // On a phone held upright the playing view is taller than 4:3: grow the view, keeping the horizon and the runner's feet in proportion.
+  function setView(vh) {
+    vh = Math.round(vh); if (vh === VH) return;
+    VH = vh; HORIZON = Math.round(VH * 0.35); FEET = VH - 16; cv.height = VH * SA; sky = buildSky();
+    cv.style.setProperty('--run-r', (VW / VH).toFixed(4));
+  }
+  function refit() {
+    const playing = $('screen-runner').dataset.play === 'true' && !document.documentElement.classList.contains('wide');
+    const r = $('run-canvas').parentElement.getBoundingClientRect();
+    setView(playing && r.width > 40 ? Math.max(VH0, Math.min(460, VW * r.height / r.width)) : VH0);
+  }
+  new ResizeObserver(refit).observe($('run-canvas').parentElement);
   const sideSprites = { hot: [SC.palm(), SC.roundTree(SC.TREES.autumn), SC.rocks('#8a6a55')], cold: [SC.pine(true), SC.crystalS(), SC.crystalS(['#e8fbff', '#8fd3ff'])] };
 
   // ---------- state ----------
@@ -89,11 +104,13 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
     $('run-rule').innerHTML = level.collect ? (level.collect === 'exo' ? 'Grab <b class="hot">EXOTHERMIC</b> changes (give out heat).<br>Dodge <b class="cold">ENDOTHERMIC</b> ones (take in heat).' : 'Grab <b class="cold">ENDOTHERMIC</b> changes (ΔH positive).<br>Dodge <b class="hot">EXOTHERMIC</b> ones (ΔH negative).') : 'Run through the gate with the right answer.';
     $('run-now').innerHTML = '';
     says($('run-says'), { text: level.tip });
-    $('run-start').hidden = false;
+    $('run-start').hidden = false; setPlay(false);
     if (!running) { running = true; last = performance.now(); raf = requestAnimationFrame(frame); }
   }
   function addProps(z) { for (const side of [-1, 1]) props.push({ z: z + Math.random() * 4, side, s: (side < 0 ? sideSprites.hot : sideSprites.cold)[Math.floor(Math.random() * 3)], off: 2.3 + Math.random() * 1.4 }); }
-  function begin() { if (state !== 'ready' || over) return; state = 'count'; count = 3; $('run-start').hidden = true; sound.unlock(); sound.select(); }
+  // While the player is running, the page is locked and (on a phone) the track fills the screen.
+  function setPlay(on) { $('screen-runner').dataset.play = String(on); lockPlay(on); requestAnimationFrame(() => { refit(); requestAnimationFrame(refit); }); }
+  function begin() { if (state !== 'ready' || over) return; setPlay(true); state = 'count'; count = 3; $('run-start').hidden = true; sound.unlock(); sound.select(); }
   const renderHUD = () => { $('run-hearts').innerHTML = [0, 1, 2].map(i => `<span class="${i < hearts ? '' : 'gone'}">${i < hearts ? '♥' : '♡'}</span>`).join(''); $('run-hearts').setAttribute('aria-label', `${hearts} of 3 hearts`); $('run-coins').textContent = coins; };
   const progress = () => { const f = Math.min(1, dist / finishZ); $('run-progress').firstElementChild.style.transform = `scaleX(${f})`; $('run-progress').setAttribute('aria-valuenow', Math.round(f * 100)); };
 
@@ -134,7 +151,7 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
   const burst = (x, y, col, n) => { for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, sp = 30 + Math.random() * 60; parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 40, life: 0, max: 0.7, col }); } };
 
   function finish(win) {
-    if (over) return; over = true;
+    if (over) return; over = true; setPlay(false);
     const total = course.filter(o => o.kind === 'gate').length + course.filter(o => o.kind === 'change' && judgeChange(o, level.collect).good).length;
     onFinish({
       win, hearts, coins, xp: xp + (win ? 20 : 0), levelId: level.id,
@@ -172,7 +189,8 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
   const orb = () => (orbSprite ??= (() => { const b = pxCanvas(24 * SA, 24 * SA), c = b.getContext('2d'); c.scale(SA, SA); const g = c.createRadialGradient(9, 8, 1, 12, 12, 11); g.addColorStop(0, '#ffffff'); g.addColorStop(0.4, '#d4ff3a'); g.addColorStop(1, '#6f9a00'); c.fillStyle = g; c.beginPath(); c.arc(12, 12, 10, 0, 7); c.fill(); text(c, '?', 12, 12.6, 13, '#14202e'); crisp(b, '#14202e', 110, 2); return b; })());
 
   function drawGround() {
-    // side ground in bands that slide towards you
+    // far ground (between the horizon and the first band), then side ground in bands that slide towards you
+    ctx.fillStyle = '#4f9e53'; ctx.fillRect(0, HORIZON, VW / 2, gy(ZMAX) - HORIZON + 1); ctx.fillStyle = '#8fc3dd'; ctx.fillRect(VW / 2, HORIZON, VW / 2, gy(ZMAX) - HORIZON + 1);
     for (let z = ZMAX; z > -4; z -= 4) {
       const z0 = z - ((dist % 8) / 2) * 2, y0 = gy(z0), y1 = gy(z0 - 4), band = Math.floor((z0 + dist) / 4) % 2 === 0;
       ctx.fillStyle = band ? '#5cb85f' : '#52ab56'; ctx.fillRect(0, y0, VW / 2, y1 - y0 + 1);
@@ -269,7 +287,7 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
   function drawCoin(o) { const s = proj(o.z), x = gx(o.lane, o.z), y = gy(o.z) - 10 * s, r = 5 * s, sq = Math.abs(Math.cos(t * 5 + o.z)); ctx.fillStyle = '#14202e'; ctx.beginPath(); ctx.ellipse(x, y, (r + 1) * Math.max(0.25, sq), r + 1, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#d4ff3a'; ctx.beginPath(); ctx.ellipse(x, y, r * Math.max(0.2, sq), r, 0, 0, 7); ctx.fill(); }
   function drawFinish(o) { const s = proj(o.z), y = gy(o.z), x0 = gx(-1.6, o.z), x1 = gx(1.6, o.z), top = y - 70 * s; ctx.fillStyle = '#ffffff'; ctx.fillRect(x0, top, 4 * s, y - top); ctx.fillRect(x1 - 4 * s, top, 4 * s, y - top); const n = 12, cw = (x1 - x0) / n; for (let i = 0; i < n; i++) for (let j = 0; j < 2; j++) { ctx.fillStyle = (i + j) % 2 ? '#14202e' : '#ffffff'; ctx.fillRect(x0 + i * cw, top + j * 6 * s, cw, 6 * s); } text(ctx, 'FINISH', (x0 + x1) / 2, top + 20 * s, Math.max(4, 16 * s), '#d4ff3a'); }
   function pill(str, x, y, col) { ctx.font = '800 11px "League Spartan", sans-serif'; const w = Math.min(VW - 16, ctx.measureText(str).width + 18); ctx.fillStyle = col; ctx.strokeStyle = '#14202e'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(x - w / 2, y - 9, w, 18, 9); ctx.fill(); ctx.stroke(); text(ctx, str, x, y + 0.5, 11, '#0a1628'); }
-  function banner(big, small) { ctx.fillStyle = 'rgba(6,13,27,.55)'; ctx.fillRect(0, 96, VW, 46); text(ctx, big, VW / 2, 119, big.length < 3 ? 30 : 18, '#d4ff3a'); if (small) text(ctx, small, VW / 2, 136, 9, '#e3eef8', 400); }
+  function banner(big, small) { ctx.fillStyle = 'rgba(6,13,27,.55)'; ctx.fillRect(0, HORIZON + 12, VW, 46); text(ctx, big, VW / 2, HORIZON + 35, big.length < 3 ? 30 : 18, '#d4ff3a'); if (small) text(ctx, small, VW / 2, HORIZON + 52, 9, '#e3eef8', 400); }
 
   // ---------- loop ----------
   function frame(now) {
@@ -314,7 +332,7 @@ export function createRunner({ $, data, getAvatar, says, sound, onFinish, onExit
   $('run-cam').onclick = async () => { sound.unlock(); if (cam.on) cam.stop(); else await cam.start(); };
   $('run-recal').onclick = () => { reader.reset(); sound.pop(); $('run-camstat').textContent = 'Stand still in the middle…'; };
   $('run-quit').onclick = () => { stop(); onExit(); };
-  function stop() { running = false; cancelAnimationFrame(raf); if (cam.on) cam.stop(); }
+  function stop() { running = false; cancelAnimationFrame(raf); setPlay(false); if (cam.on) cam.stop(); }
   const debug = { get state() { return state; }, get lane() { return lane; }, get course() { return course; }, get dist() { return dist; }, setLane, jump, slide, begin, skip(z) { for (const o of course) o.z -= z; } };
   return { start, stop, debug };
 }

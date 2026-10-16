@@ -147,7 +147,7 @@ function pinSprite(w, st) {
   return (pinCache[key] = cv);
 }
 
-export function createOverworld({ canvas, pinsEl, worlds, map: mapPortrait, mapWide, getState, getAvatar, onSelect, onMonster = () => {} }) {
+export function createOverworld({ canvas, pinsEl, worlds, map: mapPortrait, mapWide, getState, getAvatar, onSelect, onPin = () => {}, onMonster = () => {} }) {
   const ctx = canvas.getContext('2d');
   // Two layouts of the same nine islands: a tall one for phones and a landscape one for laptops and projectors.
   worlds.forEach(w => { w.pinPortrait = w.pin; w.pinWide = w.pinWide || w.pin; });
@@ -213,7 +213,7 @@ export function createOverworld({ canvas, pinsEl, worlds, map: mapPortrait, mapW
       wrap.style.setProperty('--accent', w.accent);
       const b = document.createElement('button'); b.type = 'button'; b.className = 'map-pin__btn';
       b.innerHTML = `<span class="map-pin__call"><b>WORLD ${w.id}</b><span>${w.name}</span><small>${w.callout}</small></span>`;
-      b.onclick = () => select(w.id);
+      b.onclick = () => { onPin(w.id); select(w.id); };
       wrap.append(b); pinsEl.append(wrap);
       if (w.calloutLift) {   // a thin stem links a raised callout to its pin
         const stem = document.createElement('span'); stem.className = 'map-pin__stem';
